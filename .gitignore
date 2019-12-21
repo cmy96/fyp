@@ -1,0 +1,4 @@
+*.xlsx
+*.csv
+/Code/SMU_v2
+.ipynb_checkpoints
