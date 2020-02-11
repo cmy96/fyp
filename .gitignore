@@ -3,3 +3,5 @@
 /Code/SMU_v2
 .ipynb_checkpoints
 *.pkl
+*.h5
+Code/price_processing
