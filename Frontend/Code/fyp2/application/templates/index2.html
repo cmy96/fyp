@@ -1,0 +1,264 @@
+<html>
+<link rel="stylesheet" media="screen" href = "{{ url_for('static', filename='bootstrap.min.css') }}">
+<meta name="viewport" content = "width=device-width, initial-scale=1.0">
+<head>
+</head>
+
+<body class = "body">
+    {% include 'nav.html' %}
+<body>
+
+</body>
+    <div class="calculator-form">
+        <div class="container-fluid">
+            <form action="/submit" method="post">
+                <div class="row form-header">
+                    <div class="col-md-2 offset-md-5">
+                        <h1 class="site-title">CALCULATOR</h1>
+                    </div>            
+                </div>   
+
+                <div class="form-group row">
+                    <label for="Age" class="col-md-2 offset-md-2">Age at Diagnosis</label>        
+                    <div class="col-md-2">
+                        <input type="text" class="form-control" name="age" id="age" placeholder="Age" required>
+                    </div>
+              
+              
+                    <label for="Gender" class="col-md-2 offset-md-1">Gender</label>
+                    <div class="col-md-2">
+                        <input type="radio" id="male" name="gender" value="male">
+                        <label for="male">Male</label>
+                        <input type="radio" id="female" name="gender" value="female">
+                        <label for="female">Female</label>
+                    </div>
+                </div>
+
+                <div class="form-group row">
+                    <label for="nodes_positive" class="col-md-2 offset-md-2">Nodes Positive</label>        
+                    <div class="col-md-2">
+                        <input type="text" class="form-control" name="nodes_positive" id="nodes_positive" placeholder="Nodes Positive" required>
+                    </div>
+
+                    <label for="size_precise" class="col-md-2 offset-md-1">Size Precise</label>
+                    <div class="col-md-2">
+                        <input type="text" class="form-control" name="size_precise" id="size_precise" placeholder="size_precise" required>
+                    </div>
+                </div>
+
+                <div class="form-group row">                   
+                    <label for="tstage" class="col-md-2 offset-md-2">T Stage</label>
+                    <div class="col-md-2">
+                        <select name="tstage" class="select-design">
+                            <option value="T0">T0</option>
+                            <option value="T1">T1</option>
+                            <option value="T1a">T1a</option>
+                            <option value="T1b">T1b</option>
+                            <option value="T1c">T1c</option>
+                            <option value="T1mic">T1mic</option>
+                            <option value="T2">T2</option>
+                            <option value="T3">T3</option>
+                            <option value="T4">T4</option>
+                            <option value="T4a">T4a</option>
+                            <option value="T4b">T4b</option>
+                            <option value="T4c">T4c</option>
+                            <option value="T4d">T4d</option>
+                            <option value="Tis">Tis</option>
+                            <option value="Tx">Tx</option>
+                            <option value="NAN">NAN</option>
+                        </select>
+                    </div>
+            
+                    <label for="ER" class="col-md-2 offset-md-1">ER</label>
+                    <div class="col-md-2">
+                        <select name="er" class="select-design">
+                            <option value="negative">Negative</option>
+                            <option value="positive">Positive</option>
+                            <option value="equivocal">Equivocal</option>
+                            <option value="unknown">Unknown</option>
+                            <option value="nan">NAN</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group row">
+
+                    <label for="nstage" class="col-md-2 offset-md-2">N Stage</label>
+                    <div class="col-md-2">
+                        <select name="nstage" class="select-design">
+                            <option value="N0">N0</option>
+                            <option value="N1">N1</option>
+                            <option value="N2">N2</option>
+                            <option value="N2a">N2a</option>
+                            <option value="N2b">N2b</option>
+                            <option value="N3">N3</option>
+                            <option value="N3a">N3a</option>
+                            <option value="N3b">N3b</option>
+                            <option value="N3c">N3c</option>
+                            <option value="Nx">Nx</option>
+                            <option value="unknown">Unknown</option>
+                            <option value="nan">NAN</option>
+                        </select>
+                    </div>
+
+                  
+                    <label for="PR" class="col-md-2 offset-md-1">PR</label>
+                    <div class="col-md-2">
+                        <select name="pr" class="select-design">
+                            <option value="negative">Negative</option>
+                            <option value="positive">Positive</option>
+                            <option value="equivocal">Equivocal</option>
+                            <option value="unknown">Unknown</option>
+                            <option value="nan">NAN</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group row">
+
+                    <label for="mstage" class="col-md-2 offset-md-2">M Stage</label>
+                    <div class="col-md-2">
+                        <select name="mstage" class="select-design">
+                            <option value="M0">M0</option>
+                            <option value="M1">M1</option>
+                            <option value="M1">M1a</option>
+                            <option value="Mx">Mx</option>
+                            <option value="nan">NAN</option>
+                        </select>
+                    </div>
+
+                  
+                    <label for="her2" class="col-md-2 offset-md-1">her2</label>
+                    <div class="col-md-2">
+                        <select name="her2" class="select-design">
+                            <option value="negative">Negative</option>
+                            <option value="positive">Positive</option>
+                            <option value="equivocal">Equivocal</option>
+                            <option value="not_done">Not done</option>
+                        <option value="unknown">Unknown</option>
+                        <option value="nan">NAN</option>
+                    </select>
+                    </div>
+                </div>
+
+                <div class="form-group row">
+
+                    <label for="pstage" class="col-md-2 offset-md-2">P Stage</label>
+                    <div class="col-md-2">
+                        <select name="pstage" class="select-design">
+                            <option value="P0">0</option>
+                            <option value="P1a">1</option>
+                            <option value="P1b">1a</option>
+                            <option value="P1">1b</option>
+                            <option value="P4">2</option>
+                            <option value="P4a">2a</option>
+                            <option value="P4b">2b</option>
+                            <option value="P3">3</option>
+                            <option value="P3a">3a</option>
+                            <option value="P3b">3b</option>
+                            <option value="P3c">3c</option>
+                            <option value="P4">4</option>
+                            <option value="unknown">unknown</option>
+                            <option value="nan">NAN</option>
+                        </select>
+                    </div>
+                  
+                    <label for="cerbB2" class="col-md-2 offset-md-1">cerbB2</label>
+                    <div class="col-md-2">
+                        <select name="cerbB2" class="select-design">
+                            <option value="negative">Negative</option>
+                            <option value="positive">Positive</option>
+                            <option value="equivocal">Equivocal</option>
+                            <option value="unknown">Unknown</option>
+                            <option value="nan">NAN</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group row">
+
+                    <label for="cstage" class="col-md-2 offset-md-2">C Stage</label>
+                    <div class="col-md-2">
+                        <select name="cstage" class="select-design">
+                            <option value="dcis_lcis">dcis lcis non-invasive</option>
+                            <option value="0">0</option>
+                            <option value="1">1</option>
+                            <option value="1a">1a</option>
+                            <option value="1b">1b</option>
+                            <option value="2">2</option>
+                            <option value="2a">2a</option>
+                            <option value="2b">2b</option>
+                            <option value="3">3</option>
+                            <option value="3a">3a</option>
+                            <option value="3b">3b</option>
+                            <option value="3c">3c</option>
+                            <option value="4">4</option>
+                            <option value="unknown">unknown</option>
+                            <option value="nan">nan</option>
+                        </select>
+                    </div>
+            
+                    <label for="AJCC8" class="col-md-2 offset-md-1">ProgStage AJCC8 Stage</label>
+                    <div class="col-md-2">
+                        <select name="AJCC8" class="select-design">
+                            <option value="i">i</option>
+                            <option value="ii">ii</option>
+                            <option value="iii">iii</option>
+                            <option value="iv">iv</option>
+                            <option value="nan">nan</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group row">
+                    <label for="diff_grade" class="col-md-2 offset-md-2">Diff Grade</label>
+                    <div class="col-md-2">
+                        <select name="diff_grade" class="select-design">
+                            <option value="1">1</option>
+                            <option value="2">2</option>
+                            <option value="3">3</option>
+                            <option value="unknown">unknown</option>
+                            <option value="nan">nan</option>
+                        </select>
+                    </div>
+                          
+                    <label for="tnm_stage" class="col-md-2 offset-md-1">TNM Stage</label>
+                    <div class="col-md-2">
+                        <select name="tnm_stage" class="select-design">
+                            <option value="dcis_lcis">dcis lcis non-invasive</option>
+                            <option value="0">0</option>
+                            <option value="1">1</option>
+                            <option value="1">1a</option>
+                            <option value="1b">1b</option>
+                            <option value="2">2</option>
+                            <option value="2a">2a</option>
+                            <option value="2b">2b</option>
+                            <option value="3">3</option>
+                            <option value="3a">3a</option>
+                            <option value="3b">3b</option>
+                            <option value="3c">3c</option>
+                            <option value="4">4</option>
+                            <option value="unknown">unknown</option>
+                            <option value="nan">nan</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group-row">
+                    <div class="col-md-2 offset-md-6">
+                            <input type="submit" value="Calculate">
+                    </div>
+                </div>
+
+                </div>
+                
+
+            </form>
+        
+
+        </div>
+    </div>
+</body>
+
+
+</html>
