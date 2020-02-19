@@ -1,6 +1,8 @@
 <html>
 <link rel="stylesheet" media="screen" href = "{{ url_for('static', filename='bootstrap.min.css') }}">
+<link rel="stylesheet" media="screen" href = "{{ url_for('static', filename='dist/css/style.css') }}">
 <meta name="viewport" content = "width=device-width, initial-scale=1.0">
+<script src="https://kit.fontawesome.com/a10c0e47f2.js" crossorigin="anonymous"></script>
 <head>
 </head>
 
@@ -12,21 +14,24 @@
     <div class="calculator-form">
         <div class="container-fluid">
             <form action="/submit" method="post">
+                <br/><br/>
                 <div class="row form-header">
-                    <div class="col-md-2 offset-md-5">
-                        <h1 class="site-title">CALCULATOR</h1>
+                    <div class="col-md-2 offset-md-1">
+                        <h1 class="site-title">Calculator</h1>
                     </div>            
                 </div>   
 
+                <br/><br/>
+
                 <div class="form-group row">
-                    <label for="Age" class="col-md-2 offset-md-2">Age at Diagnosis</label>        
+                    <label for="Age" class="col-md-2 offset-md-1">Age at Diagnosis</label>        
                     <div class="col-md-2">
                         <input type="text" class="form-control" name="age" id="age" placeholder="Age" required>
                     </div>
               
               
-                    <label for="Gender" class="col-md-2 offset-md-1">Gender</label>
-                    <div class="col-md-2">
+                    <label for="Gender" class="col-md-2 offset-md-1" align="right">Gender</label>
+                    <div class="col-md-2 offset-md-1">
                         <input type="radio" id="male" name="gender" value="male">
                         <label for="male">Male</label>
                         <input type="radio" id="female" name="gender" value="female">
@@ -34,21 +39,23 @@
                     </div>
                 </div>
 
+
                 <div class="form-group row">
-                    <label for="nodes_positive" class="col-md-2 offset-md-2">Nodes Positive</label>        
+                    <label for="nodes_positive" class="col-md-2 offset-md-1">Nodes Positive</label>        
                     <div class="col-md-2">
                         <input type="text" class="form-control" name="nodes_positive" id="nodes_positive" placeholder="Nodes Positive" required>
                     </div>
 
-                    <label for="size_precise" class="col-md-2 offset-md-1">Size Precise</label>
-                    <div class="col-md-2">
+                    <label for="size_precise" class="col-md-2 offset-md-1" align="right">Size Precise</label>
+                    <div class="col-md-2 offset-md-1">
                         <input type="text" class="form-control" name="size_precise" id="size_precise" placeholder="size_precise" required>
                     </div>
                 </div>
 
+
                 <div class="form-group row">                   
-                    <label for="tstage" class="col-md-2 offset-md-2">T Stage</label>
-                    <div class="col-md-2">
+                    <label for="tstage" class="col-md-2 offset-md-1" >T Stage</label>
+                    <div class="col-md-2 selectWrapper">
                         <select name="tstage" class="select-design">
                             <option value="T0">T0</option>
                             <option value="T1">T1</option>
@@ -69,8 +76,8 @@
                         </select>
                     </div>
             
-                    <label for="ER" class="col-md-2 offset-md-1">ER</label>
-                    <div class="col-md-2">
+                    <label for="ER" class="col-md-2 offset-md-1" align="right">ER</label>
+                    <div class="col-md-2 offset-md-1">
                         <select name="er" class="select-design">
                             <option value="negative">Negative</option>
                             <option value="positive">Positive</option>
@@ -81,9 +88,10 @@
                     </div>
                 </div>
 
+
                 <div class="form-group row">
 
-                    <label for="nstage" class="col-md-2 offset-md-2">N Stage</label>
+                    <label for="nstage" class="col-md-2 offset-md-1">N Stage</label>
                     <div class="col-md-2">
                         <select name="nstage" class="select-design">
                             <option value="N0">N0</option>
@@ -102,8 +110,8 @@
                     </div>
 
                   
-                    <label for="PR" class="col-md-2 offset-md-1">PR</label>
-                    <div class="col-md-2">
+                    <label for="PR" class="col-md-2 offset-md-1" align="right">PR</label>
+                    <div class="col-md-2 offset-md-1">
                         <select name="pr" class="select-design">
                             <option value="negative">Negative</option>
                             <option value="positive">Positive</option>
@@ -114,9 +122,10 @@
                     </div>
                 </div>
 
+
                 <div class="form-group row">
 
-                    <label for="mstage" class="col-md-2 offset-md-2">M Stage</label>
+                    <label for="mstage" class="col-md-2 offset-md-1">M Stage</label>
                     <div class="col-md-2">
                         <select name="mstage" class="select-design">
                             <option value="M0">M0</option>
@@ -128,8 +137,8 @@
                     </div>
 
                   
-                    <label for="her2" class="col-md-2 offset-md-1">her2</label>
-                    <div class="col-md-2">
+                    <label for="her2" class="col-md-2 offset-md-1" align="right">her2</label>
+                    <div class="col-md-2 offset-md-1">
                         <select name="her2" class="select-design">
                             <option value="negative">Negative</option>
                             <option value="positive">Positive</option>
@@ -141,9 +150,10 @@
                     </div>
                 </div>
 
+
                 <div class="form-group row">
 
-                    <label for="pstage" class="col-md-2 offset-md-2">P Stage</label>
+                    <label for="pstage" class="col-md-2 offset-md-1">P Stage</label>
                     <div class="col-md-2">
                         <select name="pstage" class="select-design">
                             <option value="P0">0</option>
@@ -163,8 +173,8 @@
                         </select>
                     </div>
                   
-                    <label for="cerbB2" class="col-md-2 offset-md-1">cerbB2</label>
-                    <div class="col-md-2">
+                    <label for="cerbB2" class="col-md-2 offset-md-1" align="right">cerbB2</label>
+                    <div class="col-md-2 offset-md-1">
                         <select name="cerbB2" class="select-design">
                             <option value="negative">Negative</option>
                             <option value="positive">Positive</option>
@@ -175,9 +185,11 @@
                     </div>
                 </div>
 
+
+
                 <div class="form-group row">
 
-                    <label for="cstage" class="col-md-2 offset-md-2">C Stage</label>
+                    <label for="cstage" class="col-md-2 offset-md-1">C Stage</label>
                     <div class="col-md-2">
                         <select name="cstage" class="select-design">
                             <option value="dcis_lcis">dcis lcis non-invasive</option>
@@ -198,8 +210,8 @@
                         </select>
                     </div>
             
-                    <label for="AJCC8" class="col-md-2 offset-md-1">ProgStage AJCC8 Stage</label>
-                    <div class="col-md-2">
+                    <label for="AJCC8" class="col-md-2 offset-md-1" align="right">ProgStage AJCC8 Stage</label>
+                    <div class="col-md-2 offset-md-1">
                         <select name="AJCC8" class="select-design">
                             <option value="i">i</option>
                             <option value="ii">ii</option>
@@ -210,8 +222,9 @@
                     </div>
                 </div>
 
+
                 <div class="form-group row">
-                    <label for="diff_grade" class="col-md-2 offset-md-2">Diff Grade</label>
+                    <label for="diff_grade" class="col-md-2 offset-md-1">Diff Grade</label>
                     <div class="col-md-2">
                         <select name="diff_grade" class="select-design">
                             <option value="1">1</option>
@@ -222,8 +235,8 @@
                         </select>
                     </div>
                           
-                    <label for="tnm_stage" class="col-md-2 offset-md-1">TNM Stage</label>
-                    <div class="col-md-2">
+                    <label for="tnm_stage" class="col-md-2 offset-md-1" align="right">TNM Stage</label>
+                    <div class="col-md-2 offset-md-1">
                         <select name="tnm_stage" class="select-design">
                             <option value="dcis_lcis">dcis lcis non-invasive</option>
                             <option value="0">0</option>
@@ -243,6 +256,8 @@
                         </select>
                     </div>
                 </div>
+
+                <br/><br/>
 
                 <div class="form-group-row">
                     <div class="col-md-2 offset-md-6">
