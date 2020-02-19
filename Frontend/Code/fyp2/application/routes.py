@@ -8,9 +8,6 @@ import numpy as numpy
 from sklearn.externals import joblib
 
 
-#lr=joblib.load("C:\wamp64\www\fyp2\application\dash_application\model.pkl")
-
-#model = pickle.load(open('application/model.pkl','rb'))
 
 
 main_bp = Blueprint('main_bp', __name__,

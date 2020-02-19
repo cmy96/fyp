@@ -140,7 +140,7 @@ odio dui."""
 
 def Add_Dash(server):
     """Create a Dash app."""
-    external_stylesheets = ['C:\wamp64\www\\fyp2\\application\static\dist\css\style.css',
+    external_stylesheets = ['.\\fyp\\Frontend\\Code\\fyp2\\application\\static\\dist\\css\\styles.css',
                             'https://fonts.googleapis.com/css?family=Lato',
                             'https://use.fontawesome.com/releases/v5.8.1/css/all.css', 
                             dbc.themes.BOOTSTRAP]
