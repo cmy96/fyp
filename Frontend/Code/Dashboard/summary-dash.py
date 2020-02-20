@@ -188,7 +188,8 @@ html.Div([
                 [go.Scatter(
                         x = df_A['X'],
                         y = df_A['Y'],
-                        mode = 'markers')],
+                        mode = 'markers',
+                        marker = dict(color = '#97B2DE'))],
             'layout': go.Layout(
                 title = 'Old Faithful Eruption Intervals v Durations',
                 xaxis = {'title': 'Duration of eruption (minutes)'},
@@ -210,7 +211,7 @@ html.Div([
                             x= graph2_data['counts'],
                             y= graph2_data['unique_values'],
                             orientation='h',
-                            marker=dict(color=['#ED7E84','#92C0EF','#47DFDA','#87EF9C','#EFEE69'])
+                            marker=dict(color=['#97B2DE','#97B2DE','#97B2DE','#97B2DE','#97B2DE'])
                         )],
                     'layout': go.Layout(
                         title = 'Top 5 Patient Expenditures By Service',
@@ -235,7 +236,8 @@ html.Div([
                         go.Bar(
                             x= graph3_data['Service Department'],
                             y= graph3_data['Treatment Gross'],
-                            text = graph3_data['Treatment Gross']
+                            text = graph3_data['Treatment Gross'],
+                            marker = dict(color = '#97B2DE')
                             )
                         ],
                     'layout': go.Layout(
@@ -290,7 +292,8 @@ html.Div([
                             x = df['Age_@_Dx'],
                             histnorm='probability',
                             xbins=dict(start=df['Age_@_Dx'].min(), end=df['Age_@_Dx'].max(), size=5),
-                            text = list(age_bin_count)
+                            text = list(age_bin_count), 
+                            marker = dict(color = '#97B2DE')
                         ),
                     ],
                     'layout': go.Layout(
@@ -315,6 +318,7 @@ html.Div([
                     y=list(death_cause_dict.values()),
                     text= list(death_cause_dict.values()),
                     textposition='auto',
+                     marker=dict(color=['lightgreen','lightcoral','indianred','lightslategray' ])
             )
                 ],
                 'layout': go.Layout(
@@ -340,7 +344,7 @@ html.Div([
                             orientation='h',
                             marker=dict(
                             color='lightgreen',
-                            line=dict(color='rgb(128, 173, 102)', width=3)
+                            line=dict(color='lightgreen', width=3)
                             )
                         ),
                         go.Bar(
@@ -349,8 +353,8 @@ html.Div([
                             name='Dead- Breast cancer related',
                             orientation='h',
                             marker=dict(
-                            color='rgba(246, 78, 139, 0.6)',
-                            line=dict(color='rgba(246, 78, 139, 1.0)', width=3)
+                            color='lightcoral',
+                            line=dict(color='lightcoral', width=3)
                             )
                         ),
                         go.Bar(
@@ -359,8 +363,8 @@ html.Div([
                             name='Dead',
                             orientation='h',
                             marker=dict(
-                            color='rgb(248, 97, 58)',
-                            line=dict(color='red', width=3)
+                            color='indianred',
+                            line=dict(color='indianred', width=3)
                             )
                         ),
                         go.Bar(
@@ -369,8 +373,8 @@ html.Div([
                             name='Unknown',
                             orientation='h',
                             marker=dict(
-                            color='rgba(58, 71, 80, 0.6)',
-                            line=dict(color='rgba(58, 71, 80, 1.0)', width=3)
+                            color='lightslategrey',
+                            line=dict(color='lightslategrey', width=3)
                             )
                         )
                     ],
@@ -396,14 +400,14 @@ html.Div([
             x= list(graph8_data['type']),
             y= list(graph8_data['counts']),
             name='ER',
-            marker=dict(color='#4C91A8')
+            marker=dict(color='lightpink')
             # Change labels to percentage ,text=[6,87,68,46]
         ),
         go.Bar(
             x = list(g8_data2['type']),
             y=list(g8_data2['counts']),
             name = 'PR',
-            marker = dict(color = '#C07C45')
+            marker = dict(color = 'steelblue')
             #change count to percent
         )
         ],
