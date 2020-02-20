@@ -14,6 +14,13 @@ import base64
 
 external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
 
+def rename_keys(dict_, new_keys):
+    """
+     new_keys: type List(), must match length of dict_
+    """
+    d1 = dict( zip( list(dict_.keys()), new_keys) )
+    return {d1[oldK]: value for oldK, value in dict_.items()}
+
 def calPercent(df1,columnDF,nullExist=False, *replaceWith):
     dict_list = {}
     values = columnDF.unique()
@@ -32,6 +39,7 @@ def calPercent(df1,columnDF,nullExist=False, *replaceWith):
 
     return dict_list
 
+
 #Launch App
 app = dash.Dash(__name__,external_stylesheets=external_stylesheets)
 app.scripts.config.serve_locally = True
@@ -46,6 +54,13 @@ df_A = pd.read_csv(url2, index_col=0)
 # df = pd.read_csv("C:\\Users\\User\\Documents\\fyp\\clinical.csv")
 df = pd.read_csv('data/clinical.csv')
 
+# rename columns
+death_cause = df['cause_of_death']
+death_cause_dict_old = calPercent(df,death_cause,True,"Alive")
+death_cause_dict = rename_keys(death_cause_dict_old,\
+                        ['Alive', 'Dead- Breast Cancer', 'Dead- Others', 'Dead- Unknown'])
+
+                        
 #Data manipulation for graph dataset
 
 ##Jess's Graphs
@@ -59,9 +74,7 @@ graph3_data = graph3_data.sort_values('Treatment Gross',ascending=False).head(10
 
 
 ##Tanny's Graphs
-# this has null
-death_cause = df['cause_of_death']
-death_cause_dict = calPercent(df,death_cause,True,"Alive")
+
 
 #assuming no nan data
 TNM = df['TNM_Stage']
@@ -70,7 +83,7 @@ TNM_Stage = TNM.unique()
 
 for stage in TNM_Stage:
     status_dict = {}
-    for life_status in death_cause_dict.keys():
+    for life_status in death_cause_dict_old.keys():
         
         tmp = df[['TNM_Stage','cause_of_death']]
           
@@ -89,7 +102,7 @@ TNM_dict = dict(sorted(TNM_dict.items(), key=lambda x:operator.getitem(x[1],'bre
 
 # reorganize the previous dict into status for every stage
 finalized_dict = {}
-for status in death_cause_dict.keys():
+for status in death_cause_dict_old.keys():
     for stage in TNM_Stage:
         finalized_dict[status] = [v[status] for k,v in TNM_dict.items()] 
 
@@ -99,7 +112,7 @@ age = pd.Series(df['Age_@_Dx'])
 bins = np.arange(df['Age_@_Dx'].min(),df['Age_@_Dx'].max() + 4, 4)
 df['binned'] = np.searchsorted(bins, df['Age_@_Dx'].values)
 age_bin_count = df.groupby(pd.cut(df['Age_@_Dx'], bins=19, precision = 0, right = False)).size()
-print(age_bin_count)
+
 
 ##Data for Graph 8
 graph8_data = df['ER'].value_counts()
@@ -224,7 +237,7 @@ html.Div([
                             y= graph3_data['Treatment Gross'],
                             text = graph3_data['Treatment Gross']
                             )
-                        )],
+                        ],
                     'layout': go.Layout(
                         title = 'Patient Spend Breakdown',
                         xaxis = {'title': 'Service'},
@@ -353,7 +366,7 @@ html.Div([
                         go.Bar(
                             x= list(finalized_dict['unknown']),
                             y= list(TNM_dict.keys()),
-                            name='unknown',
+                            name='Unknown',
                             orientation='h',
                             marker=dict(
                             color='rgba(58, 71, 80, 0.6)',
@@ -384,12 +397,14 @@ html.Div([
             y= list(graph8_data['counts']),
             name='ER',
             marker=dict(color='#4C91A8')
+            # Change labels to percentage ,text=[6,87,68,46]
         ),
         go.Bar(
             x = list(g8_data2['type']),
             y=list(g8_data2['counts']),
             name = 'PR',
             marker = dict(color = '#C07C45')
+            #change count to percent
         )
         ],
         'layout': go.Layout(
