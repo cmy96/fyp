@@ -18,11 +18,14 @@ main_bp = Blueprint('main_bp', __name__,
 @main_bp.route('/')
 def home():
     """Landing page."""
-    return render_template('index2.html',
+    return render_template('landing.html',
                            title='C.A.R.E',
                            template='home-template',
                            body="")
 
+@app.route('/index2.html')
+def index():
+    return render_template('index2.html')
 
 
 @app.route('/submit', methods=['POST', 'GET'])
