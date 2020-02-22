@@ -129,18 +129,13 @@ for status_er in ERlist:
 
         status_dict[status_pr] = round(NumRecord,2)
     ER_dict[status_er] = status_dict
-ER_dict = dict(sorted(ER_dict.items(), key=lambda x:operator.getitem(x[1],'positive')))
 
-# reorganize the previous dict into status for every stage
-ER_output_dict = {}
-for x in ERlist:
-    for y in PRlist:
-        ER_output_dict[y] = [v[x] for k,v in ER_dict.items()] 
+ER_dict = dict(sorted(ER_dict.items(),key=lambda i:ERlist.index(i[0])))
 
-
-from pprint import pprint
-pprint(ER_output_dict)
-pprint(ER_dict)
+er_finalized_dict = {}
+for key in ER_dict.keys():
+    for value in ER_dict[key].keys():
+        er_finalized_dict[key] = [v for k,v in ER_dict[key].items()] 
 
 #Styling settings
 styles = {
@@ -417,14 +412,14 @@ html.Div([
         figure={'data':[
         go.Bar(
             x= ERlist,
-            y= list(ER_dict['positive']['positive']),
+            y= er_finalized_dict['positive'],
             name='ER',
             marker=dict(color='lightpink')
             # Change labels to percentage ,text=[6,87,68,46]
         ),
         go.Bar(
             x= ERlist,
-            y= list(ER_dict['negative']['positive']),
+            y= er_finalized_dict['negative'],
             name='ER',
             marker=dict(color='lightblue')
             # Change labels to percentage ,text=[6,87,68,46]
