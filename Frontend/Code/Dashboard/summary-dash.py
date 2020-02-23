@@ -137,6 +137,11 @@ for key in ER_dict.keys():
     for value in ER_dict[key].keys():
         er_finalized_dict[key] = [v for k,v in ER_dict[key].items()] 
 
+# print([er_finalized_dict['positive'][0],er_finalized_dict['negative'][0]])
+# print(er_finalized_dict['negative'])
+# print(er_finalized_dict['equivocal'])
+# print(er_finalized_dict)
+
 #Styling settings
 styles = {
     'pre': {
@@ -405,45 +410,73 @@ html.Div([
             ],
             className = "pretty_container five columns"
             ),
-
-    html.Div([
-        #Graph 8 - Tanny 4
-        dcc.Graph(id="graph-8",
-        figure={'data':[
-        go.Bar(
-            x= ERlist,
-            y= er_finalized_dict['positive'],
-            name='ER',
-            marker=dict(color='lightpink')
-            # Change labels to percentage ,text=[6,87,68,46]
-        ),
-        go.Bar(
-            x= ERlist,
-            y= er_finalized_dict['negative'],
-            name='ER',
-            marker=dict(color='lightblue')
-            # Change labels to percentage ,text=[6,87,68,46]
-        )
-        ],
-        'layout': go.Layout(
-                        title = "Relationship Between ER & PR",
-                        xaxis = {'title': 'Type'},
-                        yaxis = {'title': '# of Patients'},
+     html.Div([
+        #Graph 7 - Tanny 3
+        dcc.Graph(
+                id='ER VS PR',
+                figure={
+                    'data': [
+                        go.Bar(
+                            x= [er_finalized_dict['positive'][0],er_finalized_dict['negative'][0],er_finalized_dict['equivocal'][0]],
+                            y= ['positive','negative','equivocal','unknown'],
+                            name='PR Positive',
+                            orientation='h',
+                            marker=dict(
+                            color='palegreen',
+                            line=dict(color='palegreen', width=3)
+                            )
+                        ),
+                        go.Bar(
+                            x= [er_finalized_dict['positive'][1],er_finalized_dict['negative'][1],er_finalized_dict['equivocal'][1]],
+                            y= ['positive','negative','equivocal','unknown'],
+                            name='PR Negative',
+                            orientation='h',
+                            marker=dict(
+                            color='lightpink',
+                            line=dict(color='lightpink', width=3)
+                            )
+                        ),
+                        go.Bar(
+                            x= [er_finalized_dict['positive'][2],er_finalized_dict['negative'][2],er_finalized_dict['equivocal'][2]],
+                            y= ['positive','negative','equivocal','unknown'],
+                            name='PR Equivocal',
+                            orientation='h',
+                            marker=dict(
+                            color='lightblue',
+                            line=dict(color='lightblue', width=3)
+                            )
+                        ),
+                        go.Bar(
+                            x= [er_finalized_dict['positive'][3],er_finalized_dict['negative'][3],er_finalized_dict['equivocal'][3]],
+                            y= ['positive','negative','equivocal','unknown'],
+                            name='PR Unknown',
+                            orientation='h',
+                            marker=dict(
+                            color='lightgrey',
+                            line=dict(color='lightgrey', width=3)
+                            )
+                        )
+                    ],
+                    'layout': go.Layout(
+                        title = "ER Vs PR relationship",
+                        xaxis = {'title': 'Percentages'},
+                        yaxis = {'title': 'ER Stages'},
                         hovermode='closest',
-                        barmode='group'
-        )}
-        )
-        ],className='pretty_container five columns')
+                        barmode='stack',
+
+                    )
+                }
+            )
+            ],
+            className = "pretty_container five columns"
+            ),
     ],
     className="row flex-display"
     )
 
-
-
 ],
 id="mainContainer",
 style={"display": "flex", "flex-direction": "column"}
-
 
 )
 
