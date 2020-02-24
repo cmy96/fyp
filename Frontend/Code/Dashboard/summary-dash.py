@@ -71,18 +71,18 @@ graph3_data = df_bills.groupby('Service.Department.Description')['Gross..exclude
 graph3_data = graph3_data.rename_axis('Service Department').reset_index(name='Treatment Gross')
 graph3_data = graph3_data.sort_values('Treatment Gross',ascending=False).head(10)
 
-
-
 ##Tanny's Graphs
-
 
 #assuming no nan data
 TNM = df['TNM_Stage']
 TNM_dict = {}
 TNM_Stage = TNM.unique()
 
+# for every stage in TNM_stage, it becomes the key for the MAIN dictionary
 for stage in TNM_Stage:
     status_dict = {}
+
+    #every stage in tnm_stage will have a dictionary that holds death_status as key and number of death as value
     for life_status in death_cause_dict_old.keys():
         
         tmp = df[['TNM_Stage','cause_of_death']]
@@ -100,6 +100,7 @@ for stage in TNM_Stage:
     TNM_dict[stage] = status_dict
 TNM_dict = dict(sorted(TNM_dict.items(), key=lambda x:operator.getitem(x[1],'breast cancer related')))
 
+
 # reorganize the previous dict into status for every stage
 finalized_dict = {}
 for status in death_cause_dict_old.keys():
@@ -107,23 +108,41 @@ for status in death_cause_dict_old.keys():
         finalized_dict[status] = [v[status] for k,v in TNM_dict.items()] 
 
 #Binning of diagnosed age - Tanny
-age = pd.Series(df['Age_@_Dx'])
-
 bins = np.arange(df['Age_@_Dx'].min(),df['Age_@_Dx'].max() + 4, 4)
 df['binned'] = np.searchsorted(bins, df['Age_@_Dx'].values)
 age_bin_count = df.groupby(pd.cut(df['Age_@_Dx'], bins=19, precision = 0, right = False)).size()
 
-
 ##Data for Graph 8
-graph8_data = df['ER'].value_counts()
-graph8_data = graph8_data.rename_axis('type').reset_index(name='counts')
+ER_dict = {}
 
-g8_data2 = df['PR'].value_counts()
-g8_data2 = g8_data2.rename_axis('type').reset_index(name='counts')
+ERlist = list(['positive','negative','equivocal','unknown'])
+PRlist = list(['positive','negative','equivocal','unknown'])
+for status_er in ERlist:
+    status_dict = {}
+    for status_pr in PRlist:
+        tmp = df[['ER','PR']]
+        
+        if len(df[df.ER==status_er]) > 0 or len(tmp[(tmp['ER']==status_er) & (tmp['PR']==status_pr)]) > 0:
+            NumRecord  = len(tmp[(tmp['ER']==status_er) & (tmp['PR']==status_pr)])/len(df[df['ER'] == status_er])*100
+        else:
+            pass
 
+        status_dict[status_pr] = round(NumRecord,2)
+    ER_dict[status_er] = status_dict
 
-##Styling settings
+ER_dict = dict(sorted(ER_dict.items(),key=lambda i:ERlist.index(i[0])))
 
+er_finalized_dict = {}
+for key in ER_dict.keys():
+    for value in ER_dict[key].keys():
+        er_finalized_dict[key] = [v for k,v in ER_dict[key].items()] 
+
+# print([er_finalized_dict['positive'][0],er_finalized_dict['negative'][0]])
+# print(er_finalized_dict['negative'])
+# print(er_finalized_dict['equivocal'])
+# print(er_finalized_dict)
+
+#Styling settings
 styles = {
     'pre': {
         'border': 'thin lightgrey solid',
@@ -391,45 +410,73 @@ html.Div([
             ],
             className = "pretty_container five columns"
             ),
-
-    html.Div([
-        #Graph 8 - Tanny 4
-        dcc.Graph(id="graph-8",
-        figure={'data':[
-        go.Bar(
-            x= list(graph8_data['type']),
-            y= list(graph8_data['counts']),
-            name='ER',
-            marker=dict(color='lightpink')
-            # Change labels to percentage ,text=[6,87,68,46]
-        ),
-        go.Bar(
-            x = list(g8_data2['type']),
-            y=list(g8_data2['counts']),
-            name = 'PR',
-            marker = dict(color = 'steelblue')
-            #change count to percent
-        )
-        ],
-        'layout': go.Layout(
-                        title = "Relationship Between ER & PR",
-                        xaxis = {'title': 'Type'},
-                        yaxis = {'title': '# of Patients'},
+     html.Div([
+        #Graph 7 - Tanny 3
+        dcc.Graph(
+                id='ER VS PR',
+                figure={
+                    'data': [
+                        go.Bar(
+                            x= [er_finalized_dict['positive'][0],er_finalized_dict['negative'][0],er_finalized_dict['equivocal'][0]],
+                            y= ['positive','negative','equivocal','unknown'],
+                            name='PR Positive',
+                            orientation='h',
+                            marker=dict(
+                            color='palegreen',
+                            line=dict(color='palegreen', width=3)
+                            )
+                        ),
+                        go.Bar(
+                            x= [er_finalized_dict['positive'][1],er_finalized_dict['negative'][1],er_finalized_dict['equivocal'][1]],
+                            y= ['positive','negative','equivocal','unknown'],
+                            name='PR Negative',
+                            orientation='h',
+                            marker=dict(
+                            color='lightpink',
+                            line=dict(color='lightpink', width=3)
+                            )
+                        ),
+                        go.Bar(
+                            x= [er_finalized_dict['positive'][2],er_finalized_dict['negative'][2],er_finalized_dict['equivocal'][2]],
+                            y= ['positive','negative','equivocal','unknown'],
+                            name='PR Equivocal',
+                            orientation='h',
+                            marker=dict(
+                            color='lightblue',
+                            line=dict(color='lightblue', width=3)
+                            )
+                        ),
+                        go.Bar(
+                            x= [er_finalized_dict['positive'][3],er_finalized_dict['negative'][3],er_finalized_dict['equivocal'][3]],
+                            y= ['positive','negative','equivocal','unknown'],
+                            name='PR Unknown',
+                            orientation='h',
+                            marker=dict(
+                            color='lightgrey',
+                            line=dict(color='lightgrey', width=3)
+                            )
+                        )
+                    ],
+                    'layout': go.Layout(
+                        title = "ER Vs PR relationship",
+                        xaxis = {'title': 'Percentages'},
+                        yaxis = {'title': 'ER Stages'},
                         hovermode='closest',
-                        barmode='group'
-        )}
-        )
-        ],className='pretty_container five columns')
+                        barmode='stack',
+
+                    )
+                }
+            )
+            ],
+            className = "pretty_container five columns"
+            ),
     ],
     className="row flex-display"
     )
 
-
-
 ],
 id="mainContainer",
 style={"display": "flex", "flex-direction": "column"}
-
 
 )
 
