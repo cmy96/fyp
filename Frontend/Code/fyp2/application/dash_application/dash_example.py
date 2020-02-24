@@ -18,6 +18,8 @@ import operator
 from plotly.subplots import make_subplots
 import plotly
 import base64
+from flask import Blueprint, render_template, request, jsonify, json, redirect, session, url_for
+import flask
 
 external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
 
@@ -153,78 +155,65 @@ layout = dict(
 )
 
 
-def Add_Dash(server):
-    """Create a Dash app."""
-    external_stylesheets = ['.\\fyp\\Frontend\\Code\\fyp2\\application\\static\\dist\\css\\styles.css',
-                            'https://fonts.googleapis.com/css?family=Lato',
-                            'https://use.fontawesome.com/releases/v5.8.1/css/all.css', 
-                            dbc.themes.BOOTSTRAP]
-    external_scripts = ['/static/dist/js/includes/jquery.min.js',
-                        '/static/dist/js/main.js']
-    dash_app = dash.Dash(server=server,
-                         external_stylesheets=external_stylesheets,
-                         external_scripts=external_scripts,
-                         routes_pathname_prefix='/dashapp/')
-
-    # Override the underlying HTML template
-    dash_app.index_string = html_layout
-
-    #Create Dash Layout comprised of Data Tables
-    dash_app.layout = html.Div([
-    #HEADER#
+dashboard = html.Div([
     html.Div(
         [
             html.Div(
-                    [
-                        html.Img(
-                            src=app.get_asset_url('logo.png'),
-                            id="logo",
-                            style={
-                                "height": "150px",
-                                "width": "auto",
-                                "margin-bottom": "25px",
-                                "float":"right"
-                            },
-                        )
-                    ], className = "one-third column",
-                ),
-                html.Div(
-                    [
+                [
+                    html.Img(
+                        src=app.get_asset_url('logo.png'),
+                        id="logo",
+                        style={
+                            "height": "150px",
+                            "width": "auto",
+                            "margin-bottom": "25px",
+                            "float":"right"
+                        },
+                    )
+                ], className = "one-third column",
+            ),
+
+            html.Div(
+                [
                     html.H3('Data Exploration For Breast Cancer Patients Dataset', style={'textAlign': 'left', 'color': '#0080FF', 'margin-top':'30px'})
-                    ],
-                    className="one-half column", id="title"
-                )
-        ]),
+                ],
+                className="one-half column", id="title"
+            )
+        ]
+    ),
 
-html.Div([
-    html.Div([html.H3("Bills Dataset", style={'textAlign': 'center', 'color': 'red', 'margin-top':'30px'})]
-    #add comma and classname col to manipulate
-    )
-]),
+    html.Div([
+        html.Div([
+            html.H3("Bills Dataset", style={'textAlign': 'center', 'color': 'red', 'margin-top':'30px'})]
+            #add comma and classname col to manipulate
+        )
+    ]),
 
 
-#Jesslyn Charts Wrapper#   
-html.Div([
-    # #Graph 1
+    #Jesslyn Charts Wrapper#   
+    html.Div([
+        # #Graph 1
         html.Div([
             dcc.Graph(
             id='old_faithful',
             figure={
                 'data': 
-                [go.Scatter(
-                        x = df_A['X'],
-                        y = df_A['Y'],
-                        mode = 'markers',
-                        marker = dict(color = '#97B2DE'))],
-            'layout': go.Layout(
-                title = 'Old Faithful Eruption Intervals v Durations',
-                xaxis = {'title': 'Duration of eruption (minutes)'},
-                yaxis = {'title': 'Interval to next eruption (minutes)'},
-                hovermode='closest'
-            )
-            }   
-        )],
-        className="pretty_container six columns"
+                [go.Scatter
+                    (
+                    x = df_A['X'],
+                    y = df_A['Y'],
+                    mode = 'markers',
+                    marker = dict(color = '#97B2DE')
+                    )
+                ],
+                'layout': go.Layout(
+                    title = 'Old Faithful Eruption Intervals v Durations',
+                    xaxis = {'title': 'Duration of eruption (minutes)'},
+                    yaxis = {'title': 'Interval to next eruption (minutes)'},
+                    hovermode='closest'
+                )
+            })
+        ], className="pretty_container six columns"
         ),
 
         html.Div([
@@ -247,9 +236,7 @@ html.Div([
                     )
                 }
             )
-        ],
-        id="right-column",
-        className='six columns'
+        ], id="right-column", className='six columns'
         ),
 
         html.Div([
@@ -276,9 +263,9 @@ html.Div([
                 }
             )
         ], className="pretty_container eight columns"
-
-    )],className="row flex-display"
-),
+        )
+    ],className="row flex-display"
+    ),
 
     #Graph 4 - FRequency of Mammograms done by breast cancer patients
     # dcc.Graph(
@@ -300,14 +287,17 @@ html.Div([
     #     }
     # ),
 
-html.Div([
-    html.Div([html.H3("Clinical Dataset", style={'textAlign': 'center', 'color': 'red', 'margin-top':'30px'})]
-    #add comma and classname col to manipulate
-    )
-]),
+    html.Div([
+        html.Div(
+            [
+                html.H3("Clinical Dataset", style={'textAlign': 'center', 'color': 'red', 'margin-top':'30px'})
+            ]
+        #add comma and classname col to manipulate
+        )
+    ]),
 
-##TANNY WRAPPER##
-html.Div([
+    ##TANNY WRAPPER##
+    html.Div([
         #Graph 5 - Tanny 1
         html.Div([
             dcc.Graph(
@@ -335,35 +325,36 @@ html.Div([
 
         html.Div([
         #Graph 6 - Tanny 2
-        dcc.Graph(
-            id='Proportion of Patients Alive Vs Dead',
-            figure={
-                'data': [
-                    go.Bar(
-                    x=list(death_cause_dict.keys()), 
-                    y=list(death_cause_dict.values()),
-                    text= list(death_cause_dict.values()),
-                    textposition='auto',
-                     marker=dict(color=['lightgreen','lightcoral','indianred','lightslategray' ])
+            dcc.Graph(
+                id='Proportion of Patients Alive Vs Dead',
+                figure={
+                    'data': [
+                        go.Bar(
+                        x=list(death_cause_dict.keys()), 
+                        y=list(death_cause_dict.values()),
+                        text= list(death_cause_dict.values()),
+                        textposition='auto',
+                        marker=dict(color=['lightgreen','lightcoral','indianred','lightslategray' ])
+                        )
+                    ],
+                    'layout': go.Layout(
+                        title = "Proportion of Patients Alive Vs Dead",
+                        xaxis = {'title': 'Cause of Death'},
+                        yaxis = {'title': 'Percentage of Patients'},
+                        hovermode='closest'
+                    )
+                }
             )
-                ],
-                'layout': go.Layout(
-                    title = "Proportion of Patients Alive Vs Dead",
-                    xaxis = {'title': 'Cause of Death'},
-                    yaxis = {'title': 'Percentage of Patients'},
-                    hovermode='closest'
-                )
-            }
-        )],
-        className = "pretty_container six columns"
+        ], className = "pretty_container six columns"
         ),
-    html.Div([
-        #Graph 7 - Tanny 3
-        dcc.Graph(
+
+        html.Div([
+            #Graph 7 - Tanny 3
+            dcc.Graph(
                 id='TNM Stage Alive Vs Dead',
                 figure={
                     'data': [
-                    go.Bar(
+                        go.Bar(
                             x= list(finalized_dict['Alive']),
                             y= list(TNM_dict.keys()),
                             name='Alive',
@@ -410,41 +401,40 @@ html.Div([
                         yaxis = {'title': 'Cancer Stages'},
                         hovermode='closest',
                         barmode='stack',
-
                     )
                 }
             )
-            ],
-            className = "pretty_container five columns"
-            ),
-
-    html.Div([
-        #Graph 8 - Tanny 4
-        dcc.Graph(id="graph-8",
-        figure={'data':[
-        go.Bar(
-            x= list(graph8_data['type']),
-            y= list(graph8_data['counts']),
-            name='ER',
-            marker=dict(color='lightpink')
-            # Change labels to percentage ,text=[6,87,68,46]
+        ], className = "pretty_container five columns"
         ),
-        go.Bar(
-            x = list(g8_data2['type']),
-            y=list(g8_data2['counts']),
-            name = 'PR',
-            marker = dict(color = 'steelblue')
-            #change count to percent
-        )
-        ],
-        'layout': go.Layout(
+
+        html.Div([
+            #Graph 8 - Tanny 4
+            dcc.Graph(id="graph-8",
+                figure={'data':[
+                    go.Bar(
+                        x= list(graph8_data['type']),
+                        y= list(graph8_data['counts']),
+                        name='ER',
+                        marker=dict(color='lightpink')
+                        # Change labels to percentage ,text=[6,87,68,46]
+                    ),
+                    go.Bar(
+                        x = list(g8_data2['type']),
+                        y=list(g8_data2['counts']),
+                        name = 'PR',
+                        marker = dict(color = 'steelblue')
+                        #change count to percent
+                    )
+                ],
+                'layout': go.Layout(
                         title = "Relationship Between ER & PR",
                         xaxis = {'title': 'Type'},
                         yaxis = {'title': '# of Patients'},
                         hovermode='closest',
                         barmode='group'
-        )}
-        )
+                    )
+                }
+            )
         ],className='pretty_container five columns')
     ],
     className="row flex-display"
@@ -455,48 +445,62 @@ html.Div([
 ],
 id="mainContainer",
 style={"display": "flex", "flex-direction": "column"}
-
-
 )
 
+
+def Add_Dash(server):
+    """Create a Dash app."""
+    external_stylesheets = ['.\\fyp\\Frontend\\Code\\fyp2\\application\\static\\dist\\css\\styles.css',
+                            'https://fonts.googleapis.com/css?family=Lato',
+                            'https://use.fontawesome.com/releases/v5.8.1/css/all.css', 
+                            dbc.themes.BOOTSTRAP]
+    external_scripts = ['/static/dist/js/includes/jquery.min.js',
+                        '/static/dist/js/main.js']
+    dash_app = dash.Dash(server=server,
+                         external_stylesheets=external_stylesheets,
+                         external_scripts=external_scripts,
+                         #routes_pathname_prefix='/dashapp/'
+                         )
+
+    # Override the underlying HTML template
+    dash_app.index_string = html_layout
+
+    #Create Dash Layout comprised of Data Tables
+    dash_app.layout = html.Div([
+
+        dcc.Location(id='url', refresh=False),
+        html.Div(id='page-content'),
+        html.Div(id='output-graph'),
+        html.Div(id='input'),
+        html.Div(id='output'),
     
-        
-    #     html.Div(
 
-    #     #children=get_datasets(),
-    #     #id='dash-container',
+    ])
 
-    #     children = [
-
-    #         html.Div(
-    #             html.Nav(className = "nav nav-pills", children = [
-    #             html.A('C.A.R.E', className="nav-item nav-link btn", href='/'),
-    #             html.A('Calculator', className="nav-item nav-link active btn", href='/dashapp') 
-    #             ]
-    #             )
-    #         ),
-    #         html.Div(
-    #             html.H1("Dashboard"),
-    #         ),
-
-    #         html.Div(
-    #             dcc.Graph(
-    #                 id='example-graph',
-    #                 figure={
-    #                 'data': [
-    #                     {'x': [1, 2, 3], 'y': [4, 1, 2], 'type': 'bar', 'name': 'SF'},
-    #                     {'x': [1, 2, 3], 'y': [2, 4, 5], 'type': 'bar', 'name': u'Montréal'},
-    #                 ],
-    #                 'layout': {
-    #                 'title': 'Dash Data Visualization'
-    #                 }
-    #                 }
-    #             )
-    #         )
-    #     ]
-    # )
+    init_callbacks(dash_app)
 
     return dash_app.server
+
+
+
+def init_callbacks(dash_app):
+    @dash_app.callback(dash.dependencies.Output('page-content', 'children'),
+                        
+                        [dash.dependencies.Input('url', 'pathname')]
+                       
+                    )
+    def display_page(pathname):        
+        if pathname =="/dashapp/":
+            return dashboard
+        elif pathname == "/results/":
+            cookies = session['received']
+            cookies = str(cookies, 'utf-8')
+            cookies =cookies.split(",")
+
+            print(cookies)
+            cookie = html.H1(cookies)
+            return cookie
+            #return dashboard
 
 
 # def get_datasets():

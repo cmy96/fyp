@@ -1,14 +1,16 @@
 """Routes for core Flask app."""
-from flask import Blueprint, render_template, request, jsonify, json
+from flask import Blueprint, render_template, request, jsonify, json, redirect, session, url_for
 from flask import current_app as app
 import pickle
 
-import pandas as pd
-import numpy as numpy
-from sklearn.externals import joblib
 
+import socket
+import sys
+import json
 
-
+SESSION_TYPE = 'memcache'
+app.secret_key = 'super secret key'
+app.config['SESSION_TYPE'] = 'filesystem'
 
 main_bp = Blueprint('main_bp', __name__,
                     template_folder='templates',
@@ -28,30 +30,43 @@ def index():
     return render_template('index2.html')
 
 
-@app.route('/submit', methods=['POST', 'GET'])
+@app.route('/submit', methods=['POST'])
 def submit():
-    data = jsonify(request.form)
+    req = request.form
+    data = json.dumps(req) 
+    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    BUFF_SIZE = 4096
+    full_message =b''
 
-    return data
+    server_address = ('localhost', 1236)
+    print('connecting to {} port {}'.format(*server_address))
 
-# def predict():
+    sock.connect(server_address)
 
-#     form_data = jsonify(request.form)
+    try:
+        message = bytes(data, encoding='utf-8')
+        print('sending {!r}'.format(message))
+        sock.sendall(message)
 
-#     # get data
-#     data = request.get_json(force=True)
+        amount_received = 0
+        amount_expected = len(message)
+
+        while True:
+            received = sock.recv(BUFF_SIZE)
+            full_message += received
+
+            #amount_received += len(received)
+            if len(part) < BUFF_SIZE: 
+                break            
+        
+    finally:
+        print('received {!r}'.format(received))
+        print('closing socket')
+        sock.close()
+        session['received'] = full_message
+        print(session)
+        return redirect('/results/')
 
 
-#     # convert data into dataframe
-#     data.update((x, [y]) for x, y in data.items())
-#     data_df = pd.DataFrame.from_dict(data)
 
-#     # predictions
-#     result = model.predict(data_df)
-
-#     # send back to browser
-#     output = {'results': int(result[0])}
-
-#     # return data
-#     return jsonify(results=output)
 
