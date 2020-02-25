@@ -1,26 +1,39 @@
 <html>
 <link rel="stylesheet" media="screen" href = "{{ url_for('static', filename='bootstrap.min.css') }}">
-<link rel="stylesheet" media="screen" href = "{{ url_for('static', filename='dist/css/style.css') }}">
-<meta name="viewport" content = "width=device-width, initial-scale=1.0">
+<link rel="stylesheet" media="screen" href = "{{ url_for('static', filename='dist/css/styles.css') }}">
+<meta name="viewport"  content = "width=device-width, initial-scale=1.0, user-scalable=yes">
 <script src="https://kit.fontawesome.com/a10c0e47f2.js" crossorigin="anonymous"></script>
 <head>
+    <style>
+
+    </style>
 </head>
 
 <body class = "body">
+    <style>
+        body {
+            background-image: url('https://geneticliteracyproject.org/wp-content/uploads/2019/08/unnamed-file-6.jpg');
+            background-size: cover;
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+            background-size: 100% 100%;
+
+        }
+    </style>
     <div class="navBar">
             {% include 'nav.html' %}
     </div>
     
 
-    <header class="masthead">
-        <div class="container h-100">
-            <div class="row h-100 align-items-center justify-content-center text-center">
+    <header class="masthead ">
+        <div class="container landing-design">
+            <div class="row align-items-center justify-content-center text-center">
                 <div class="col-lg-10 align-self-end">
-                    <h1 class="text-uppercase text-white font-weight-bold">Your Favorite Source of Free Bootstrap Themes</h1>
+                    <h1 class="text-uppercase text-white font-weight-bold">C.A.R.E Prediction Tool</h1>
                     <hr class="divider my-4">
                 </div>
                 <div class="col-lg-8 align-self-baseline">
-                    <p class="text-white-75 font-weight-light mb-5">Start Bootstrap can help you build better websites using the Bootstrap framework! Just download a theme and start customizing, no strings attached!</p>
+                    <p class="text-white-75 font-weight-light mb-5"></p>
                     <a class="btn btn-primary btn-xl js-scroll-trigger" href="/index2.html">Start</a>
                 </div>
             </div>

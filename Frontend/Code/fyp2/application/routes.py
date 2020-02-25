@@ -2,6 +2,7 @@
 from flask import Blueprint, render_template, request, jsonify, json, redirect, session, url_for
 from flask import current_app as app
 import pickle
+import os
 
 
 import socket
@@ -22,8 +23,7 @@ def home():
     """Landing page."""
     return render_template('landing.html',
                            title='C.A.R.E',
-                           template='home-template',
-                           body="")
+                        )
 
 @app.route('/index2.html')
 def index():
@@ -67,6 +67,18 @@ def submit():
         print(session)
         return redirect('/results/')
 
+@app.context_processor
+def override_url_for():
+    return dict(url_for=dated_url_for)
+
+def dated_url_for(endpoint, **values):
+    if endpoint == 'static':
+        filename = values.get('filename', None)
+        if filename:
+            file_path = os.path.join(app.root_path,
+                                 endpoint, filename)
+            values['q'] = int(os.stat(file_path).st_mtime)
+    return url_for(endpoint, **values)
 
 
 

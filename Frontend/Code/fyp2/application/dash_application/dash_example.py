@@ -58,6 +58,17 @@ app.scripts.config.serve_locally = True
 app.css.config.serve_locally = True
 
 
+# plt.step(x//365.25, y, where="post", label=str(0))
+# plt.ylabel("Survival probability")
+# plt.xlabel("Time (Years)")
+# plt.title("Overall Survival Curve (in Years)")
+# plt.grid(True)
+# plt.legend()
+
+
+
+
+
 #Create df from .csv file
 url = 'data/bills1.csv'
 url2 = 'data/OldFaithful.csv'
@@ -65,6 +76,8 @@ df_bills = pd.read_csv(url, index_col=0)
 df_A = pd.read_csv(url2, index_col=0)
 # df = pd.read_csv("C:\\Users\\User\\Documents\\fyp\\clinical.csv")
 df = pd.read_csv('data/clinical.csv')
+
+
 
 # rename columns
 death_cause = df['cause_of_death']
@@ -171,6 +184,10 @@ layout = dict(
     legend=dict(font=dict(size=10), orientation="h"),
     title="Satellite Overview"
 )
+
+
+
+
 
 
 dashboard = html.Div([
@@ -496,6 +513,285 @@ id="mainContainer",
 style={"display": "flex", "flex-direction": "column"}
 )
 
+# card = dbc.Container(
+#     [
+#         html.Br(),
+#         html.Br(),
+        
+#         dbc.Row(
+#             [
+#                 dbc.Col(
+#                     [
+#                         html.Div(
+#                             dbc.Card(
+#                                 [
+#                                     dbc.CardHeader(
+#                                         dbc.Tabs(
+#                                             [
+#                                                 dbc.Tab(label="Doctor View", tab_id="Doctor"),
+#                                                 dbc.Tab(label="Patient View", tab_id="View"),
+#                                             ],
+#                                             id="card-tabs",
+#                                             card=True,
+#                                             active_tab="Doctor",
+#                                         )
+#                                     ),
+#                                     dbc.CardBody(html.P(id="card-content", className="card-text")),
+#                                 ]
+#                             )
+#                         )
+#                     ], width=12,
+#                 ), 
+                
+#             ]
+#         )
+#     ]
+# )
+
+Doctor_View = dbc.Card(
+    dbc.CardBody(
+        [
+            html.P("This is Doctor Tab!", className="card-text"),
+        ]
+    ),
+    className="mt-3",
+)
+
+Patient_View = dbc.Card(
+    dbc.CardBody(
+        [
+            html.P("This is Patient Tab!", className="card-text"),
+        ]
+    ),
+    className="mt-3",
+)
+
+
+card = html.Div(
+    [
+        html.Br(),
+        html.Br(),
+        dbc.Row(
+            dbc.Col(
+                [
+                    dbc.Card(
+                        [
+                            dbc.CardHeader(
+                                dbc.Tabs(
+                                    [
+                                        dbc.Tab(
+                                            label="Doctor View", tab_id="Doctor"
+                                        ),
+                                        dbc.Tab(label="Patient View", tab_id="View"),
+                                    ],
+                                    id="card-tabs",
+                                    card=True,
+                                    active_tab="Doctor",
+                                )
+                            ),
+                            dbc.CardBody(html.P(id="card-content", className="card-text")),
+                        ]
+                    )
+                ], width=10,
+            ), justify="center",
+        )
+    ]
+)
+
+survival_layout = dbc.Container(
+    [
+        html.Br(),
+        html.Br(),
+        html.Br(),
+        html.Br(),
+        
+        dbc.Row(
+             #dbc.Col(
+                [
+                    html.H1("Survival Prediction")
+                ], align="center", justify="center",
+            ),   
+            
+        #),
+        html.Br(),
+        html.Br(),
+
+        dbc.Row(
+            [
+                dbc.Col(
+                    [
+                        dbc.Button(
+                            "Survival Prediction", outline=True, color="secondary", className="md-4", href="/survival/", block=True, size="lg", active=True
+                        ),
+                    ]
+                ),
+
+                dbc.Col(
+                    [
+                        dbc.Button(
+                            "Cost Prediction", outline=True, color="secondary", className="md-4", href="/cost/", block=True, size="lg"
+                        ),
+                    ]
+                )
+            ]
+        )
+    ] 
+)
+
+cost_layout = dbc.Container(
+    [
+        html.Br(),
+        html.Br(),
+        html.Br(),
+        html.Br(),
+        
+        dbc.Row(
+            #dbc.Col(
+            [
+                html.H1("Cost Prediction")
+            ], align="center", justify="center",
+        ),  
+
+        html.Br(),
+        html.Br(),
+
+        dbc.Row(
+            [
+                dbc.Col(
+                    [
+                        dbc.Button(
+                            "Survival Prediction", outline=True, color="secondary", className="md-4", href="/survival/", block=True, size="lg"
+                        ),
+                    ]
+                ),
+
+                dbc.Col(
+                    [
+                        dbc.Button(
+                            "Cost Prediction", outline=True, color="secondary", className="md-4", href="/cost/", block=True, size="lg", active=True
+                        ),
+                    ]
+                )
+            ]
+        )
+    ]
+)
+
+cost_graphs =  html.Div(
+    [
+        html.Br(),
+        html.Br(),
+        dbc.Row(
+            dbc.Col(
+                [
+                    dbc.Card(
+                        dbc.CardBody("This is some text within a card body"),
+                        outline=True, color="secondary"
+                    ),
+                ], width=10,
+            ), justify="center",
+        )
+    ]
+)
+
+patient_graphs =  html.Div(
+    [
+        html.Br(),
+        html.Br(),
+        dbc.Row(
+            dbc.Col(
+                [
+                    dbc.Card(
+                        dbc.CardBody("This is some text within a card body"),
+                        outline=True, color="secondary"
+                    ),
+                ], width=10,
+            ), justify="center",
+        )
+    ]
+)
+
+doctor_graphs =  html.Div(
+    [
+        html.Br(),
+        html.Br(),
+        dbc.Row(
+            dbc.Col(
+                [
+                    dbc.Card(
+                        dbc.CardBody(
+                            [
+                                
+                            ]
+                            
+                        ),
+                        outline=True, color="secondary"
+                    ),
+                ], width=10,
+            ), justify="center",
+        )
+    ]
+)
+
+doctor_items = [
+    dbc.DropdownMenuItem("Doctor View", href="/survival/doctor", active=True),
+    dbc.DropdownMenuItem("Patient View", href="/survival/patient"),
+]
+
+patient_items = [
+    dbc.DropdownMenuItem("Doctor View", href="/survival/doctor"),
+    dbc.DropdownMenuItem("Patient View", href="/survival/patient", active=True),
+]
+
+
+
+doctor_button = dbc.Container(
+    [
+        dbc.Row(
+            [
+                dbc.Col(
+                    [
+                        html.Br(),
+                        html.Br(),
+                        html.Div(
+                            [
+                                dbc.DropdownMenu(
+                                    doctor_items, label="Doctor View", color="primary", className="md-4", bs_size="lg"
+                                ),
+
+
+                            ],
+                        )
+                    ]
+                )
+            ]
+        )
+    ]
+)
+
+patient_button = dbc.Container(
+    [
+        dbc.Row(
+            [
+                dbc.Col(
+                    [
+                        html.Br(),
+                        html.Br(),
+                        html.Div(
+                            [
+                                dbc.DropdownMenu(
+                                    patient_items, label="Patient View", color="primary", className="md-4", bs_size="lg"
+                                ),
+
+
+                            ],
+                        )
+                    ]
+                )
+            ]
+        )
+    ]
+)
 
 def Add_Dash(server):
     """Create a Dash app."""
@@ -533,11 +829,16 @@ def Add_Dash(server):
 
 
 def init_callbacks(dash_app):
-    @dash_app.callback(dash.dependencies.Output('page-content', 'children'),
-                        
-                        [dash.dependencies.Input('url', 'pathname')]
+    @dash_app.callback(
+        
+            dash.dependencies.Output('page-content', 'children'),
+                                  
+        [
+            dash.dependencies.Input('url', 'pathname'),
+            
+        ]
+    )
                        
-                    )
     def display_page(pathname):        
         if pathname =="/dashapp/":
             return dashboard
@@ -546,11 +847,29 @@ def init_callbacks(dash_app):
             cookies = str(cookies, 'utf-8')
             cookies =cookies.split(",")
 
-            print(cookies)
+            #print(cookies)
             cookie = html.H1(cookies)
-            return cookie
+            return survival_layout, doctor_button, doctor_graphs
             #return dashboard
+        elif pathname == "/survival/":
+            return survival_layout, doctor_button, doctor_graphs
+        elif pathname == "/cost/":
+            return cost_layout, cost_graphs
+        elif pathname =="/survival/patient":
+            return survival_layout, patient_button, patient_graphs
+        elif pathname =="/survival/doctor":
+            return survival_layout, doctor_button, doctor_graphs
 
+
+
+
+# @app.callback(Output("content", "children"), [Input("tabs", "active_tab")])
+# def switch_tab(at):
+#     if at == "tab-1":
+#         return tab1_content
+#     elif at == "tab-2":
+#         return tab2_content
+#     return html.P("This shouldn't ever be displayed...")
 
 # def get_datasets():
 #     """Return previews of all CSVs saved in /data directory."""
