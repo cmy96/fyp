@@ -128,9 +128,16 @@ nav a:hover {
   cursor: pointer
 }
 
+
 nav a i {
   margin-right: 5px
 }
+
+
+/* .nav_edit {
+  padding-top:10px;
+  padding-bottom: 10px;
+} */
 
 .dash-spreadsheet-container {
   margin: 30px auto!important;
@@ -271,11 +278,11 @@ table tbody tr td {
   border-radius: 20px;
   display: inline-block;
   text-align: center;
-  color: black;
-  border: 1px solid black;
+  color: pink;
+  border: 1px solid pink;
   width: 200px;
   height: 50px;
-  background-color: #fff
+  background-color: #fff;
 }
 
 .submitContainer {
@@ -283,6 +290,22 @@ table tbody tr td {
   align-items: center;
 }
 
+.submit_design{
+  padding-top:50px;
+}
+
 .optionDesign {
   margin-left: 100px;
+}
+
+.calculator_header {
+  margin-top:40px;
+  margin-bottom:50px;
+}
+
+.landing-design{
+  text-align: center;
+  justify-content: center;
+  background-color: transparent;
+  align-items: center;
 }
