@@ -34,7 +34,8 @@ setup(
                       'dash_html_components',
                       'dash_table',
                       'dash_renderer',
-                      'pathlib'],
+                      'pathlib',
+                      'plotly'],
     entry_points={
         'console_scripts': [
             'run = wsgi:main',

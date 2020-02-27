@@ -551,9 +551,9 @@ style={"display": "flex", "flex-direction": "column"}
 Doctor_View = dbc.Card(
     dbc.CardBody(
         [
-            html.P("This is Doctor Tab!", className="card-text"),
-        ]
-    ),
+            html.P("This is Doctor Tab!", className="card-text")
+
+        ]),
     className="mt-3",
 )
 
@@ -561,42 +561,26 @@ Patient_View = dbc.Card(
     dbc.CardBody(
         [
             html.P("This is Patient Tab!", className="card-text"),
+            html.H1("HWELLO"),
+            html.Img(
+                src=app.get_asset_url('waffle-1-chart.png'),
+                id="waffle-1",
+                style={
+                    "height": "200px",
+                    "width": "800px",
+                    "margin-bottom": "25px"
+                
+            }
+            ),
+            html.P('This chart depicts the survival rates of 100 women who already had surgery. This display shows the outcomes for those women based on the inputs and treatments 1/2/5/10 [Selected] years after surgery')
         ]
+        
     ),
     className="mt-3",
 )
 
 
-card = html.Div(
-    [
-        html.Br(),
-        html.Br(),
-        dbc.Row(
-            dbc.Col(
-                [
-                    dbc.Card(
-                        [
-                            dbc.CardHeader(
-                                dbc.Tabs(
-                                    [
-                                        dbc.Tab(
-                                            label="Doctor View", tab_id="Doctor"
-                                        ),
-                                        dbc.Tab(label="Patient View", tab_id="View"),
-                                    ],
-                                    id="card-tabs",
-                                    card=True,
-                                    active_tab="Doctor",
-                                )
-                            ),
-                            dbc.CardBody(html.P(id="card-content", className="card-text")),
-                        ]
-                    )
-                ], width=10,
-            ), justify="center",
-        )
-    ]
-)
+
 
 survival_layout = dbc.Container(
     [
@@ -702,8 +686,13 @@ patient_graphs =  html.Div(
             dbc.Col(
                 [
                     dbc.Card(
-                        dbc.CardBody("This is some text within a card body"),
-                        outline=True, color="secondary"
+                        dbc.CardBody(
+                            [
+                                html.H1("This is some text within a yoooooooooooooooo body"),
+                                html.H1("hwllo"),
+                            ]),
+                        outline=True, color="secondary",
+                        
                     ),
                 ], width=10,
             ), justify="center",
