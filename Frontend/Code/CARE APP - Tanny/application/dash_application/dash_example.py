@@ -57,13 +57,6 @@ app = dash.Dash(__name__,external_stylesheets=external_stylesheets)
 app.scripts.config.serve_locally = True
 app.css.config.serve_locally = True
 
-
-# plt.step(x//365.25, y, where="post", label=str(0))
-# plt.ylabel("Survival probability")
-# plt.xlabel("Time (Years)")
-# plt.title("Overall Survival Curve (in Years)")
-# plt.grid(True)
-# plt.legend()
 def df_func(output,column1,column2):
     tmp = pd.DataFrame(output.items(), columns=[column1, column2])
     return tmp
@@ -77,14 +70,11 @@ df_A = pd.read_csv(url2, index_col=0)
 df = pd.read_csv('data/clinical.csv')
 patient = pd.read_csv('data/patient1.csv')
 
-
-
 # rename columns
 death_cause = df['cause_of_death']
 death_cause_dict_old = calPercent(df,death_cause,True,"Alive")
 death_cause_dict = rename_keys(death_cause_dict_old,\
                         ['Alive', 'Dead- Breast Cancer', 'Dead- Others', 'Dead- Unknown'])
-
                         
 #Data manipulation for graph dataset
 
@@ -96,10 +86,7 @@ graph3_data = df_bills.groupby('Service.Department.Description')['Gross..exclude
 graph3_data = graph3_data.rename_axis('Service Department').reset_index(name='Treatment Gross')
 graph3_data = graph3_data.sort_values('Treatment Gross',ascending=False).head(10)
 
-
-
 ##Tanny's Graphs
-
 
 #assuming no nan data
 TNM = df['TNM_Stage']
@@ -185,8 +172,8 @@ layout = dict(
 )
 
 #python codes for survival
-s_output = {"6 months before":100.0, "6 months after":96.20, "1 year after":90.10, 
-    "2 years after":86.90, "5 years after":80.09, "10 years after":71.22}
+s_output = {"6 months before":100.0, "6 months after":99.58, "1 year after":99.57, 
+    "2 years after":99.31, "5 years after":97.69, "10 years after":93.61}
 df2 = pd.DataFrame(s_output.items(), columns=['Years', 'Survival'])
 #python codes for cost
 c_output = {"6 months before":3882.80, "6 months after":13112.54, "1 year after":2230.19, 
@@ -1085,6 +1072,22 @@ y = patient["y"]
 # surv3 = (go.Scatter(x=x//365.25, y=y, name="vh",
 #                     line_shape='vh'))
 surv4 = (go.Scatter(x=x//365.25, y=y, name="hv",
+                    line_shape='hv'))
+
+
+x = patient["x"]
+y = patient["y"]
+# surv1 = (go.Scatter(x=x//365.25, y=y, name="linear",
+#                     line_shape='linear'))
+# surv2 = (go.Scatter(x=x//365.25, y=y, name="spline",
+#                     text=["tweak line smoothness<br>with 'smoothing' in line object"],
+#                     hoverinfo='text+name',
+#                     line_shape='spline'))
+# surv3 = (go.Scatter(x=x//365.25, y=y, name="vh",
+#                     line_shape='vh'))
+surv4 = (go.Scatter(x=x//365.25, 
+                    y=y, 
+                    name="Patient's Survival Rate",
                     line_shape='hv'))
 
 
