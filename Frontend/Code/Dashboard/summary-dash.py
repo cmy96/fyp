@@ -45,7 +45,6 @@ app = dash.Dash(__name__,external_stylesheets=external_stylesheets)
 app.scripts.config.serve_locally = True
 app.css.config.serve_locally = True
 
-
 #Create df from .csv file
 url = 'data/bills1.csv'
 url2 = 'data/OldFaithful.csv'
@@ -411,7 +410,7 @@ html.Div([
             className = "pretty_container five columns"
             ),
      html.Div([
-        #Graph 7 - Tanny 3
+        #Graph 8 - Tanny 3
         dcc.Graph(
                 id='ER VS PR',
                 figure={
