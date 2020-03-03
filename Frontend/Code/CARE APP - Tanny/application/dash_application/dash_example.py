@@ -180,363 +180,614 @@ c_output = {"6 months before":3882.80, "6 months after":13112.54, "1 year after"
     "2 years after":1736.58, "5 years after":11800.33, "10 years after":14917.57}
 df = pd.DataFrame(c_output.items(), columns=['Years', 'Cost'])
 
-dashboard = html.Div([
-    html.Div(
-        [
-            html.Div(
-                [
-                    html.Img(
-                        src=app.get_asset_url('logo.png'),
-                        id="logo",
-                        style={
-                            "height": "150px",
-                            "width": "auto",
-                            "margin-bottom": "25px",
-                            "float":"right"
-                        },
-                    )
-                ], className = "one-third column",
-            ),
+# dashboard = html.Div([
+#     html.Div(
+#         [
+#             html.Div(
+#                 [
+#                     html.Img(
+#                         src=app.get_asset_url('logo.png'),
+#                         id="logo",
+#                         style={
+#                             "height": "150px",
+#                             "width": "auto",
+#                             "margin-bottom": "25px",
+#                             "float":"right"
+#                         },
+#                     )
+#                 ], className = "one-third column",
+#             ),
 
-            html.Div(
-                [
-                    html.H3('Data Exploration For Breast Cancer Patients Dataset', style={'textAlign': 'left', 'color': '#0080FF', 'margin-top':'30px'})
-                ],
-                className="one-half column", id="title"
-            )
-        ]
-    ),
+#             html.Div(
+#                 [
+#                     html.H3('Data Exploration For Breast Cancer Patients Dataset', style={'textAlign': 'left', 'color': '#0080FF', 'margin-top':'30px'})
+#                 ],
+#                 className="one-half column", id="title"
+#             )
+#         ]
+#     ),
 
-    html.Div([
-        html.Div([
-            html.H3("Bills Dataset", style={'textAlign': 'center', 'color': 'red', 'margin-top':'30px'})]
-            #add comma and classname col to manipulate
-        )
-    ]),
-
-
-    #Jesslyn Charts Wrapper#   
-    html.Div([
-        # #Graph 1
-        html.Div([
-            dcc.Graph(
-            id='old_faithful',
-            figure={
-                'data': 
-                [go.Scatter
-                    (
-                    x = df_A['X'],
-                    y = df_A['Y'],
-                    mode = 'markers',
-                    marker = dict(color = '#97B2DE')
-                    )
-                ],
-                'layout': go.Layout(
-                    title = 'Old Faithful Eruption Intervals v Durations',
-                    xaxis = {'title': 'Duration of eruption (minutes)'},
-                    yaxis = {'title': 'Interval to next eruption (minutes)'},
-                    hovermode='closest'
-                )
-            })
-        ], className="pretty_container six columns"
-        ),
-
-        html.Div([
-            #Graph 2 - Top 5 Service Departments for dataset
-            dcc.Graph(
-                id='graph-2',
-                figure={
-                    'data': [
-                        go.Bar(
-                            x= graph2_data['counts'],
-                            y= graph2_data['unique_values'],
-                            orientation='h',
-                            marker=dict(color=['#97B2DE','#97B2DE','#97B2DE','#97B2DE','#97B2DE'])
-                        )],
-                    'layout': go.Layout(
-                        title = 'Top 5 Patient Expenditures By Service',
-                        xaxis = {'title': 'Number of patients'},
-                        yaxis = {'title': 'Service'},
-                        hovermode='closest'
-                    )
-                }
-            )
-        ], id="right-column", className='six columns'
-        ),
-
-        html.Div([
-            #Graph 3 - Avg Treatment Cost by Service
-            dcc.Graph(
-                id='graph-3',
-                figure={
-
-                    'data': [
-                        go.Bar(
-                            x= graph3_data['Service Department'],
-                            y= graph3_data['Treatment Gross'],
-                            text = graph3_data['Treatment Gross'],
-                            marker = dict(color = '#97B2DE')
-                            )
-                        ],
-                    'layout': go.Layout(
-                        title = 'Patient Spend Breakdown',
-                        xaxis = {'title': 'Service'},
-                        yaxis = {'title': 'Cost'},
-                        hovermode='closest'
-                    )
-
-                }
-            )
-        ], className="pretty_container eight columns"
-        )
-    ],className="row flex-display"
-    ),
-
-    #Graph 4 - FRequency of Mammograms done by breast cancer patients
-    # dcc.Graph(
-    #     id='graph-4',
-    #     figure={
-
-    #         'data': [
-    #             go.Bar(
-    #                 x= graph3_data['Service Department'],
-    #                 y= graph3_data['Treatment Gross']
-    #             )],
-    #         'layout': go.Layout(
-    #             title = 'Patient Spend Breakdown',
-    #             xaxis = {'title': 'Service'},
-    #             yaxis = {'title': 'Cost'},
-    #             hovermode='closest'
-    #         )
-
-    #     }
-    # ),
-
-    html.Div([
-        html.Div(
-            [
-                html.H3("Clinical Dataset", style={'textAlign': 'center', 'color': 'red', 'margin-top':'30px'})
-            ]
-        #add comma and classname col to manipulate
-        )
-    ]),
-
-    ##TANNY WRAPPER##
-    html.Div([
-        #Graph 5 - Tanny 1
-        html.Div([
-            dcc.Graph(
-                id='diagnosed-age-histogram',
-                figure={
-                    'data': [
-                        go.Histogram(                
-                            x = df_age,
-                            histnorm='probability',
-                            xbins=dict(start=df_age.min(), end=df_age.max(), size=5),
-                            text = list(age_bin_count), 
-                            marker = dict(color = '#97B2DE')
-                        ),
-                    ],
-                    'layout': go.Layout(
-                        title = "Patient's Diagnosed Age Distribution",
-                        xaxis = {'title': 'Diagnosed Age'},
-                        yaxis = {'title': 'Percentage of Patients'},
-
-                    )
-                }
-        )],
-        className = "pretty_container six columns"
-        ),
-
-        html.Div([
-        #Graph 6 - Tanny 2
-            dcc.Graph(
-                id='Proportion of Patients Alive Vs Dead',
-                figure={
-                    'data': [
-                        go.Bar(
-                        x=list(death_cause_dict.keys()), 
-                        y=list(death_cause_dict.values()),
-                        text= list(death_cause_dict.values()),
-                        textposition='auto',
-                        marker=dict(color=['lightgreen','lightcoral','indianred','lightslategray' ])
-                        )
-                    ],
-                    'layout': go.Layout(
-                        title = "Proportion of Patients Alive Vs Dead",
-                        xaxis = {'title': 'Cause of Death'},
-                        yaxis = {'title': 'Percentage of Patients'},
-                        hovermode='closest'
-                    )
-                }
-            )
-        ], className = "pretty_container six columns"
-        ),
-
-        html.Div([
-            #Graph 7 - Tanny 3
-            dcc.Graph(
-                id='TNM Stage Alive Vs Dead',
-                figure={
-                    'data': [
-                        go.Bar(
-                            x= list(finalized_dict['Alive']),
-                            y= list(TNM_dict.keys()),
-                            name='Alive',
-                            orientation='h',
-                            marker=dict(
-                            color='lightgreen',
-                            line=dict(color='lightgreen', width=3)
-                            )
-                        ),
-                        go.Bar(
-                            x= list(finalized_dict['breast cancer related']),
-                            y= list(TNM_dict.keys()),
-                            name='Dead- Breast cancer related',
-                            orientation='h',
-                            marker=dict(
-                            color='lightcoral',
-                            line=dict(color='lightcoral', width=3)
-                            )
-                        ),
-                        go.Bar(
-                            x= list(finalized_dict['n']),
-                            y= list(TNM_dict.keys()),
-                            name='Dead',
-                            orientation='h',
-                            marker=dict(
-                            color='indianred',
-                            line=dict(color='indianred', width=3)
-                            )
-                        ),
-                        go.Bar(
-                            x= list(finalized_dict['unknown']),
-                            y= list(TNM_dict.keys()),
-                            name='Unknown',
-                            orientation='h',
-                            marker=dict(
-                            color='lightslategrey',
-                            line=dict(color='lightslategrey', width=3)
-                            )
-                        )
-                    ],
-                    'layout': go.Layout(
-                        title = "TNM Stage Alive Vs Dead",
-                        xaxis = {'title': 'Percentage of Patients'},
-                        yaxis = {'title': 'Cancer Stages'},
-                        hovermode='closest',
-                        barmode='stack',
-                    )
-                }
-            )
-        ], className = "pretty_container five columns"
-        ),
-
-             html.Div([
-        #Graph 8 - Tanny 3
-        dcc.Graph(
-                id='ER VS PR',
-                figure={
-                    'data': [
-                        go.Bar(
-                            x= [er_finalized_dict['positive'][0],er_finalized_dict['negative'][0],er_finalized_dict['equivocal'][0]],
-                            y= ['positive','negative','equivocal','unknown'],
-                            name='PR Positive',
-                            orientation='h',
-                            marker=dict(
-                            color='palegreen',
-                            line=dict(color='palegreen', width=3)
-                            )
-                        ),
-                        go.Bar(
-                            x= [er_finalized_dict['positive'][1],er_finalized_dict['negative'][1],er_finalized_dict['equivocal'][1]],
-                            y= ['positive','negative','equivocal','unknown'],
-                            name='PR Negative',
-                            orientation='h',
-                            marker=dict(
-                            color='lightpink',
-                            line=dict(color='lightpink', width=3)
-                            )
-                        ),
-                        go.Bar(
-                            x= [er_finalized_dict['positive'][2],er_finalized_dict['negative'][2],er_finalized_dict['equivocal'][2]],
-                            y= ['positive','negative','equivocal','unknown'],
-                            name='PR Equivocal',
-                            orientation='h',
-                            marker=dict(
-                            color='lightblue',
-                            line=dict(color='lightblue', width=3)
-                            )
-                        ),
-                        go.Bar(
-                            x= [er_finalized_dict['positive'][3],er_finalized_dict['negative'][3],er_finalized_dict['equivocal'][3]],
-                            y= ['positive','negative','equivocal','unknown'],
-                            name='PR Unknown',
-                            orientation='h',
-                            marker=dict(
-                            color='lightgrey',
-                            line=dict(color='lightgrey', width=3)
-                            )
-                        )
-                    ],
-                    'layout': go.Layout(
-                        title = "ER Vs PR relationship",
-                        xaxis = {'title': 'Percentages'},
-                        yaxis = {'title': 'ER Stages'},
-                        hovermode='closest',
-                        barmode='stack',
-
-                    )
-                }
-            )
-            ],
-            className = "pretty_container five columns"
-            ),
-    ],
-    className="row flex-display"
-    )
+#     html.Div([
+#         html.Div([
+#             html.H3("Bills Dataset", style={'textAlign': 'center', 'color': 'red', 'margin-top':'30px'})]
+#             #add comma and classname col to manipulate
+#         )
+#     ]),
 
 
+#     #Jesslyn Charts Wrapper#   
+#     html.Div([
+#         # #Graph 1
+#         html.Div([
+#             dcc.Graph(
+#             id='old_faithful',
+#             figure={
+#                 'data': 
+#                 [go.Scatter
+#                     (
+#                     x = df_A['X'],
+#                     y = df_A['Y'],
+#                     mode = 'markers',
+#                     marker = dict(color = '#97B2DE')
+#                     )
+#                 ],
+#                 'layout': go.Layout(
+#                     title = 'Old Faithful Eruption Intervals v Durations',
+#                     xaxis = {'title': 'Duration of eruption (minutes)'},
+#                     yaxis = {'title': 'Interval to next eruption (minutes)'},
+#                     hovermode='closest'
+#                 )
+#             })
+#         ], className="pretty_container six columns"
+#         ),
 
-],
-id="mainContainer",
-style={"display": "flex", "flex-direction": "column"}
-)
+#         html.Div([
+#             #Graph 2 - Top 5 Service Departments for dataset
+#             dcc.Graph(
+#                 id='graph-2',
+#                 figure={
+#                     'data': [
+#                         go.Bar(
+#                             x= graph2_data['counts'],
+#                             y= graph2_data['unique_values'],
+#                             orientation='h',
+#                             marker=dict(color=['#97B2DE','#97B2DE','#97B2DE','#97B2DE','#97B2DE'])
+#                         )],
+#                     'layout': go.Layout(
+#                         title = 'Top 5 Patient Expenditures By Service',
+#                         xaxis = {'title': 'Number of patients'},
+#                         yaxis = {'title': 'Service'},
+#                         hovermode='closest'
+#                     )
+#                 }
+#             )
+#         ], id="right-column", className='six columns'
+#         ),
 
-# card = dbc.Container(
-#     [
-#         html.Br(),
-#         html.Br(),
-        
-#         dbc.Row(
+#         html.Div([
+#             #Graph 3 - Avg Treatment Cost by Service
+#             dcc.Graph(
+#                 id='graph-3',
+#                 figure={
+
+#                     'data': [
+#                         go.Bar(
+#                             x= graph3_data['Service Department'],
+#                             y= graph3_data['Treatment Gross'],
+#                             text = graph3_data['Treatment Gross'],
+#                             marker = dict(color = '#97B2DE')
+#                             )
+#                         ],
+#                     'layout': go.Layout(
+#                         title = 'Patient Spend Breakdown',
+#                         xaxis = {'title': 'Service'},
+#                         yaxis = {'title': 'Cost'},
+#                         hovermode='closest'
+#                     )
+
+#                 }
+#             )
+#         ], className="pretty_container eight columns"
+#         )
+#     ],className="row flex-display"
+#     ),
+
+#     #Graph 4 - FRequency of Mammograms done by breast cancer patients
+#     # dcc.Graph(
+#     #     id='graph-4',
+#     #     figure={
+
+#     #         'data': [
+#     #             go.Bar(
+#     #                 x= graph3_data['Service Department'],
+#     #                 y= graph3_data['Treatment Gross']
+#     #             )],
+#     #         'layout': go.Layout(
+#     #             title = 'Patient Spend Breakdown',
+#     #             xaxis = {'title': 'Service'},
+#     #             yaxis = {'title': 'Cost'},
+#     #             hovermode='closest'
+#     #         )
+
+#     #     }
+#     # ),
+
+#     html.Div([
+#         html.Div(
 #             [
-#                 dbc.Col(
-#                     [
-#                         html.Div(
-#                             dbc.Card(
-#                                 [
-#                                     dbc.CardHeader(
-#                                         dbc.Tabs(
-#                                             [
-#                                                 dbc.Tab(label="Doctor View", tab_id="Doctor"),
-#                                                 dbc.Tab(label="Patient View", tab_id="View"),
-#                                             ],
-#                                             id="card-tabs",
-#                                             card=True,
-#                                             active_tab="Doctor",
-#                                         )
-#                                     ),
-#                                     dbc.CardBody(html.P(id="card-content", className="card-text")),
-#                                 ]
+#                 html.H3("Clinical Dataset", style={'textAlign': 'center', 'color': 'red', 'margin-top':'30px'})
+#             ]
+#         #add comma and classname col to manipulate
+#         )
+#     ]),
+
+#     ##TANNY WRAPPER##
+#     html.Div([
+#         #Graph 5 - Tanny 1
+#         html.Div([
+#             dcc.Graph(
+#                 id='diagnosed-age-histogram',
+#                 figure={
+#                     'data': [
+#                         go.Histogram(                
+#                             x = df_age,
+#                             histnorm='probability',
+#                             xbins=dict(start=df_age.min(), end=df_age.max(), size=5),
+#                             text = list(age_bin_count), 
+#                             marker = dict(color = '#97B2DE')
+#                         ),
+#                     ],
+#                     'layout': go.Layout(
+#                         title = "Patient's Diagnosed Age Distribution",
+#                         xaxis = {'title': 'Diagnosed Age'},
+#                         yaxis = {'title': 'Percentage of Patients'},
+
+#                     )
+#                 }
+#         )],
+#         className = "pretty_container six columns"
+#         ),
+
+#         html.Div([
+#         #Graph 6 - Tanny 2
+#             dcc.Graph(
+#                 id='Proportion of Patients Alive Vs Dead',
+#                 figure={
+#                     'data': [
+#                         go.Bar(
+#                         x=list(death_cause_dict.keys()), 
+#                         y=list(death_cause_dict.values()),
+#                         text= list(death_cause_dict.values()),
+#                         textposition='auto',
+#                         marker=dict(color=['lightgreen','lightcoral','indianred','lightslategray' ])
+#                         )
+#                     ],
+#                     'layout': go.Layout(
+#                         title = "Proportion of Patients Alive Vs Dead",
+#                         xaxis = {'title': 'Cause of Death'},
+#                         yaxis = {'title': 'Percentage of Patients'},
+#                         hovermode='closest'
+#                     )
+#                 }
+#             )
+#         ], className = "pretty_container six columns"
+#         ),
+
+#         html.Div([
+#             #Graph 7 - Tanny 3
+#             dcc.Graph(
+#                 id='TNM Stage Alive Vs Dead',
+#                 figure={
+#                     'data': [
+#                         go.Bar(
+#                             x= list(finalized_dict['Alive']),
+#                             y= list(TNM_dict.keys()),
+#                             name='Alive',
+#                             orientation='h',
+#                             marker=dict(
+#                             color='lightgreen',
+#                             line=dict(color='lightgreen', width=3)
+#                             )
+#                         ),
+#                         go.Bar(
+#                             x= list(finalized_dict['breast cancer related']),
+#                             y= list(TNM_dict.keys()),
+#                             name='Dead- Breast cancer related',
+#                             orientation='h',
+#                             marker=dict(
+#                             color='lightcoral',
+#                             line=dict(color='lightcoral', width=3)
+#                             )
+#                         ),
+#                         go.Bar(
+#                             x= list(finalized_dict['n']),
+#                             y= list(TNM_dict.keys()),
+#                             name='Dead',
+#                             orientation='h',
+#                             marker=dict(
+#                             color='indianred',
+#                             line=dict(color='indianred', width=3)
+#                             )
+#                         ),
+#                         go.Bar(
+#                             x= list(finalized_dict['unknown']),
+#                             y= list(TNM_dict.keys()),
+#                             name='Unknown',
+#                             orientation='h',
+#                             marker=dict(
+#                             color='lightslategrey',
+#                             line=dict(color='lightslategrey', width=3)
 #                             )
 #                         )
-#                     ], width=12,
-#                 ), 
-                
-#             ]
-#         )
-#     ]
+#                     ],
+#                     'layout': go.Layout(
+#                         title = "TNM Stage Alive Vs Dead",
+#                         xaxis = {'title': 'Percentage of Patients'},
+#                         yaxis = {'title': 'Cancer Stages'},
+#                         hovermode='closest',
+#                         barmode='stack',
+#                     )
+#                 }
+#             )
+#         ], className = "pretty_container five columns"
+#         ),
+
+#              html.Div([
+#         #Graph 8 - Tanny 3
+#         dcc.Graph(
+#                 id='ER VS PR',
+#                 figure={
+#                     'data': [
+#                         go.Bar(
+#                             x= [er_finalized_dict['positive'][0],er_finalized_dict['negative'][0],er_finalized_dict['equivocal'][0]],
+#                             y= ['positive','negative','equivocal','unknown'],
+#                             name='PR Positive',
+#                             orientation='h',
+#                             marker=dict(
+#                             color='palegreen',
+#                             line=dict(color='palegreen', width=3)
+#                             )
+#                         ),
+#                         go.Bar(
+#                             x= [er_finalized_dict['positive'][1],er_finalized_dict['negative'][1],er_finalized_dict['equivocal'][1]],
+#                             y= ['positive','negative','equivocal','unknown'],
+#                             name='PR Negative',
+#                             orientation='h',
+#                             marker=dict(
+#                             color='lightpink',
+#                             line=dict(color='lightpink', width=3)
+#                             )
+#                         ),
+#                         go.Bar(
+#                             x= [er_finalized_dict['positive'][2],er_finalized_dict['negative'][2],er_finalized_dict['equivocal'][2]],
+#                             y= ['positive','negative','equivocal','unknown'],
+#                             name='PR Equivocal',
+#                             orientation='h',
+#                             marker=dict(
+#                             color='lightblue',
+#                             line=dict(color='lightblue', width=3)
+#                             )
+#                         ),
+#                         go.Bar(
+#                             x= [er_finalized_dict['positive'][3],er_finalized_dict['negative'][3],er_finalized_dict['equivocal'][3]],
+#                             y= ['positive','negative','equivocal','unknown'],
+#                             name='PR Unknown',
+#                             orientation='h',
+#                             marker=dict(
+#                             color='lightgrey',
+#                             line=dict(color='lightgrey', width=3)
+#                             )
+#                         )
+#                     ],
+#                     'layout': go.Layout(
+#                         title = "ER Vs PR relationship",
+#                         xaxis = {'title': 'Percentages'},
+#                         yaxis = {'title': 'ER Stages'},
+#                         hovermode='closest',
+#                         barmode='stack',
+
+#                     )
+#                 }
+#             )
+#             ],
+#             className = "pretty_container five columns"
+#             ),
+#     ],
+#     className="row flex-display"
+#     )
+
+
+
+# ],
+# id="mainContainer",
+# style={"display": "flex", "flex-direction": "column"}
 # )
+
+
+
+dashboard2 = dbc.Container(
+    [
+        html.Br(),
+        html.Br(),
+        html.Br(),
+        html.Br(),
+        
+        dbc.Row(
+                [
+                    html.H1("Data Exploration For Breast Cancer Patients Dataset")
+                ], align="center", justify="center",
+            ),   
+             
+        html.Br(),
+        html.Br(),
+
+        dbc.Row(
+            [                
+                html.H3("Bills Dataset")
+            ], align="left", justify="left",
+        
+        ),
+
+        html.Br(),
+
+        dbc.Row(
+            [
+                dbc.Col(             
+                    html.Div(
+                        [
+                            #Graph 1 - Top 5 Service Departments for dataset
+                            dcc.Graph( 
+                                id='service_5',
+                                figure = {
+                                    'data':[
+                                        go.Bar(
+                                            x= graph2_data['counts'],
+                                            y= graph2_data['unique_values'],
+                                            orientation='h',
+                                            marker=dict(color=['#97B2DE','#97B2DE','#97B2DE','#97B2DE','#97B2DE'])
+                                        )
+                                    ],
+                                    'layout': go.Layout(
+                                        title = 'Top 5 Patient Expenditures By Service',
+                                        xaxis = {'title': 'Number of patients'},
+                                        yaxis = {'title': 'Service'},
+                                        hovermode='closest'
+                                    )
+                                }
+                            )
+                        ],
+                    )
+                ),
+                dbc.Col(
+                    html.Div(
+                        [
+                            #Graph 2 - Average Treatment Cost by Service
+                            dcc.Graph(
+                                id='average_treatment',
+                                figure={
+                                    'data': [
+                                        go.Bar(
+                                            x= graph3_data['Service Department'],
+                                            y= graph3_data['Treatment Gross'],
+                                            text = graph3_data['Treatment Gross'],
+                                            marker = dict(color = '#97B2DE')
+                                        )
+                                    ],
+                                    'layout': go.Layout(
+                                        title='Patient Spend Breakdown',
+                                        xaxis = {'title': 'Service'},
+                                        yaxis = {'title': 'Cost'},
+                                        hovermode='closest'
+                                    )
+                                }
+                            )
+                        ]
+
+                    )
+                )
+            ]
+        ),
+        dbc.Row(
+            [                
+                html.H3("Clinical Dataset")
+            ], align="left", justify="left",
+        
+        ),
+
+        dbc.Row(
+            [
+                dbc.Col(
+                    [
+                        html.Div(
+                            [   
+                                dcc.Graph(
+                                    id='diagnosed-age-histogram',
+                                    figure={
+                                        'data': [
+                                            go.Histogram(                
+                                                x = df_age,
+                                                histnorm='probability',
+                                                xbins=dict(start=df_age.min(), end=df_age.max(), size=5),
+                                                text = list(age_bin_count), 
+                                                marker = dict(color = '#97B2DE')
+                                            ),
+                                        ],
+                                        'layout': go.Layout(
+                                            title = "Patient's Diagnosed Age Distribution",
+                                            xaxis = {'title': 'Diagnosed Age'},
+                                            yaxis = {'title': 'Percentage of Patients'},
+                                        )
+
+                                    }
+                                )
+                            ],
+                        )
+                    ]
+                ),
+                dbc.Col(
+                    [
+                        html.Div(
+                            [
+                                dcc.Graph(
+                                    id="Proportion of Patients Alive vs Dead",
+                                    figure={
+                                        'data': [
+                                            go.Bar(
+                                                x=list(death_cause_dict.keys()), 
+                                                y=list(death_cause_dict.values()),
+                                                text= list(death_cause_dict.values()),
+                                                textposition='auto',
+                                                marker=dict(color=['lightgreen','lightcoral','indianred','lightslategray' ])
+                                            )
+                                        ],
+                                        'layout': go.Layout(
+                                            title = "Proportion of Patients Alive Vs Dead",
+                                            xaxis = {'title': 'Cause of Death'},
+                                            yaxis = {'title': 'Percentage of Patients'},
+                                            hovermode='closest'
+                                        )
+                                    }
+                                )
+                            ]
+                        )
+                    ]
+                )
+            ]
+        ),
+        dbc.Row(
+            [
+                dbc.Col(
+                    [
+                        html.Div(
+                            [
+                                dcc.Graph(
+                                    id="TNM Stage Alive vs Dead",
+                                    figure={
+                                        'data':[
+                                            go.Bar(
+                                                x= list(finalized_dict['Alive']),
+                                                y= list(TNM_dict.keys()),
+                                                name='Alive',
+                                                orientation='h',
+                                                marker=dict(
+                                                color='lightgreen',
+                                                line=dict(color='lightgreen', width=3) 
+                                                )
+                                            ),
+                                            go.Bar(
+                                                x= list(finalized_dict['breast cancer related']),
+                                                y= list(TNM_dict.keys()),
+                                                name='Dead- Breast cancer related',
+                                                orientation='h',
+                                                marker=dict(
+                                                color='lightcoral',
+                                                line=dict(color='lightcoral', width=3)
+                                                )
+                                            ),
+                                            go.Bar(
+                                                x= list(finalized_dict['n']),
+                                                y= list(TNM_dict.keys()),
+                                                name='Dead',
+                                                orientation='h',
+                                                marker=dict(
+                                                color='indianred',
+                                                line=dict(color='indianred', width=3)
+                                                )
+                                            ),
+                                            go.Bar(
+                                                x= list(finalized_dict['unknown']),
+                                                y= list(TNM_dict.keys()),
+                                                name='Unknown',
+                                                orientation='h',
+                                                marker=dict(
+                                                color='lightslategrey',
+                                                line=dict(color='lightslategrey', width=3)
+                                                )
+                                            )
+
+                                        ],
+                                        'layout': go.Layout(
+                                            title = "TNM Stage Alive Vs Dead",
+                                            xaxis = {'title': 'Percentage of Patients'},
+                                            yaxis = {'title': 'Cancer Stages'},
+                                            hovermode='closest',
+                                            barmode='stack',
+                                        )
+                                    }
+                                )
+                            ]
+                        )
+                    ]
+                ),
+                dbc.Col(
+                    [
+                        html.Div(
+                            [
+                                dcc.Graph(
+                                    id="ER vs PR",
+                                    figure={
+                                        'data': [
+                                            go.Bar(
+                                                x= [er_finalized_dict['positive'][0],er_finalized_dict['negative'][0],er_finalized_dict['equivocal'][0]],
+                                                y= ['positive','negative','equivocal','unknown'],
+                                                name='PR Positive',
+                                                orientation='h',
+                                                marker=dict(
+                                                color='palegreen',
+                                                line=dict(color='palegreen', width=3)
+                                                )
+                                            ),
+                                            go.Bar(
+                                                x= [er_finalized_dict['positive'][1],er_finalized_dict['negative'][1],er_finalized_dict['equivocal'][1]],
+                                                y= ['positive','negative','equivocal','unknown'],
+                                                name='PR Negative',
+                                                orientation='h',
+                                                marker=dict(
+                                                color='lightpink',
+                                                line=dict(color='lightpink', width=3)
+                                                )
+                                            ),
+                                            go.Bar(
+                                                x= [er_finalized_dict['positive'][2],er_finalized_dict['negative'][2],er_finalized_dict['equivocal'][2]],
+                                                y= ['positive','negative','equivocal','unknown'],
+                                                name='PR Equivocal',
+                                                orientation='h',
+                                                marker=dict(
+                                                color='lightblue',
+                                                line=dict(color='lightblue', width=3)
+                                                )
+                                            ),
+                                            go.Bar(
+                                                x= [er_finalized_dict['positive'][3],er_finalized_dict['negative'][3],er_finalized_dict['equivocal'][3]],
+                                                y= ['positive','negative','equivocal','unknown'],
+                                                name='PR Unknown',
+                                                orientation='h',
+                                                marker=dict(
+                                                color='lightgrey',
+                                                line=dict(color='lightgrey', width=3)
+                                                )
+                                            )
+
+                                        ],
+                                        'layout': go.Layout(
+                                            title = "ER Vs PR relationship",
+                                            xaxis = {'title': 'Percentages'},
+                                            yaxis = {'title': 'ER Stages'},
+                                            hovermode='closest',
+                                            barmode='stack',
+                                        )
+                                    }
+                                )
+                            ]
+                        )
+                    ]
+                )
+            ]
+        )
+
+    ] 
+)
+
 
 Doctor_View = dbc.Card(
     dbc.CardBody(
@@ -698,8 +949,7 @@ cost_layout = dbc.Container(
 #cost graphs for FC
 cost_graphs =  html.Div(
     [
-        html.Br(),
-        html.Br(),
+        
         dbc.Row(
             dbc.Col(
                 [
@@ -741,8 +991,7 @@ cost_graphs =  html.Div(
 #patient's graphs
 patient_graphs =  html.Div(
     [
-        html.Br(),
-        html.Br(),
+
         dbc.Row(
             dbc.Col(
                 [
@@ -776,9 +1025,56 @@ patient_graphs =  html.Div(
                     ),
                 ], width=10,
             ), justify="center",
-        )
+        ),
+        dbc.Row(
+            dbc.Col(
+                [ 
+                    html.Img(
+                        src=app.get_asset_url('waffle1.png'),
+                        id="waffle-1",
+                        style={
+                            "height": "200px",
+                            "width": "800px",
+                            "margin-bottom": "25px",
+                            "margin-left":"200px"
+                        },
+                    ),
+                    html.P('Out of a 100 random women, 5 will be dead within 10 years... '),
+                    html.Br(),
+                    html.Img(
+                        src=app.get_asset_url('waffle2.png'),
+                        id="waffle-2",
+                        style={
+                            "height": "200px",
+                            "width": "800px",
+                            "margin-bottom": "25px",
+                            "margin-left":"200px"
+                        },
+                    ),
+                    html.Div([
+                        html.P("Out of 100 random breast cancer patients, 95 will survive within the 10 year time period.")
+                    ])
+                    
+                ], width=10,
+            ), justify="center",
+        ),        
     ]
 )
+
+x = patient["x"]
+y = patient["y"]
+# surv1 = (go.Scatter(x=x//365.25, y=y, name="linear",
+#                     line_shape='linear'))
+# surv2 = (go.Scatter(x=x//365.25, y=y, name="spline",
+#                     text=["tweak line smoothness<br>with 'smoothing' in line object"],
+#                     hoverinfo='text+name',
+#                     line_shape='spline'))
+# surv3 = (go.Scatter(x=x//365.25, y=y, name="vh",
+#                     line_shape='vh'))
+surv4 = (go.Scatter(x=x//365.25, y=y, name="hv",
+                    line_shape='hv'))
+
+
 x = patient["x"]
 y = patient["y"]
 # surv1 = (go.Scatter(x=x//365.25, y=y, name="linear",
@@ -817,7 +1113,6 @@ doctor_graphs =  html.Div(
         )
     ]
 )
-
 doctor_items = [
     dbc.DropdownMenuItem("Doctor View", href="/survival/doctor", active=True),
     dbc.DropdownMenuItem("Patient View", href="/survival/patient"),
@@ -892,10 +1187,10 @@ def Add_Dash(server):
                          #routes_pathname_prefix='/dashapp/'
                          )
 
-    # Override the underlying HTML template
+    # Override the underlying HTML template. File in layout.py
     dash_app.index_string = html_layout
 
-    #Create Dash Layout comprised of Data Tables
+    #Create Dash Layout 
     dash_app.layout = html.Div([
 
         dcc.Location(id='url', refresh=False),
@@ -907,6 +1202,8 @@ def Add_Dash(server):
 
     ])
 
+    #Initialize callbacks after our app is loaded
+    # Pass dash_app as a parameter
     init_callbacks(dash_app)
 
     return dash_app.server
@@ -926,7 +1223,7 @@ def init_callbacks(dash_app):
                        
     def display_page(pathname):        
         if pathname =="/dashapp/":
-            return dashboard
+            return dashboard2
         elif pathname == "/results/":
             cookies = session['received']
             cookies = str(cookies, 'utf-8')

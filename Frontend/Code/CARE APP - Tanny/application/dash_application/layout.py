@@ -1,7 +1,7 @@
 html_layout = '''<!DOCTYPE html>
                     <html>
-                    <link rel="stylesheet" media="screen" href = "{{ url_for('static', filename='bootstrap.min.css') }}">
-                    <link rel="stylesheet" media="screen" href = "{{ url_for('static', filename='dist/css/stylesssss.css') }}">
+                    <link rel="stylesheet" media="screen" href = "\{\{ url_for('static', filename='bootstrap.min.css') }}">
+                    <link rel="stylesheet" media="screen" href = "\{\{ url_for('static', filename='dist/css/styles.css') }}">
                     <meta name="viewport"  content = "width=device-width, initial-scale=1.0, user-scalable=yes">
                     <script src="https://kit.fontawesome.com/a10c0e47f2.js" crossorigin="anonymous"></script>
                         <head>
