@@ -32,7 +32,7 @@ cdf = pd.read_csv(clinical, index_col=0)
 #Data Manipulation
 graph1 = bdf.groupby('Patient.ID')['Gross..exclude.GST.'].sum()
 graph1 = graph1.rename_axis('Patient.ID').reset_index(name='Total Spent')
-graph1 = graph1.sort_values('Total Spent',ascending=False)
+# graph1 = graph1.sort_values('Total Spent',ascending=False)
 
 labels = bdf['Institution.Code'].unique()
 values = bdf.groupby('Institution.Code')['Institution.Code'].count()
@@ -40,6 +40,20 @@ values = bdf.groupby('Institution.Code')['Institution.Code'].count()
 values = values.rename_axis('Hospital').reset_index(name='count')
 values = values['count']
 
+pdf = pdf.fillna(0)
+before_6m = pdf['before_6m'].mean()
+after_6m = pdf['after_6m'].mean()
+after_1y = pdf['after_1y'].mean()
+after_2y = pdf['after_2y'].mean()
+after_3y = pdf['after_3y'].mean()
+after_4y = pdf['after_4y'].mean()
+after_5y = pdf['after_5y'].mean()
+after_6y = pdf['after_6y'].mean()
+after_7y = pdf['after_7y'].mean()
+after_8y = pdf['after_8y'].mean()
+after_9y = pdf['after_9y'].mean()
+after_10y = pdf['after_10y'].mean()
+price_list = [before_6m, after_6m, after_1y, after_2y,after_3y,after_4y, after_5y, after_6y, after_7y,after_8y,after_9y, after_10y]
 
 def create_cost_bins():
     bins = []
@@ -56,40 +70,74 @@ app.layout = html.Div([
 #Line chart
 html.Div([
     html.Div([dcc.Graph(
-        id='expenditure-histogram',
+        id='expenditure-scatter',
                 figure={
                     'data': [
-                        go.Histogram(                
-
-                            x = graph1['Total Spent'],
-                            xbins=dict(start=graph1['Total Spent'].min(), end=graph1['Total Spent'].max(), size=30000),
-                            text = list(cost_bins), 
-                            marker = dict(color = '#97B2DE')
+                        go.Scatter(                
+                            x=graph1['Patient.ID'],
+                            y=graph1['Total Spent'],
+                            mode='markers',
+                            marker=dict(
+                                    size=12,
+                                    color=np.random.randn(100000), #set color equal to a variable
+                                    colorscale='Viridis', # one of plotly colorscales
+                                    showscale=True
+                                )
                         ),
                     ],
                     'layout': go.Layout(
                         title = "Distribution of patient expenditure",
-                        xaxis = {'title': 'Amount spent on treatments'},
-                        yaxis = {'title': 'Number of patients'},
-                    )
+                        xaxis = {'title': 'Patient ID'},
+                        yaxis = {'title': 'Patient expenditure ($)'})
                 }
                 )
 
         ],className="three columns"),
+
+        html.Div([
+            dcc.Graph(
+                id="boxplot",
+                figure={
+                    'data':[
+                        go.Box(
+                            y=graph1['Total Spent']
+                        )
+                    ]
+                }
+            )
+        ]),
         html.Div([
                 dcc.Graph(
                     id='hospital-pie-chart',
                     figure={
                         'data': [go.Pie(labels=labels, values=list(values))],
                         'layout': go.Layout(
-                            title="Pie Chart"
+                            title="Patient transactions by Institution"
                         )
                     }
                 )
-        ],className="four columns")
+        ],className="four columns"),
 
+        html.Div([
+            dcc.Graph(
+                id='predicted-price-chart',
+                figure={
+                    'data':[
+                        go.Scatter(
+                            x=list(pdf.columns),
+                            y=price_list
+                        )
+                    ],
+                    'layout':go.Layout(
+                        title='Predicted Average Treatment Cost, Annual'
+                    )
+                }
+            )
+        ])
     ],className="seven columns")
-],className = "container")
+],
+id="mainContainer",
+style={"display": "flex", "flex-direction": "column"})
 
 
 
