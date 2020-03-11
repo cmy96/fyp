@@ -19,7 +19,7 @@ app = dash.Dash(
 )
 
 server = app.server
-app.config.suppress_callback_exceptions = True
+# app.config.suppress_callback_exceptions = True
 
 # Path
 BASE_PATH = pathlib.Path(__file__).parent.resolve()
@@ -34,6 +34,8 @@ ER_list = clinical['ER'].dropna().unique()
 pr_list = clinical['PR'].dropna().unique()
 Her2_list = clinical['Her2'].dropna().unique()
 clinical['Age_@_Dx'] = clinical['Age_@_Dx'].astype(int)
+
+
 
 ###########################################   Data manipulation for clinical charts    ######################################
 def rename_keys(dict_, new_keys):
@@ -67,7 +69,7 @@ def calPercent(df1,columnDF,nullExist=False, *replaceWith):
 death_cause = clinical['cause_of_death']
 death_cause_dict_old = calPercent(clinical,death_cause,True,"Alive")
 death_cause_dict = rename_keys(death_cause_dict_old,\
-                        ['Alive', 'Dead- Breast Cancer', 'Dead- Others', 'Dead- Unknown'])
+                       death_cause.unique())
 
 
 #Binning of diagnosed age - Tanny
@@ -81,12 +83,12 @@ def generate_tnm_chart_data(df, dc):
     # for every stage in TNM_stage, it becomes the key for the MAIN dictionary
     #assuming no nan data
     TNM = df['TNM_Stage']
-    TNM_Stage = TNM.dropna().unique()
+    # TNM_Stage = TNM.dropna().unique()
     TNM_dict={}
-    for stage in TNM_Stage:
+
+    for stage in clinical['TNM_Stage'].dropna().unique():
         status_dict = {}
         # tnm_death_cause_dict = calPercent(df,dc,True,"Alive")
-        
 
         #every stage in tnm_stage will have a dictionary that holds death_status as key and number of death as value
         for life_status in death_cause_dict_old.keys():
@@ -94,6 +96,7 @@ def generate_tnm_chart_data(df, dc):
             condition1 = df[TNM==stage]
             condition2 = tmp[(tmp['cause_of_death']==life_status) & (tmp['TNM_Stage']==stage)]
             condition3 = tmp[(tmp['cause_of_death'].isnull()) & (tmp['TNM_Stage'] == stage)]
+            NumRecord = 0
 
             if life_status == "Alive":
                 if len(condition1) > 0 or len(condition2) > 0:
@@ -102,7 +105,7 @@ def generate_tnm_chart_data(df, dc):
                 if len(condition1) > 0 or len(condition2) > 0:
                     NumRecord  = len(condition2)/len(condition1)*100
                 else:
-                    pass
+                   NumRecord = 0
 
             status_dict[life_status] = round(NumRecord,2)
         TNM_dict[stage] = status_dict
@@ -112,38 +115,55 @@ def generate_tnm_chart_data(df, dc):
     # reorganize the previous dict into status for every stage
     finalized_dict = {}
     for status in death_cause_dict_old.keys():
-        for stage in TNM_Stage:
+        for stage in clinical['TNM_Stage'].dropna().unique():
             finalized_dict[status] = [v[status] for k,v in TNM_dict.items()]
-    print(finalized_dict)
-    return TNM_dict, finalized_dict
+    # print(finalized_dict)
+    # print('tnm')
+    # print(TNM_dict)
+    return finalized_dict
 
 
 def generate_epr_chart_data(df):
-    ER_dict = {}
-    ERlist = list(['positive','negative','equivocal','unknown'])
-    PRlist = list(['positive','negative','equivocal','unknown'])
-
-    for status_er in ERlist:
-        status_dict = {}
-        for status_pr in PRlist:
-            tmp = df[['ER','PR']]
-            if len(df[df['ER']==status_er]) > 0 or len(tmp[(tmp['ER']==status_er) & (tmp['PR']==status_pr)]) > 0:
-                NumRecord  = len(tmp[(tmp['ER']==status_er) & (tmp['PR']==status_pr)])/len(df[df['ER'] == status_er])*100
-            else:
-                pass
-
-            status_dict[status_pr] = round(NumRecord,2)
-
-        ER_dict[status_er] = status_dict
-
-    ER_dict = dict(sorted(ER_dict.items(),key=lambda i:ERlist.index(i[0])))
-
-    er_finalized_dict = {}
-    for key in ER_dict.keys():
-        for value in ER_dict[key].keys():
-            er_finalized_dict[key] = [v for k,v in ER_dict[key].items()] 
-
-    return er_finalized_dict
+    '''
+    :return a dictionary of dictionaries where each ER status has a dictionary of scores (% against a PR status)
+    '''
+    #all er status aginst each pr values (pos/neg/equivocal/unknown)
+    er_dict = {'positive':[], 'negative':[], 'equivocal':[], 'unknown':[]}
+    
+    #iterate to fill each er status with epr scores
+    for key in er_dict:
+        status_dict = {'positive': 0.0, 'negative':0.0, 'equivocal':0.0, 'unknown':0.0}
+        #Number of ER/PR in given dataset (filtered)
+        filtered_er = df[df['ER'] == key]
+        if len(filtered_er) > 0:
+            num_of_er = len(filtered_er)
+            #Calculate pr scores for each er status
+            for pr_status in ['positive','negative', 'equivocal','unknown']:
+               
+                filtered_pr = df[df['PR'] == pr_status]
+                if len(filtered_pr) > 0:
+                    num_of_epr = len(df[(df['ER'] == key) & (df['PR'] == pr_status)])
+                    total_score = num_of_epr/num_of_er*100
+                    status_dict[pr_status] = round(total_score,2)
+                else:
+                    total_score = 0.00
+                    status_dict[pr_status] = round(total_score,2)
+                    continue
+        else:
+            # num_of_er = 0.00
+            total_score = 0.00
+            er_dict[key] = status_dict 
+            continue #skip to next er status if er status is not found in df
+        
+        # er_dict = dict(sorted(er_dict.items(),key=lambda i:ER_list.index(i[0])))
+        er_dict[key] = status_dict
+    #Convert dictionaries in er_dict to lists
+    final = {}
+    for item in er_dict.items():
+        # print(item)
+        final[item[0]] = list(item[1].values())
+    # print(final)
+    return final 
 
 ###########################################################################################################################
 
@@ -160,7 +180,6 @@ def filter_df(df, min1, max1, tnm_select, er_select, pr_select, her2_select):
     '''
     condition = (df['Age_@_Dx'] < max1) & (df['Age_@_Dx'] > min1) & (df['ER'] == er_select) & (df['PR'] == pr_select) & (df['TNM_Stage'] == tnm_select) & (df['Her2'] == her2_select)
     output = df[condition]
-    print(output)
     return output
 
 def description_card():
@@ -206,7 +225,7 @@ def generate_controls():
             dcc.Dropdown(
                 id="tnm_select",
                 options= [{"label": i, "value": i} for i in tnm_list],
-                value=tnm_list[2],
+                value=tnm_list[1],
             ),
             html.Br(),
             html.P("Select ER status"),
@@ -256,7 +275,7 @@ layout = dict(
         showlegend=False,
 )
 
-TNM_dict, finalized_dict = generate_tnm_chart_data(clinical, death_cause)
+finalized_dict = generate_tnm_chart_data(clinical, death_cause)
 er_finalized_dict = generate_epr_chart_data(clinical)
 
 app.layout = html.Div(
@@ -291,33 +310,40 @@ app.layout = html.Div(
             children=[
                 html.Div(
                     id="main-dash-card",
-                    className = 'four columns',
+                    
                     children=[
-                        html.B("Age Distribution"),
-                        dcc.Graph(id="age-distribution-hist",
-                        figure={
-                        'data':[
-                            {
-                            'x': clinical['Age_@_Dx'],
-                            'name': 'Age Distribution',
-                            'type': 'histogram',
-                            'autobinx': False,
-                            'histnorm':'probability',
-                            'xbins': {
-                                'start': clinical['Age_@_Dx'].min(),
-                                'end': clinical['Age_@_Dx'].max(),
-                                'size': 5
-                            }
-                            }
-                        ],
-                        'layout': {
-                            'title': "Patient's Diagnosed Age Distribution",
-                            'xaxis': "Diagnosis Age",
-                            'yaxis':'Percentage of Patients'
-                        }
-                        }),
-                    ]
-                ),
+                html.Div(
+                        id="age-dist-card",
+                        className = 'four columns',
+                        children=[
+                                html.B("Age Distribution"),
+                                dcc.Graph(
+                                id="age-distribution-hist",
+                                figure={
+                                    'data':[
+                                        {
+                                        'x': clinical['Age_@_Dx'],
+                                        'name': 'Age Distribution',
+                                        'type': 'histogram',
+                                        'autobinx': False,
+                                        'histnorm':'probability',
+                                        'xbins': {
+                                            'start': clinical['Age_@_Dx'].min(),
+                                            'end': clinical['Age_@_Dx'].max(),
+                                            'size': 5
+                                        }
+                                        }
+                                    ],
+                                    'layout':go.Layout(
+                                        title = "Patient's Diagnosed Age Distribution",
+                                        xaxis = {'title': 'Diagnosed Age'},
+                                        yaxis = {'title': 'Percentage of Patients'},
+
+                                    )
+                                 }
+                             )
+                            ]
+                        ),
                 html.Div(
                     id="alive-dead-card",
                     className = "four columns",
@@ -345,12 +371,8 @@ app.layout = html.Div(
                                 }
                             )
                     ]
-                )
-                
-                    ]
                 ),
-                html.Div([
-                    html.Div(
+                html.Div(
                         id="tnm-stage-card",
                         children=[
                             html.B('TNM Stage Alive Vs Dead'),
@@ -359,8 +381,8 @@ app.layout = html.Div(
                                 figure={
                                     'data': [
                                     go.Bar(
-                                            x= list(finalized_dict['Alive']),
-                                            y= list(TNM_dict.keys()),
+                                            x= finalized_dict['Alive'],
+                                            y= clinical['TNM_Stage'].dropna().unique(),
                                             name='Alive',
                                             orientation='h',
                                             marker=dict(
@@ -369,8 +391,8 @@ app.layout = html.Div(
                                             )
                                         ),
                                         go.Bar(
-                                            x= list(finalized_dict['breast cancer related']),
-                                            y= list(TNM_dict.keys()),
+                                            x= finalized_dict['breast cancer related'],
+                                            y= clinical['TNM_Stage'].dropna().unique(),
                                             name='Dead- Breast cancer related',
                                             orientation='h',
                                             marker=dict(
@@ -379,8 +401,8 @@ app.layout = html.Div(
                                             )
                                         ),
                                         go.Bar(
-                                            x= list(finalized_dict['n']),
-                                            y= list(TNM_dict.keys()),
+                                            x=finalized_dict['n'],
+                                            y= clinical['TNM_Stage'].dropna().unique(),
                                             name='Dead',
                                             orientation='h',
                                             marker=dict(
@@ -389,8 +411,8 @@ app.layout = html.Div(
                                             )
                                         ),
                                         go.Bar(
-                                            x= list(finalized_dict['unknown']),
-                                            y= list(TNM_dict.keys()),
+                                            x= finalized_dict['unknown'],
+                                            y= clinical['TNM_Stage'].dropna().unique(),
                                             name='Unknown',
                                             orientation='h',
                                             marker=dict(
@@ -408,69 +430,78 @@ app.layout = html.Div(
                                         showlegend=False
                                     )
                                 }
-                            ),
-                            html.Br(),
-                            html.B("ER VS PR"),
-                            dcc.Graph(
-                                id='er_pr_chart',
-                                figure={
-                                    'data': [
-                                        go.Bar(
-                                            x= [er_finalized_dict['positive'][0],er_finalized_dict['negative'][0],er_finalized_dict['equivocal'][0]],
-                                            y= ['positive','negative','equivocal','unknown'],
-                                            name='PR Positive',
-                                            orientation='h',
-                                            marker=dict(
-                                            color='palegreen',
-                                            line=dict(color='palegreen', width=3)
-                                            )
-                                        ),
-                                        go.Bar(
-                                            x= [er_finalized_dict['positive'][1],er_finalized_dict['negative'][1],er_finalized_dict['equivocal'][1]],
-                                            y= ['positive','negative','equivocal','unknown'],
-                                            name='PR Negative',
-                                            orientation='h',
-                                            marker=dict(
-                                            color='lightpink',
-                                            line=dict(color='lightpink', width=3)
-                                            )
-                                        ),
-                                        go.Bar(
-                                            x= [er_finalized_dict['positive'][2],er_finalized_dict['negative'][2],er_finalized_dict['equivocal'][2]],
-                                            y= ['positive','negative','equivocal','unknown'],
-                                            name='PR Equivocal',
-                                            orientation='h',
-                                            marker=dict(
-                                            color='lightblue',
-                                            line=dict(color='lightblue', width=3)
-                                            )
-                                        ),
-                                        go.Bar(
-                                            x= [er_finalized_dict['positive'][3],er_finalized_dict['negative'][3],er_finalized_dict['equivocal'][3]],
-                                            y= ['positive','negative','equivocal','unknown'],
-                                            name='PR Unknown',
-                                            orientation='h',
-                                            marker=dict(
-                                            color='lightgrey',
-                                            line=dict(color='lightgrey', width=3)
-                                            )
-                                        )
-                                    ],
-                                    'layout': go.Layout(
-                                        title = "Relationship between ER & PR",
-                                        xaxis = {'title': 'Percentage of ER & PR'},
-                                        yaxis = {'title': 'ER/PR stages'},
-                                        hovermode='closest',
-                                        barmode='stack',
-                                    )
-                                }
                             )
-                        ],className = 'four columns'
-                    )
-                ],className='eight columns'
+                        ]
+                ),
+                html.Div(
+                    id = "er_pr_card",
+                    children=[
+                        html.B("ER VS PR"),
+                        dcc.Graph(
+                            id='er_pr_chart',
+                            figure={
+                                'data': [
+                                    go.Bar(
+                                        x= [er_finalized_dict['positive'][0],er_finalized_dict['negative'][0],er_finalized_dict['equivocal'][0]],
+                                        y= ['positive','negative','equivocal','unknown'],
+                                        name='PR Positive',
+                                        orientation='h',
+                                        marker=dict(
+                                        color='palegreen',
+                                        line=dict(color='palegreen', width=3)
+                                        )
+                                    ),
+                                    go.Bar(
+                                        x= [er_finalized_dict['positive'][1],er_finalized_dict['negative'][1],er_finalized_dict['equivocal'][1]],
+                                        y= ['positive','negative','equivocal','unknown'],
+                                        name='PR Negative',
+                                        orientation='h',
+                                        marker=dict(
+                                        color='lightpink',
+                                        line=dict(color='lightpink', width=3)
+                                        )
+                                    ),
+                                    go.Bar(
+                                        x= [er_finalized_dict['positive'][2],er_finalized_dict['negative'][2],er_finalized_dict['equivocal'][2]],
+                                        y= ['positive','negative','equivocal','unknown'],
+                                        name='PR Equivocal',
+                                        orientation='h',
+                                        marker=dict(
+                                        color='lightblue',
+                                        line=dict(color='lightblue', width=3)
+                                        )
+                                    ),
+                                    go.Bar(
+                                        x= [er_finalized_dict['positive'][3],er_finalized_dict['negative'][3],er_finalized_dict['equivocal'][3]],
+                                        y= ['positive','negative','equivocal','unknown'],
+                                        name='PR Unknown',
+                                        orientation='h',
+                                        marker=dict(
+                                        color='lightgrey',
+                                        line=dict(color='lightgrey', width=3)
+                                        )
+                                    )
+                                ],
+                                'layout': go.Layout(
+                                    title = "Relationship between ER & PR",
+                                    xaxis = {'title': 'Percentage of ER & PR'},
+                                    yaxis = {'title': 'ER/PR stages'},
+                                    hovermode='closest',
+                                    barmode='stack',
+                                )
+                            }
+                        )
+                    ]
+                )
+                
+                ]
                 )
 
-    ])
+                            
+            ]
+        )
+    ]
+)
 
 
 ]) #end
@@ -478,11 +509,11 @@ app.layout = html.Div(
 
 #Callbacks
 
-app.clientside_callback(
-    ClientsideFunction(namespace="clientside", function_name="resize"),
-    Output('output-clientside','children'),
-    [Input('age_slider','value')]
-)
+# app.clientside_callback(
+#     ClientsideFunction(namespace="clientside", function_name="resize"),
+#     Output('output-clientside','children'),
+#     [Input('age_slider','value')]
+# )
 
 @app.callback(
     [
@@ -508,14 +539,16 @@ def update_all(age_slider,tnm_select, er_select, pr_select, her2_select):
     #editing alive vs dead bar chart - overwrite initial version
     cause = df['cause_of_death']
     dcdict_new = calPercent(df,cause,True,"Alive")
+    # print(calPercent(df, df['cause_of_death'], True, "Alive"))
     dcdict = rename_keys(dcdict_new,\
                             ['Alive', 'Dead- Breast Cancer', 'Dead- Others', 'Dead- Unknown'])
 
     #Overwrite initial tnm chart
-    tdict, fdict = generate_tnm_chart_data(df, cause)
+    fdict = generate_tnm_chart_data(df, cause)
 
     #Overwrite original chart data with sliced dataset according to filters
     er_dict = generate_epr_chart_data(df)
+    # print(er_dict)
     
     figure={
         'data': 
@@ -533,8 +566,7 @@ def update_all(age_slider,tnm_select, er_select, pr_select, her2_select):
                     'size': 5
                 }
             }
-        ],
-         'layout': layout
+        ]
     }
 
     figure2 ={
@@ -553,21 +585,19 @@ def update_all(age_slider,tnm_select, er_select, pr_select, her2_select):
 
     figure3 ={
             'data': [
-                dict(
-                        x= list(fdict['Alive']),
-                        y= list(tdict.keys()),
+                    dict(
+                        x= fdict['Alive'],
+                        y= clinical['TNM_Stage'].dropna().unique(),
                         type='bar',
                         name='Alive',
                         orientation='h',
                         marker=dict(
                         color='lightgreen',
-                        line=dict(color='lightgreen', width=3)
-                        
-                        )
+                        line=dict(color='lightgreen', width=3))
                     ),
                     dict(
-                        x= list(fdict['breast cancer related']),
-                        y= list(tdict.keys()),
+                        x= fdict['breast cancer related'],
+                        y= clinical['TNM_Stage'].dropna().unique(),
                         type='bar',
                         name='Dead- Breast cancer related',
                         orientation='h',
@@ -577,8 +607,8 @@ def update_all(age_slider,tnm_select, er_select, pr_select, her2_select):
                         )
                     ),
                     dict(
-                        x= list(fdict['n']),
-                        y= list(tdict.keys()),
+                        x= fdict['n'],
+                        y= clinical['TNM_Stage'].dropna().unique(),
                         type='bar',
                         name='Dead',
                         orientation='h',
@@ -588,8 +618,8 @@ def update_all(age_slider,tnm_select, er_select, pr_select, her2_select):
                         )
                     ),
                     dict(
-                        x= list(fdict['unknown']),
-                        y= list(tdict.keys()),
+                        x= fdict['unknown'],
+                        y= clinical['TNM_Stage'].dropna().unique(),
                         type='bar',
                         name='Unknown',
                         orientation='h',
