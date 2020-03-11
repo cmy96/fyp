@@ -131,7 +131,7 @@ for status_er in ERlist:
 
 ER_dict = dict(sorted(ER_dict.items(),key=lambda i:ERlist.index(i[0])))
 
-er_finalized_dict = {}
+er_finalized_dict = {'breast cancer related':[], 'unknown':[]}
 for key in ER_dict.keys():
     for value in ER_dict[key].keys():
         er_finalized_dict[key] = [v for k,v in ER_dict[key].items()] 
