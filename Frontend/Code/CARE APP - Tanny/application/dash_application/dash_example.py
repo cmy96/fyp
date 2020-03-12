@@ -539,18 +539,26 @@ dashboard2 = dbc.Container(
                             dcc.Graph( 
                                 id='service_5',
                                 figure = {
+                                    
                                     'data':[
                                         go.Bar(
-                                            x= graph2_data['counts'],
-                                            y= graph2_data['unique_values'],
-                                            orientation='h',
-                                            marker=dict(color=['#97B2DE','#97B2DE','#97B2DE','#97B2DE','#97B2DE'])
+                                            y= graph2_data['counts'],
+                                            x= graph2_data['unique_values'],
+                                            text= list(graph2_data['counts']),
+                                            textposition='inside',
+                                            marker = dict(color = '#97B2DE')
                                         )
                                     ],
                                     'layout': go.Layout(
                                         title = 'Top 5 Patient Expenditures By Service',
-                                        xaxis = {'title': 'Number of patients'},
-                                        yaxis = {'title': 'Service'},
+                                        xaxis = {'title': 'Number of patients','automargin': True},
+                                        width = 500,
+                                        height = 450,
+                                        yaxis=go.layout.YAxis(
+                                            title="Patient's Medical Service Types",
+                                            automargin=True,
+                                            titlefont=dict(size=15.5),
+                                        ),
                                         hovermode='closest'
                                     )
                                 }
@@ -569,16 +577,18 @@ dashboard2 = dbc.Container(
                                         go.Bar(
                                             x= graph3_data['Service Department'],
                                             y= graph3_data['Treatment Gross'],
-                                            text = graph3_data['Treatment Gross'],
                                             marker = dict(color = '#97B2DE')
                                         )
                                     ],
                                     'layout': go.Layout(
-                                        title='Patient Spend Breakdown',
-                                        xaxis = {'title': 'Service'},
-                                        yaxis = {'title': 'Cost'},
+                                        title='Total Patient Spenditure by Service',
+                                        xaxis = {'title': "Patient's Medical Service Types", 'automargin': True},
+                                        yaxis = {'title': 'Total Cost ($)'},
+                                        width = 500,
+                                        height = 530,
                                         hovermode='closest'
-                                    )
+                                    ),
+                                    
                                 }
                             )
                         ]
@@ -599,7 +609,7 @@ dashboard2 = dbc.Container(
                 dbc.Col(
                     [
                         html.Div(
-                            [   
+                            [   #graph 3
                                 dcc.Graph(
                                     id='diagnosed-age-histogram',
                                     figure={
@@ -627,7 +637,7 @@ dashboard2 = dbc.Container(
                 dbc.Col(
                     [
                         html.Div(
-                            [
+                            [   #graph4
                                 dcc.Graph(
                                     id="Proportion of Patients Alive vs Dead",
                                     figure={
@@ -642,7 +652,7 @@ dashboard2 = dbc.Container(
                                         ],
                                         'layout': go.Layout(
                                             title = "Proportion of Patients Alive Vs Dead",
-                                            xaxis = {'title': 'Cause of Death'},
+                                            xaxis = {'title': 'Cause of Death', 'automargin': True},
                                             yaxis = {'title': 'Percentage of Patients'},
                                             hovermode='closest'
                                         )
@@ -659,9 +669,9 @@ dashboard2 = dbc.Container(
                 dbc.Col(
                     [
                         html.Div(
-                            [
+                            [   #graph5
                                 dcc.Graph(
-                                    id="TNM Stage Alive vs Dead",
+                                    id="TNM Stage Alive vs Dead (Most Deadly to Least)",
                                     figure={
                                         'data':[
                                             go.Bar(
@@ -707,7 +717,7 @@ dashboard2 = dbc.Container(
 
                                         ],
                                         'layout': go.Layout(
-                                            title = "TNM Stage Alive Vs Dead",
+                                            title = "TNM Stage Alive vs Dead (Most Deadly to Least)",
                                             xaxis = {'title': 'Percentage of Patients'},
                                             yaxis = {'title': 'Cancer Stages'},
                                             hovermode='closest',
@@ -722,7 +732,7 @@ dashboard2 = dbc.Container(
                 dbc.Col(
                     [
                         html.Div(
-                            [
+                            [ #graph 6
                                 dcc.Graph(
                                     id="ER vs PR",
                                     figure={
@@ -952,7 +962,7 @@ cost_graphs =  html.Div(
         
         dbc.Row(
             dbc.Col(
-                [
+                [   #cost table
                     dcc.Graph(
                         id='Cost Table',
                         figure={
@@ -979,7 +989,9 @@ cost_graphs =  html.Div(
                             data=[trace1,trace2],
                     
                             layout=go.Layout(
-                                title="Patient's Cost Prediction ($)"
+                                title="Patient's Cost Prediction ($)",
+                                xaxis = {'title': 'Time Period', 'automargin': True},
+                                yaxis = {'title': 'Predicted Cost ($)'},
                             )
                         ),
                     )
@@ -1019,7 +1031,9 @@ patient_graphs =  html.Div(
                         figure=go.Figure(
                             data=[trace1s,trace2s],
                         layout=go.Layout(
-                            title="Patient's Survival Rates Prediction (%)"
+                            title="Patient's Survival Rates Prediction (%)",
+                            xaxis = {'title': 'Time Period', 'automargin': True},
+                            yaxis = {'title': 'Predicted Survival Rates'},                            
                         ),
                         ),
                     ),
@@ -1077,14 +1091,14 @@ surv4 = (go.Scatter(x=x//365.25, y=y, name="hv",
 
 x = patient["x"]
 y = patient["y"]
-# surv1 = (go.Scatter(x=x//365.25, y=y, name="linear",
-#                     line_shape='linear'))
-# surv2 = (go.Scatter(x=x//365.25, y=y, name="spline",
-#                     text=["tweak line smoothness<br>with 'smoothing' in line object"],
-#                     hoverinfo='text+name',
-#                     line_shape='spline'))
-# surv3 = (go.Scatter(x=x//365.25, y=y, name="vh",
-#                     line_shape='vh'))
+surv1 = (go.Scatter(x=x//365.25, y=y, name="linear",
+                    line_shape='linear'))
+surv2 = (go.Scatter(x=x//365.25, y=y, name="spline",
+                    text=["tweak line smoothness<br>with 'smoothing' in line object"],
+                    hoverinfo='text+name',
+                    line_shape='spline'))
+surv3 = (go.Scatter(x=x//365.25, y=y, name="vh",
+                    line_shape='vh'))
 surv4 = (go.Scatter(x=x//365.25, 
                     y=y, 
                     name="Patient's Survival Rate",
@@ -1102,9 +1116,11 @@ doctor_graphs =  html.Div(
                     dcc.Graph(
                         id="Survival Prediction",
                         figure=go.Figure(
-                                            data=[surv4],
+                                            data=[surv1,surv2,surv3,surv4],
                                             layout=go.Layout(
-                                                title="Patient's Predicted Survival Chart"
+                                                title="Patient's Survival Rate Prediction Chart",
+                                                xaxis = {'title': 'Time Period', 'automargin': True},
+                                                yaxis = {'title': 'Survival Prediction Rate'},
                                             ),
                                         ),
                     ),
