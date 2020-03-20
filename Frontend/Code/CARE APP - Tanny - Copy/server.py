@@ -2,6 +2,10 @@ import socket
 import time
 import sys
 import json
+import pandas as pd
+import pickle
+
+from somefunction import haha
 
 # Create a TCP/ IP socket
 sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -42,9 +46,16 @@ while True:
                 # if required, use json.dumps(var) to convert data to string. bytes() function requires string argument to encode.
                 # if required, use bytes(var, encoding='utf-8') function to convert string to bytes object. Connection.sendall accepts bytes object.
 
+                pred = haha(data)
+                stringData = pred.to_json()
+
+                
+                pred_json2 = bytes(stringData, encoding='utf-8')
+
                 #sends data back to client  
+
                 print('sending data back to the client')
-                connection.sendall(pred_json)
+                connection.sendall(pred_json2)
 
             else:
                 print('no data from', client_address)
