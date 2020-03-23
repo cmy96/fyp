@@ -19,16 +19,12 @@ sock.bind(server_address)
 sock.listen(1)
 
 # hardcoded prediction results
-pred = {"cost":{"6 months before":3882.80, "6 months after":13112.54, "1 year after":2230.19, 
-    "2 year after":1736.58, "5 years after":11800.33, "10 years after":14917.57},
-    "survival": {"6 months before":100.0, "6 months after":96.20, "1 year after":90.10, 
-    "2 years after":86.90, "5 years after":80.09, "10 years after":71.22}}
-    
-#takes json object and returns a string
-pred_string = json.dumps(pred)
 
-#takes string and returns bytes object
-pred_json = bytes(pred_string, encoding='utf-8')
+#takes json object and returns a string
+# pred_string = json.dumps(pred)
+
+# #takes string and returns bytes object
+# pred_json = bytes(pred_string, encoding='utf-8')
 
 while True:
     # Wait for a connection
@@ -46,12 +42,23 @@ while True:
                 # if required, use json.dumps(var) to convert data to string. bytes() function requires string argument to encode.
                 # if required, use bytes(var, encoding='utf-8') function to convert string to bytes object. Connection.sendall accepts bytes object.
 
-                pred = haha(data)
+                z, pred, groupj, bills= haha(data)
 
                 fileLocation = "..\\middleWomen\\patient_new.csv"
+                fileLocation_my = "..\\middleWomen\\bills_new.csv"
+                # fileLocation_survival = "..\\middleWomen\\survival.csv"
                 pred.to_csv(fileLocation)
+                bills.to_csv(fileLocation_my)
+                # z.to_csv(fileLocation_survival)
+                
+                # print(a, b)
+                pred_string = json.dumps(groupj)
 
-                # sends data back to client  
+#takes string and returns bytes object
+                pred_json = bytes(pred_string, encoding='utf-8')
+                connection.sendall(pred_json)
+                # sends data back to client 
+                 
                 print('sending data back to the client')
                 break
 

@@ -5,31 +5,80 @@ import numpy as np
 import pandas as pd
 import ast
 import json
+import tensorflow as tf
+
+def loadOHE(df,OHE_LOCATION = "C:\\SMU_v2\\OHE\\", name=""):
+    '''
+    load enconder to OHE new raw data for prediction
+    '''
+    with open( "{}{}{}".format(OHE_LOCATION, name, '_encoder.pickle'), 'rb') as f:
+        enc = pickle.load(f) 
+    
+    #type case object to category
+    typeCastList = list(df.select_dtypes(include=[object]).columns)
+    df[typeCastList] = df[typeCastList].astype("category")
+    OHE_New_Data = enc.transform(df)
+    
+    return OHE_New_Data
+    
+def get_patient_prediction(raw_data,group):
+    
+    if group == 1:
+        
+        model = tf.keras.models.load_model('C:\\SMU_v2\\ann\\model_group1_10y.h5',\
+                                           compile=False,
+                                           custom_objects={'leaky_relu': tf.nn.leaky_relu})
+        pred_10y = model.predict(raw_data)[0][0]
+        model.load_weights('C:\\SMU_v2\\ann\\model_group1_5y.h5')
+        pred_5y = model.predict(raw_data)[0][0]
+        model.load_weights('C:\\SMU_v2\\ann\\model_group1_2y.h5')
+        pred_2y = model.predict(raw_data)[0][0]
+        model.load_weights('C:\\SMU_v2\\ann\\model_group1_1y.h5')
+        pred_1y = model.predict(raw_data)[0][0]
+        model.load_weights('C:\\SMU_v2\\ann\\model_group1_6m.h5')
+        pred_6m = model.predict(raw_data)[0][0]
+
+    elif group == 2:
+ 
+        model = tf.keras.models.load_model('C:\\SMU_v2\\ann\\model_group2_10y.h5',\
+                                           compile=False,\
+                                           custom_objects={'leaky_relu': tf.nn.leaky_relu})
+        pred_10y = model.predict(raw_data)[0][0]
+        model.load_weights('C:\\SMU_v2\\ann\\model_group2_5y.h5')
+        pred_5y = model.predict(raw_data)[0][0]
+        model.load_weights('C:\\SMU_v2\\ann\\model_group2_2y.h5')
+        pred_2y = model.predict(raw_data)[0][0]
+        model.load_weights('C:\\SMU_v2\\ann\\model_group2_1y.h5')
+        pred_1y = model.predict(raw_data)[0][0]
+        model.load_weights('C:\\SMU_v2\\ann\\model_group2_6m.h5')
+        pred_6m = model.predict(raw_data)[0][0]
+
+    elif group == 3:
+        model = tf.keras.models.load_model('C:\\SMU_v2\\ann\\model_group3_10y.h5',\
+                                           compile=False,\
+                                           custom_objects={'leaky_relu': tf.nn.leaky_relu})
+        pred_10y = model.predict(raw_data)[0][0]
+        model.load_weights('C:\\SMU_v2\\ann\\model_group3_5y.h5')
+        pred_5y = model.predict(raw_data)[0][0]
+        model.load_weights('C:\\SMU_v2\\ann\\model_group3_2y.h5')
+        pred_2y = model.predict(raw_data)[0][0]
+        model.load_weights('C:\\SMU_v2\\ann\\model_group3_1y.h5')
+        pred_1y = model.predict(raw_data)[0][0]
+        model.load_weights('C:\\SMU_v2\\ann\\model_group3_6m.h5')
+        pred_6m = model.predict(raw_data)[0][0]
+
+    to_return = pd.DataFrame([[pred_6m,pred_1y,pred_2y,pred_5y,pred_10y]],columns = ["6m","1y","2y","5y","10y"])
+    return to_return
 
 def survivalTable(modelName, raw_data):
     '''
     Calculate survival rate in years of interest
     '''
-    OHE_LOCATION = "C:\\SMU_v2\\OHE\\"  
     interval = list([0.5,1,2,5,10])
-
-    for k,v in raw_data.items():
-        if str(v[0]).isalpha():
-            raw_data[k] = v[0].lower()
         
-    raw_data = pd.DataFrame.from_dict(raw_data)
-    
     model = joblib.load('..\\..\\..\\Code\\Model_folder\\{}.pkl'.format(modelName))
 
-    with open( "{}{}{}".format(OHE_LOCATION, modelName[:-4], '_encoder.pickle'), 'rb') as f:
-            enc = pickle.load(f) 
-        
-    #type case object to category
-    typeCastList = list(raw_data.select_dtypes(include=[object]).columns)
-    raw_data[typeCastList] = raw_data[typeCastList].astype("category")
-    data = enc.transform(raw_data)
-
-    surv = model.predict_survival_function(data)
+    surv = model.predict_survival_function(raw_data)
     
     dic = {}
     
@@ -67,9 +116,10 @@ def haha(input):
                     'diff': [raw['diff']]
                 }
         MTU = 'group 1_layer 4_rsf'
-        print("!!!!!!!!!!!!!!!!!!!hi")
+
+        group = "group 1"
     # group 2
-    elif raw['stage'] == 'dcis/lcis non invasive':
+    elif raw['stage'] == 'dcis/lcis non-invasive':
         if float(raw['size_precise']) <= 1.0:
             size = "0 - 1 cm"
         elif float(raw['size_precise']) <= 2.0:
@@ -96,9 +146,10 @@ def haha(input):
                     'diff': [raw['diff']]
                    }
         MTU = 'group 2_layer 1_rsf'
-        print("!!!!!!!!!!!!!!!!!!!",size)
+
+        group = "group 2"
     else:
-        # # group 3
+        # group 3
         raw_data = {
                     'ER': [raw['ER']],\
                     'PR': [raw['PR']],\
@@ -111,8 +162,17 @@ def haha(input):
                     'M': [raw['mStage']],
                    }
         MTU = 'group 3_layer 5_rsf'
-        print("!!!!!!!!!!!!!!!!!!!bye")
+
+        group = "group 3"
+
+    for k,v in raw_data.items():
+        if str(v[0]).isalpha():
+            raw_data[k] = v[0].lower()
+
+    raw_data = pd.DataFrame.from_dict(raw_data)
+    raw_data = loadOHE(raw_data,OHE_LOCATION = "C:\\SMU_v2\\OHE\\", name=MTU[:-4])
 
     z,DF = survivalTable(MTU,raw_data)  
-  
-    return DF
+    to_return = get_patient_prediction(raw_data,int(group[-1]))
+
+    return z,DF, group, to_return
