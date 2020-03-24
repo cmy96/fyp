@@ -1025,6 +1025,42 @@ survival_layout = dbc.Container(
     ] 
 )
 
+cost_layout = dbc.Container(
+        [dbc.Row(
+            #dbc.Col(
+            [
+                html.H1("Cost Prediction")
+            ], align="center", justify="center",
+        ),  
+
+        html.Br(),
+        html.Br(),
+
+        dbc.Row(
+            [
+                dbc.Col(
+                    html.Div(
+                    [
+                        dbc.Button(
+                            "Survival Prediction", outline=True, color="secondary", className="md-4", href="/survival/", block=True, size="lg"
+                        ),
+                    ]
+                    ), width = {"size":4, "offset": 2}
+                ),
+
+                dbc.Col(
+                    html.Div(
+                    [
+                        dbc.Button(
+                            "Cost Prediction", outline=True, color="secondary", className="md-4", href="/cost/", block=True, size="lg", active=True
+                        ),
+                    ]
+                    ), width = {"size":4}
+                )
+            ]
+        )
+    ]
+)
 
 doctor_items = [
     dbc.DropdownMenuItem("Doctor View", href="/survival/doctor", active=True),
@@ -1045,9 +1081,6 @@ jumbotron =  '''
         <p><h6>Service</h6></p>
     </div>
     '''
-
-
-
 
 doctor_button = dbc.Container(
     [
@@ -1681,44 +1714,6 @@ def init_callbacks(dash_app):
                 name = "survival trendline"
                 )
 
-            cost_layout = dbc.Container(
-                [
-
-                    dbc.Row(
-                        #dbc.Col(
-                        [
-                            html.H1("Cost Prediction")
-                        ], align="center", justify="center",
-                    ),  
-
-                    html.Br(),
-                    html.Br(),
-
-                    dbc.Row(
-                        [
-                            dbc.Col(
-                                html.Div(
-                                [
-                                    dbc.Button(
-                                        "Survival Prediction", outline=True, color="secondary", className="md-4", href="/survival/", block=True, size="lg"
-                                    ),
-                                ]
-                                ), width = {"size":4, "offset": 2}
-                            ),
-
-                            dbc.Col(
-                                html.Div(
-                                [
-                                    dbc.Button(
-                                        "Cost Prediction", outline=True, color="secondary", className="md-4", href="/cost/", block=True, size="lg", active=True
-                                    ),
-                                ]
-                                ), width = {"size":4}
-                            )
-                        ]
-                    )
-                ]
-            )
 
             #patient's graphs
             patient_graphs =  html.Div(
