@@ -1,3 +1,5 @@
+#`````````````````` Update this whole file and give then the model files ````````````
+
 from sksurv.preprocessing import OneHotEncoder
 from sklearn.externals import joblib
 import pickle
@@ -76,7 +78,7 @@ def survivalTable(modelName, raw_data):
     '''
     interval = list([0.5,1,2,5,10])
         
-    model = joblib.load('..\\..\\..\\Code\\Model_folder\\{}.pkl'.format(modelName))
+    model = joblib.load('C:\\SMU_v2\\Model_folder\\{}.pkl'.format(modelName))
 
     surv = model.predict_survival_function(raw_data)
     
@@ -88,7 +90,8 @@ def survivalTable(modelName, raw_data):
     graphaxis = pd.DataFrame({'x':x,'y':y}, columns = ['x','y'])
     for i in interval:
         result = np.where(x > (365.25*(i+1)))[0][0]
-        dic[i] = y[result]
+        dic[str(i) + " years"] = [y[result]]
+    dic = pd.DataFrame.from_dict(dic)
     return dic,graphaxis
 
 def haha(input):
@@ -131,11 +134,7 @@ def haha(input):
         elif float(raw['size_precise']) <= 5.0:
             size = "4.01 to 5 cm"
         elif float(raw['size_precise']) >= 5.0:
-            size = "> 5 cm"     
-        #---- to ask munyee !! ---
-        
-        # else: 
-        #     size = "unknown"    
+            size = "> 5 cm"       
 
         raw_data = {
                     'ER': [raw['ER']],\
@@ -175,4 +174,4 @@ def haha(input):
     z,DF = survivalTable(MTU,raw_data)  
     to_return = get_patient_prediction(raw_data,int(group[-1]))
 
-    return z,DF, group, to_return
+    return z, DF, group, to_return
