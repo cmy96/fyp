@@ -1,5 +1,3 @@
-#`````````````````` Update this whole file and give then the model files ````````````
-
 from sksurv.preprocessing import OneHotEncoder
 from sklearn.externals import joblib
 import pickle
