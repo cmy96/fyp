@@ -26,6 +26,10 @@ from logging.handlers import RotatingFileHandler
 import matplotlib.pyplot as plt
 from matplotlib import cm
 from pywaffle import Waffle
+import math
+import os, shutil
+from flask_caching import Cache
+import datetime
 
 
 
@@ -44,6 +48,40 @@ app = dash.Dash(__name__,external_stylesheets=external_stylesheets)
 app.scripts.config.serve_locally = True
 app.css.config.serve_locally = True
 # app.config.suppress_callback_exceptions = True
+
+cache = Cache(app.server, config={
+    # try 'filesystem' if you don't want to setup redis
+    'CACHE_TYPE': 'filesystem',
+    'CACHE_DEFAULT_TIMEOUT':20,
+    'CACHE_THRESHOLD':3,
+    'CACHE_DIR': "C:\\Users\\Jesslyn\\Documents\\GitHub\\fyp\\Frontend\\Code\\MAINAPP\\application\\cache"
+})
+app.config.suppress_callback_exceptions = True
+
+timeout = 20
+app.layout = html.Div([
+    html.Div(id='flask-cache-memoized-children'),
+    dcc.RadioItems(
+        id='flask-cache-memoized-dropdown',
+        options=[
+            {'label': 'Option {}'.format(i), 'value': 'Option {}'.format(i)}
+            for i in range(1, 4)
+        ],
+        value='Option 1'
+    ),
+    html.Div('Results are cached for {} seconds'.format(timeout))
+])
+
+
+@app.callback(
+    Output('flask-cache-memoized-children', 'children'),
+    [Input('flask-cache-memoized-dropdown', 'value')])
+@cache.memoize(timeout=timeout)  # in seconds
+def render(value):
+    return 'Selected "{}" at "{}"'.format(
+        value, datetime.datetime.now().strftime('%H:%M:%S')
+    )
+
 
 
 # Path
@@ -103,64 +141,108 @@ df = pd.DataFrame(c_output.items(), columns=['Years', 'Cost'])
 
 ###########################################   Prediction model visualisations    ######################################
 
-def generate_waffle_chart(waffle2data):
+
+def generate_waffle_chart():
     '''
-        parameters: dictionary containing
-        return: waffle chart image
+        parameters: waffle2data should be the output of survival model
+        return: waffle chart image in assets folder (for results page to extract)
     '''
-    km = pd.read_csv('data\\kaplan_meier_by_group.csv')
-    waffle1data = km.to_dict()
-    waffle1 = plt.figure(
+ #Data should look like this ={'Disease-free Survival': 61, 'Overall Survival': 34, 'Dead in 10 years':5}
+    km = pd.read_csv('data\\kaplan_meier_by_group.csv') #extract from km prediction model
+    kmdict = {'DFS': 0, 'OS': 0, 'CSS':0} #use this as a template to input ur values
+    
+    #sum of all dfs, os, css values
+    total_rows = km.shape[0]
+
+    #fill kmdict with predicted values
+    for key in kmdict:
+        value = km[km['class_label'] == key].shape[0]
+        kmdict[key] = int((value / total_rows)*100)
+
+    kmdict = rename_keys(kmdict, ['Disease-Free Survival','Overall Survival', 'Dead in 10 years']) #rename keys in dict
+    print(kmdict)
+
+    plt.figure(
         FigureClass=Waffle, 
         rows=5, 
-        values=waffle1data, 
+        values=kmdict, 
         colors=['#3CB371','#90EE90','#FF0000'],
         legend={
-            'labels': ["{0} ({1})".format(k, v) for k, v in waffle1data.items()],
+            'labels': ["{0} ({1})".format(k, v) for k, v in kmdict.items()],
             'loc': 'upper left', 'bbox_to_anchor': (1, 1)
             },
-        icons='child', icon_size=18, 
+        icons='child', icon_size=14, 
         icon_legend=True,
         figsize=(10, 9),
         title={
         'label': 'Survivability Rate for Breast Cancer Patients ',
         'loc': 'center',
-        'fontdict': {
-        'fontsize': 12
-        }
+        'fontdict':{'fontsize':8}
         }
     )
 
-    plt.savefig('assets/waffle-1-chart.png',bbox_inches='tight', pad_inches=0)
+    filename = 'C:\\Users\\Jesslyn\\Documents\\GitHub\\fyp\\Frontend\\Code\\MAINAPP\\application\\assets\\waffle-chart-km.png' #where picture will be stored, replace w ur own
+    if os.path.exists(filename):
+        os.remove(filename) #remove old
+    plt.savefig(filename ,bbox_inches='tight', pad_inches=0) #replace 
 
-    # data = {'Dead - In 6 months': 1, 'Dead -  1 Year': 0, 'Dead - 2 Years': 1 ,'Dead - 5 Years': 3, 'Survived - 10 Years':95}
-    #Replace Keys of survival model output
-    #take in output of survival model and rewrite keys
-    
-    waffle2 = plt.figure(
+    #set the vars needed
+    populate_this_dict = {'0.5 years': 0, '1 years': 0, '2 years': 0, '5 years':0, '10 years':0} #this is done to set the initial dict. Populate w the actual values to pass the chart printer.
+    list_of_dict_keys = list(populate_this_dict.keys()) #retrieve all the keys, convert to list
+    to_sum = []
+
+    waffle2data = pd.read_csv("..\\middleWomen\\survival.csv") #extract model predictions survival csv
+    waffle2data.drop("Unnamed: 0", axis=1, inplace=True) #drop extra col
+    print("WAFFLE DATA")
+    print(waffle2data)
+
+    #Arithmetics - still need old cols, replace old cols at end.
+    # all values in waffle2data(survival rate in deci) * 100 to convert to % 
+    # Here we will take prev num minus next num and absolute it
+    # find out who is left out of the original pool of 100%
+    for i in range(len(list_of_dict_keys)):
+        if i == 0:
+            populate_this_dict[list_of_dict_keys[i]] = int(abs(100 - (waffle2data[list_of_dict_keys[i]]*100)))
+            to_sum.append(populate_this_dict[list_of_dict_keys[i]])
+        elif i < len(list_of_dict_keys)-1:
+            populate_this_dict[list_of_dict_keys[i]] = int(abs((waffle2data[list_of_dict_keys[i-1]]*100)- (waffle2data[list_of_dict_keys[i]] * 100)))
+            to_sum.append(populate_this_dict[list_of_dict_keys[i]])
+        elif i == len(list_of_dict_keys)-1:
+            survived = 100 - sum(to_sum) #100% - sum of all values in dict, note tt current value of survived10yrs = 0
+            populate_this_dict[list_of_dict_keys[i]] = survived
+        else:
+            print('i is an invalid value')
+        
+    print("this will be passed to the chart gen", populate_this_dict)
+    populate_this_dict = rename_keys(populate_this_dict, ['Dead - in 6 months', 'Dead - 1 year', 'Dead - 2 years', 'Dead - 5 years', 'Survived - 10 years'])
+    output = populate_this_dict
+
+    plt.figure(
             FigureClass=Waffle, 
             rows=5, 
-            values=waffle2data, 
+            values=output, 
             colors= ['#800000', '#FF0000', '#F08080', '#FFA07A', '#3CB371'],
             legend={
-                'labels': ["{0} ({1})".format(k, v) for k, v in waffle2data.items()],
+                'labels': ["{0} ({1})".format(k, v) for k, v in output.items()],
                 'loc': 'upper left', 'bbox_to_anchor': (1, 1)},
-            icons='child', icon_size=18, 
+            icons='child', icon_size=14, 
             icon_legend=True,
-            figsize=(10, 9),
+            figsize=(10, 9)
+            ,
             title={
             'label': 'Survivability for Breast Cancer Patients ',
             'loc': 'center',
-            'fontdict': {
-            'fontsize': 12
-            }
-            }
+            'fontdict':{'fontsize':8
+            }}
     )
-    plt.savefig('assets/waffle-2-chart.png',bbox_inches='tight', pad_inches=0)
+    filename = 'C:\\Users\\Jesslyn\\Documents\\GitHub\\fyp\\Frontend\\Code\\MAINAPP\\application\\assets\\waffle-chart-survived.png' #where picture will be stored
+    if os.path.exists(filename):
+        os.remove(filename) #remove old
+    plt.savefig(filename ,bbox_inches='tight', pad_inches=0) #replace 
 
 
 
-###########################################   Data manipulation for bills charts    ######################################
+###########################################   Data manipulation for bills charts    ##########################r###########
 
 #PIE CHART DE DONGXI
 gross = bills2.groupby(['Consolidated.Main.Group']).sum()
@@ -315,6 +397,7 @@ age_bin_count = clinical.groupby(pd.cut(clinical['Age_@_Dx'], bins=19, precision
 
 finalized_dict = generate_tnm_chart_data(clinical, death_cause,death_cause_dict_old)
 er_finalized_dict = generate_epr_chart_data(clinical)
+
 
 
 
@@ -1236,6 +1319,8 @@ def init_callbacks(dash_app):
             # ok = pd.DataFrame(cookies)
             # print(ok)
             patient = pd.read_csv("..\\middleWomen\\patient_new.csv")
+            #Execute for waffle
+            generate_waffle_chart()
 
             x = patient["x"]
             y = patient["y"]
@@ -1534,6 +1619,8 @@ def init_callbacks(dash_app):
                 name="{}".format("95% Lower CI"),
             )
 
+            
+
             #doctor's graphs
             doctor_graphs =  html.Div(
                 [
@@ -1645,11 +1732,17 @@ def init_callbacks(dash_app):
 
             #cost graphs for FC
             trace1 = go.Bar(
-                                x=key,
-                                y=[round(x[0],2) for x in values],
-                                text=[round(x[0],2) for x in values],
-                                textposition='auto',
-                                name = "predicted cost"
+                x=key,
+                y=[round(x[0],2) for x in values],
+                text=[round(x[0],2) for x in values],
+                textposition='auto',
+                name = "predicted cost"
+            )
+
+            trace2= go.Scatter(
+            x=key,
+            y=[round(x[0],2) for x in values],
+            name = "prediction line"
             )
 
             trace2= go.Scatter(
@@ -1723,6 +1816,8 @@ def init_callbacks(dash_app):
 
             #survival outputs
             surv = pd.read_csv("..\\middleWomen\\survival.csv")
+            #Execute for waffle
+            # generate_waffle_chart()
             # key = ["6 months after","1 year after","2 year after","5 years after","10 years after"]
             surv_key = surv.columns.tolist()[1:]
             surv_values = [surv[k].tolist() for k in surv_key]
@@ -1730,17 +1825,17 @@ def init_callbacks(dash_app):
 
             trace1s = go.Bar(
                 x=surv_key,
-                y=[round(n[0],2) for n in surv_values],
-                text=[round(n[0],2) for n in surv_values],
+                y=[round(n[0],2)*100 for n in surv_values],
+                text=[round(n[0],2)*100 for n in surv_values],
                 textposition='auto',
                 name = "survival rate"
             )
 
             trace2s= go.Scatter(
                 x=surv_key,
-                y=surv_values,
+                y=[round(n[0],2)*100 for n in surv_values],
                 name = "survival trendline"
-                )
+            )
 
 
             #patient's graphs
@@ -1761,7 +1856,7 @@ def init_callbacks(dash_app):
                                         fill_color='paleturquoise',
                                         align='center'),
                                         cells=dict(
-                                            values=[surv_key, [[round(x[0],2)] for x in surv_values]],
+                                            values=[surv_key, [[round(x[0],2)*100] for x in surv_values]],
                                             fill_color='white',
                                             align='center')
                                     )],
@@ -1798,30 +1893,30 @@ def init_callbacks(dash_app):
                             html.Div(
                             [ 
                                 html.Img(
-                                    src=app.get_asset_url('waffle1.png'),
+                                    src=app.get_asset_url('waffle-chart-km.png'),
                                     id="waffle-1",
                                     style={
-                                        "height": "400px",
-                                        "width": "1200px",
+                                        "height": "200px",
+                                        "width": "1000px",
                                         "margin-bottom": "25px",
                                         "margin-left":"px"
                                     },
                                 ),
                                 
-                                html.P('Out of a 100 random women, 5 will be dead within 10 years... '),
+                                html.P('Out of a 100 random women, X will be dead within 10 years... '),
                                 html.Br(),
                                 html.Img(
-                                    src=app.get_asset_url('waffle2.png'),
+                                    src=dash_app.get_asset_url('waffle-chart-survived.png'),
                                     id="waffle-2",
                                     style={
-                                        "height": "400px",
-                                        "width": "1200px",
+                                        "height": "200px",
+                                        "width": "1000px",
                                         "margin-bottom": "25px",
                                         "margin-left":"px"
                                     },
                                 ),
                                 html.Div([
-                                    html.P("Out of 100 random breast cancer patients, 95 will survive within the 10 year time period.")
+                                    html.P("Out of 100 random breast cancer patients, X will survive within the 10 year time period.")
                                 ]), 
                                 
                             ], 
