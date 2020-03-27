@@ -40,8 +40,6 @@ app = dash.Dash(__name__,external_stylesheets=external_stylesheets)
 app.scripts.config.serve_locally = True
 app.css.config.serve_locally = True
 
-
-
 ################## ORIGINAL DFS FOR RESULTS PAGE + BILLS DASHBOARD ##############################
 
 def rename_keys(dict_, new_keys):
@@ -81,7 +79,7 @@ url2 = 'data/OldFaithful.csv'
 df_bills = pd.read_csv(url, index_col=0)
 df_A = pd.read_csv(url2, index_col=0)
 # df = pd.read_csv("C:\\Users\\User\\Documents\\fyp\\clinical.csv")
-df = pd.read_csv('data/clinical.csv')
+df = pd.read_csv('data\\clinical.csv')
 
 # rename columns
 death_cause = df['cause_of_death']
@@ -194,7 +192,7 @@ s_output = {"6 months before":100.0, "6 months after":96.20, "1 year after":90.1
 df2 = pd.DataFrame(s_output.items(), columns=['Years', 'Survival'])
 #python codes for cost
 c_output = {"6 months before":3882.80, "6 months after":13112.54, "1 year after":2230.19, 
-    "2 years after":1736.58, "5 years after":11800.33, "10 years after":14917.57}
+    "2 years after":1736.58, "5 years after":11600.33, "10 years after":14917.57}
 df = pd.DataFrame(c_output.items(), columns=['Years', 'Cost'])
 
 
@@ -1196,13 +1194,13 @@ def init_callbacks(dash_app):
             group =cookies.split(",")
             # # # cookie = html.H1(cookies)
             # print(str(group)[3:10], "group 1")
-            km = pd.read_csv('data\\kaplan_meier_by_group.csv')
-            g_os = km.loc[km['class_label'] == 'OS']
-            os = g_os.loc[g_os['group_label'] == str(group)[3:10]]
-            g_dfs = km.loc[km['class_label'] == 'DFS' ]
-            dfs = g_dfs.loc[g_dfs['group_label'] == str(group)[3:10]]
-            g_css = km.loc[km['class_label'] == 'CSS' ]
-            css = g_css.loc[g_css['group_label'] == str(group)[3:10]]
+            # km = pd.read_csv('data\\kaplan_meier_by_group.csv')
+            # g_os = km.loc[km['class_label'] == 'OS']
+            # os = g_os.loc[g_os['group_label'] == str(group)[3:10]]
+            # g_dfs = km.loc[km['class_label'] == 'DFS' ]
+            # dfs = g_dfs.loc[g_dfs['group_label'] == str(group)[3:10]]
+            # g_css = km.loc[km['class_label'] == 'CSS' ]
+            # css = g_css.loc[g_css['group_label'] == str(group)[3:10]]
             # #ok = json_normalize(cookies)
             # #ok = pd.read_json(cookies)
             # ok = pd.DataFrame(cookies)
@@ -1216,160 +1214,160 @@ def init_callbacks(dash_app):
                                 line_shape='hv'))
 
             #overall survival Kaplan Meier chart
-            x = os["time"]
-            y = os["estimate"]
-            lower = os["lower"]
-            upper = os["upper"]
-            km_upper = go.Scatter(x=x, y=y*100,
-                fill=None,
-                mode='lines',
-                line_color='indigo',
-                name='Overall Survival',
-            )
+            # x = os["time"]
+            # y = os["estimate"]
+            # lower = os["lower"]
+            # upper = os["upper"]
+            # km_upper = go.Scatter(x=x, y=y*100,
+            #     fill=None,
+            #     mode='lines',
+            #     line_color='indigo',
+            #     name='Overall Survival',
+            # )
 
-            km_lower = go.Scatter( x=x,
-                y=upper*100,
-                fill='tonexty', # fill area between trace0 and trace1
-                mode='lines', 
-                line_color='lightblue',
-                name="{}".format('95% Upper CI'),
-            )
-            km = go.Scatter( x=x,
-                y=lower*100,
-                fill='tonexty', # fill area between trace0 and trace1
-                mode='lines', 
-                line_color='lightblue',
-                name="{}".format("95% Lower CI"),
-            )
+            # km_lower = go.Scatter( x=x,
+            #     y=upper*100,
+            #     fill='tonexty', # fill area between trace0 and trace1
+            #     mode='lines', 
+            #     line_color='lightblue',
+            #     name="{}".format('95% Upper CI'),
+            # )
+            # km = go.Scatter( x=x,
+            #     y=lower*100,
+            #     fill='tonexty', # fill area between trace0 and trace1
+            #     mode='lines', 
+            #     line_color='lightblue',
+            #     name="{}".format("95% Lower CI"),
+            # )
 
-            #dfs Kaplan Meier chart 
-            dfs_x = dfs["time"]
-            dfs_y = dfs["estimate"]
-            dfs_lower = dfs["lower"]
-            dfs_upper = dfs["upper"]
-            dfs_km_upper = go.Scatter(x=dfs_x, y=dfs_y*100,
-                fill=None,
-                mode='lines',
-                line_color='indigo',
-                name='Disease Free Survival',
-            )
+            # #dfs Kaplan Meier chart 
+            # dfs_x = dfs["time"]
+            # dfs_y = dfs["estimate"]
+            # dfs_lower = dfs["lower"]
+            # dfs_upper = dfs["upper"]
+            # dfs_km_upper = go.Scatter(x=dfs_x, y=dfs_y*100,
+            #     fill=None,
+            #     mode='lines',
+            #     line_color='indigo',
+            #     name='Disease Free Survival',
+            # )
 
-            dfs_km_lower = go.Scatter(x=dfs_x,
-                y=dfs_upper*100,
-                fill='tonexty', # fill area between trace0 and trace1
-                mode='lines', 
-                line_color='lightblue',
-                name="{}".format('95% Upper CI'),
-            )
-            dfs_km = go.Scatter(x=dfs_x,
-                y=dfs_lower*100,
-                fill='tonexty', # fill area between trace0 and trace1
-                mode='lines', 
-                line_color='lightblue',
-                name="{}".format("95% Lower CI"),
-            )
+            # dfs_km_lower = go.Scatter(x=dfs_x,
+            #     y=dfs_upper*100,
+            #     fill='tonexty', # fill area between trace0 and trace1
+            #     mode='lines', 
+            #     line_color='lightblue',
+            #     name="{}".format('95% Upper CI'),
+            # )
+            # dfs_km = go.Scatter(x=dfs_x,
+            #     y=dfs_lower*100,
+            #     fill='tonexty', # fill area between trace0 and trace1
+            #     mode='lines', 
+            #     line_color='lightblue',
+            #     name="{}".format("95% Lower CI"),
+            # )
 
-            #css Kaplan Meier chart
-            css_x = css["time"]
-            css_y = css["estimate"]
-            css_lower = css["lower"]
-            css_upper = css["upper"]
-            css_km_upper = go.Scatter(x=css_x, y=css_y*100,
-                fill=None,
-                mode='lines',
-                line_color='indigo',
-                name='Cancer Specific Survival',
-            )
+            # #css Kaplan Meier chart
+            # css_x = css["time"]
+            # css_y = css["estimate"]
+            # css_lower = css["lower"]
+            # css_upper = css["upper"]
+            # css_km_upper = go.Scatter(x=css_x, y=css_y*100,
+            #     fill=None,
+            #     mode='lines',
+            #     line_color='indigo',
+            #     name='Cancer Specific Survival',
+            # )
 
-            css_km_lower = go.Scatter( x=css_x,
-                y=css_upper*100 ,
-                fill='tonexty', # fill area between trace0 and trace1
-                mode='lines', 
-                line_color='lightblue',
-                name="{}".format('95% Upper CI'),
-            )
-            css_km = go.Scatter( x=css_x,
-                y=css_lower*100,
-                fill='tonexty', # fill area between trace0 and trace1
-                mode='lines', 
-                line_color='lightblue',
-                name="{}".format("95% Lower CI"),
-            )
+            # css_km_lower = go.Scatter( x=css_x,
+            #     y=css_upper*100 ,
+            #     fill='tonexty', # fill area between trace0 and trace1
+            #     mode='lines', 
+            #     line_color='lightblue',
+            #     name="{}".format('95% Upper CI'),
+            # )
+            # css_km = go.Scatter( x=css_x,
+            #     y=css_lower*100,
+            #     fill='tonexty', # fill area between trace0 and trace1
+            #     mode='lines', 
+            #     line_color='lightblue',
+            #     name="{}".format("95% Lower CI"),
+            # )
 
             #doctor's graphs
             doctor_graphs =  html.Div(
                 [
                     html.Br(),
                     html.Br(),
-                    dbc.Row(
-                        dbc.Col(
-                            html.Div(
-                                [
-                                    dcc.Graph(
-                                        id="Survival Prediction",
-                                        figure=go.Figure(
-                                                            data=[km_upper,km_lower,km],
-                                                            layout=go.Layout(
-                                                                title="Patient's Overall Survival Kaplan Meier Chart",
-                                                                height=400,
-                                                                width=1200,  
-                                                                xaxis_range=(0, 10),
-                                                                xaxis = {'title': 'Year'},
-                                                                yaxis = {'title': 'Percentage of Survival'},
-                                                                hovermode= "closest",
-                                                            ),
-                                                        ),
-                                    ),
-                                ],
-                            ), width = {"offset": 2}
-                        )
-                    ),
-                            dbc.Row(
-                        dbc.Col(
-                            html.Div(
-                                [
-                                    dcc.Graph(
-                                        id="Kaplan Meier",
-                                        figure=go.Figure(
-                                                            data=[dfs_km_upper,dfs_km_lower,dfs_km],
-                                                            layout=go.Layout(
-                                                                title="Patient's Disease-Free Survival Kaplan Meier Chart",
-                                                                height=400,
-                                                                width=1200,
-                                                                xaxis_range=(0, 10),
-                                                                xaxis = {'title': 'Year'},
-                                                                yaxis = {'title': 'Percentage of Survival'},                                                                
-                                                                hovermode= "closest",
-                                                            ),
-                                                        ),
-                                    ),
-                                ],
-                            ), width = {"offset": 2}
-                        )
-                    ),
-                    dbc.Row(
-                        dbc.Col(
-                            html.Div(
-                                [
-                                    dcc.Graph(
-                                        id="Kaplan Meier",
-                                        figure=go.Figure(
-                                                            data=[css_km_upper,css_km_lower,css_km],
-                                                            layout=go.Layout(
-                                                                title="Patient's Cancer Specific Survival Kaplan Meier Chart",
-                                                                height=400,
-                                                                width=1200,
-                                                                xaxis_range=(0, 10),
-                                                                xaxis = {'title': 'Year'},
-                                                                yaxis = {'title': 'Percentage of Survival'}, 
-                                                                hovermode= "closest",
-                                                            ),
-                                                        ),
-                                    ),
-                                ],
-                            ), width = {"offset": 2}
-                        )
-                    ),
+                    # dbc.Row(
+                    #     dbc.Col(
+                    #         html.Div(
+                    #             [
+                    #                 dcc.Graph(
+                    #                     id="Survival Prediction",
+                    #                     figure=go.Figure(
+                    #                                         data=[km_upper,km_lower,km],
+                    #                                         layout=go.Layout(
+                    #                                             title="Patient's Overall Survival Kaplan Meier Chart",
+                    #                                             height=600,
+                    #                                             width=800,  
+                    #                                             xaxis_range=(0, 10),
+                    #                                             xaxis = {'title': 'Year'},
+                    #                                             yaxis = {'title': 'Percentage of Survival'},
+                    #                                             hovermode= "closest",
+                    #                                         ),
+                    #                                     ),
+                    #                 ),
+                    #             ],
+                    #         ), width = {"offset": 2}
+                    #     )
+                    # ),
+                    #         dbc.Row(
+                    #     dbc.Col(
+                    #         html.Div(
+                    #             [
+                    #                 dcc.Graph(
+                    #                     id="Kaplan Meier",
+                    #                     figure=go.Figure(
+                    #                                         data=[dfs_km_upper,dfs_km_lower,dfs_km],
+                    #                                         layout=go.Layout(
+                    #                                             title="Patient's Disease-Free Survival Kaplan Meier Chart",
+                    #                                             height=600,
+                    #                                             width=800,
+                    #                                             xaxis_range=(0, 10),
+                    #                                             xaxis = {'title': 'Year'},
+                    #                                             yaxis = {'title': 'Percentage of Survival'},                                                                
+                    #                                             hovermode= "closest",
+                    #                                         ),
+                    #                                     ),
+                    #                 ),
+                    #             ],
+                    #         ), width = {"offset": 2}
+                    #     )
+                    # ),
+                    # dbc.Row(
+                    #     dbc.Col(
+                    #         html.Div(
+                    #             [
+                    #                 dcc.Graph(
+                    #                     id="Kaplan Meier",
+                    #                     figure=go.Figure(
+                    #                                         data=[css_km_upper,css_km_lower,css_km],
+                    #                                         layout=go.Layout(
+                    #                                             title="Patient's Cancer Specific Survival Kaplan Meier Chart",
+                    #                                             height=600,
+                    #                                             width=800,
+                    #                                             xaxis_range=(0, 10),
+                    #                                             xaxis = {'title': 'Year'},
+                    #                                             yaxis = {'title': 'Percentage of Survival'}, 
+                    #                                             hovermode= "closest",
+                    #                                         ),
+                    #                                     ),
+                    #                 ),
+                    #             ],
+                    #         ), width = {"offset": 2}
+                    #     )
+                    # ),
                     dbc.Row(
                         dbc.Col(
                             html.Div(
@@ -1380,8 +1378,8 @@ def init_callbacks(dash_app):
                                                             data=[surv4],
                                                             layout=go.Layout(
                                                                 title="Patient's Predicted Kaplan Meier Chart",
-                                                                height=400,
-                                                                width=1200,
+                                                                height=600,
+                                                                width=800,
                                                                 xaxis_range=(0, 10),
                                                                 yaxis_range=(0, 100),
                                                                 xaxis = {'title': 'Year'},
@@ -1406,17 +1404,7 @@ def init_callbacks(dash_app):
             group =cookies.split(",")
             # # # cookie = html.H1(cookies)
             # print(str(group)[3:10], "group 1")
-            km = pd.read_csv('data\\kaplan_meier_by_group.csv')
-            g_os = km.loc[km['class_label'] == 'OS']
-            os = g_os.loc[g_os['group_label'] == str(group)[3:10]]
-            g_dfs = km.loc[km['class_label'] == 'DFS' ]
-            dfs = g_dfs.loc[g_dfs['group_label'] == str(group)[3:10]]
-            g_css = km.loc[km['class_label'] == 'CSS' ]
-            css = g_css.loc[g_css['group_label'] == str(group)[3:10]]
-            # #ok = json_normalize(cookies)
-            # #ok = pd.read_json(cookies)
-            # ok = pd.DataFrame(cookies)
-            # print(ok)
+
             patient = pd.read_csv("..\\middleWomen\\patient_new.csv")
 
             x = patient["x"]
@@ -1424,87 +1412,6 @@ def init_callbacks(dash_app):
 
             surv4 = (go.Scatter(x=x/365.25, y=y*100, name="hv",
                                 line_shape='hv'))
-
-            #overall survival Kaplan Meier chart
-            x = os["time"]
-            y = os["estimate"]
-            lower = os["lower"]
-            upper = os["upper"]
-            km_upper = go.Scatter(x=x, y=y*100,
-                fill=None,
-                mode='lines',
-                line_color='indigo',
-                name='Overall Survival',
-            )
-
-            km_lower = go.Scatter( x=x,
-                y=upper*100,
-                fill='tonexty', # fill area between trace0 and trace1
-                mode='lines', 
-                line_color='lightblue',
-                name="{}".format('95% Upper CI'),
-            )
-            km = go.Scatter( x=x,
-                y=lower*100,
-                fill='tonexty', # fill area between trace0 and trace1
-                mode='lines', 
-                line_color='lightblue',
-                name="{}".format("95% Lower CI"),
-            )
-
-            #dfs Kaplan Meier chart 
-            dfs_x = dfs["time"]
-            dfs_y = dfs["estimate"]
-            dfs_lower = dfs["lower"]
-            dfs_upper = dfs["upper"]
-            dfs_km_upper = go.Scatter(x=dfs_x, y=dfs_y*100,
-                fill=None,
-                mode='lines',
-                line_color='indigo',
-                name='Disease Free Survival',
-            )
-
-            dfs_km_lower = go.Scatter(x=dfs_x,
-                y=dfs_upper*100,
-                fill='tonexty', # fill area between trace0 and trace1
-                mode='lines', 
-                line_color='lightblue',
-                name="{}".format('95% Upper CI'),
-            )
-            dfs_km = go.Scatter(x=dfs_x,
-                y=dfs_lower*100,
-                fill='tonexty', # fill area between trace0 and trace1
-                mode='lines', 
-                line_color='lightblue',
-                name="{}".format("95% Lower CI"),
-            )
-
-            #css Kaplan Meier chart
-            css_x = css["time"]
-            css_y = css["estimate"]
-            css_lower = css["lower"]
-            css_upper = css["upper"]
-            css_km_upper = go.Scatter(x=css_x, y=css_y*100,
-                fill=None,
-                mode='lines',
-                line_color='indigo',
-                name='Cancer Specific Survival',
-            )
-
-            css_km_lower = go.Scatter( x=css_x,
-                y=css_upper*100,
-                fill='tonexty', # fill area between trace0 and trace1
-                mode='lines', 
-                line_color='lightblue',
-                name="{}".format('95% Upper CI'),
-            )
-            css_km = go.Scatter( x=css_x,
-                y=css_lower*100,
-                fill='tonexty', # fill area between trace0 and trace1
-                mode='lines', 
-                line_color='lightblue',
-                name="{}".format("95% Lower CI"),
-            )
 
             #doctor's graphs
             doctor_graphs =  html.Div(
@@ -1516,82 +1423,13 @@ def init_callbacks(dash_app):
                             html.Div(
                                 [
                                     dcc.Graph(
-                                        id="Survival Prediction",
-                                        figure=go.Figure(
-                                                            data=[km_upper,km_lower,km],
-                                                            layout=go.Layout(
-                                                                title="Patient's Overal Survival Kaplan Meier Chart",
-                                                                height=400,
-                                                                width=1200,  
-                                                                xaxis_range=(0, 10),
-                                                                xaxis = {'title': 'Year'},
-                                                                yaxis = {'title': 'Percentage of Survival'}, 
-                                                                hovermode= "closest",
-                                                            ),
-                                                        ),
-                                    ),
-                                ],
-                            ), width = {"offset": 2}
-                        )
-                    ),
-                            dbc.Row(
-                        dbc.Col(
-                            html.Div(
-                                [
-                                    dcc.Graph(
-                                        id="Kaplan Meier",
-                                        figure=go.Figure(
-                                                            data=[dfs_km_upper,dfs_km_lower,dfs_km],
-                                                            layout=go.Layout(
-                                                                title="Patient's Disease-Free Survival Kaplan Meier Chart",
-                                                                height=400,
-                                                                width=1200,
-                                                                xaxis_range=(0, 10),
-                                                                xaxis = {'title': 'Year'},
-                                                                yaxis = {'title': 'Percentage of Survival'}, 
-                                                                hovermode= "closest",
-                                                            ),
-                                                        ),
-                                    ),
-                                ],
-                            ), width = {"offset": 2}
-                        )
-                    ),
-                    dbc.Row(
-                        dbc.Col(
-                            html.Div(
-                                [
-                                    dcc.Graph(
-                                        id="Kaplan Meier",
-                                        figure=go.Figure(
-                                                            data=[css_km_upper,css_km_lower,css_km],
-                                                            layout=go.Layout(
-                                                                title="Patient's Cancer Specific Survival Kaplan Meier Chart",
-                                                                height=400,
-                                                                width=1200,
-                                                                xaxis_range=(0, 10),
-                                                                xaxis = {'title': 'Year'},
-                                                                yaxis = {'title': 'Percentage of Survival'}, 
-                                                                hovermode= "closest",
-                                                            ),
-                                                        ),
-                                    ),
-                                ],
-                            ), width = {"offset": 2}
-                        )
-                    ),
-                    dbc.Row(
-                        dbc.Col(
-                            html.Div(
-                                [
-                                    dcc.Graph(
                                         id="Kaplan Meier",
                                         figure=go.Figure(
                                                             data=[surv4],
                                                             layout=go.Layout(
                                                                 title="Patient's Predicted Kaplan Meier Chart",
-                                                                height=400,
-                                                                width=1200,
+                                                                height=600,
+                                                                width=800,
                                                                 xaxis_range=(0, 10),
                                                                 yaxis_range=(0, 100),
                                                                 xaxis = {'title': 'Year'},
@@ -1603,8 +1441,7 @@ def init_callbacks(dash_app):
                                 ],
                             ), width = {"offset": 2}
                         )
-                    ),
-                    
+                    ),                
                 ]
             )
             return survival_layout, doctor_button, doctor_graphs
@@ -1612,7 +1449,7 @@ def init_callbacks(dash_app):
             #cost outputs
             my_bills = pd.read_csv("..\\middleWomen\\bills_new.csv")
             # key = ["6 months after","1 year after","2 year after","5 years after","10 years after"]
-            key = my_bills.columns.tolist()[1:-1] #to be edited!!!!!!!!!!!!!!!!!!!!!1
+            key = my_bills.columns.tolist()[1:] #to be edited!!!!!!!!!!!!!!!!!!!!!1
             values = [my_bills[k].tolist() for k in key]
 
             #cost graphs for FC
@@ -1626,7 +1463,7 @@ def init_callbacks(dash_app):
 
             trace2= go.Scatter(
             x=key,
-            y=values,
+            y=[round(x[0],2) for x in values],
             name = "prediction line"
             )
             
@@ -1654,9 +1491,9 @@ def init_callbacks(dash_app):
                                         )
                                     ],
                                     'layout':go.Layout(
-                                        title="Table",
-                                        height=400,
-                                        width=1200,
+                                        title="Predicted Cost Table",
+                                        height=600,
+                                        width=800,
                                     )
                                 }), 
                                 ],
@@ -1675,8 +1512,8 @@ def init_callbacks(dash_app):
                                         data=[trace1,trace2],
                                         layout=go.Layout(
                                             title="Patient's Cost Prediction ($)",
-                                            height =400,
-                                            width=1200,
+                                            height =600,
+                                            width=800,
 
                                     
                                         )
@@ -1698,19 +1535,19 @@ def init_callbacks(dash_app):
             # key = ["6 months after","1 year after","2 year after","5 years after","10 years after"]
             surv_key = surv.columns.tolist()[1:]
             surv_values = [surv[k].tolist() for k in surv_key]
-
+#HERE CHANGE !!!!!!!!!!!!!!!11
 
             trace1s = go.Bar(
                 x=surv_key,
-                y=[round(n[0],2) for n in surv_values],
-                text=[round(n[0],2) for n in surv_values],
+                y=[round(n[0],2)*100 for n in surv_values],
+                text=[round(n[0],4)*100 for n in surv_values],
                 textposition='auto',
                 name = "survival rate"
             )
 
             trace2s= go.Scatter(
                 x=surv_key,
-                y=surv_values,
+                y=[round(n[0],4)*100 for n in surv_values],
                 name = "survival trendline"
                 )
 
@@ -1724,22 +1561,23 @@ def init_callbacks(dash_app):
                             html.Div(
                             [
                                 dcc.Graph(
-                                    id='Survivability Rate Table',
+                                    id='Survival Rate Table',
                                     figure={
                                     'data': [
                                     go.Table(
                                         header=dict(
-                                                values=["<b>Years</b>","<b>Survivability Rate</b>"],
+                                                values=["<b>Years</b>","<b>Survival Rate</b>"],
                                         fill_color='paleturquoise',
                                         align='center'),
                                         cells=dict(
-                                            values=[surv_key, [[round(x[0],2)] for x in surv_values]],
+                                            values=[surv_key, [[round(x[0],4)*100] for x in surv_values]],
                                             fill_color='white',
                                             align='center')
                                     )],
                                     'layout': go.Layout(
-                                        height=400,
-                                        width=1200,
+                                        title="Survival Rate Table",
+                                        height=600,
+                                        width=800,
                                     )
 
 
@@ -1757,7 +1595,9 @@ def init_callbacks(dash_app):
                                     figure=go.Figure(
                                         data=[trace1s,trace2s],
                                     layout=go.Layout(
-                                        title="Patient's Survival Rates Prediction (%)"
+                                        title="Patient's Survival Rates Prediction (%)",
+                                        height=600,
+                                        width=800,
                                     ),
                                     ),
                                 ),
@@ -1773,8 +1613,8 @@ def init_callbacks(dash_app):
                                     src=app.get_asset_url('waffle1.png'),
                                     id="waffle-1",
                                     style={
-                                        "height": "400px",
-                                        "width": "1200px",
+                                        "height": "600px",
+                                        "width": "800px",
                                         "margin-bottom": "25px",
                                         "margin-left":"px"
                                     },
@@ -1786,8 +1626,8 @@ def init_callbacks(dash_app):
                                     src=app.get_asset_url('waffle2.png'),
                                     id="waffle-2",
                                     style={
-                                        "height": "400px",
-                                        "width": "1200px",
+                                        "height": "600px",
+                                        "width": "800px",
                                         "margin-bottom": "25px",
                                         "margin-left":"px"
                                     },
@@ -1808,14 +1648,7 @@ def init_callbacks(dash_app):
             cookies = cookies.decode("utf-8")
             group =cookies.split(",")
             # # # cookie = html.H1(cookies)
-            # print(str(group)[3:10], "group 1")
-            km = pd.read_csv('data\\kaplan_meier_by_group.csv')
-            g_os = km.loc[km['class_label'] == 'OS']
-            os = g_os.loc[g_os['group_label'] == str(group)[3:10]]
-            g_dfs = km.loc[km['class_label'] == 'DFS' ]
-            dfs = g_dfs.loc[g_dfs['group_label'] == str(group)[3:10]]
-            g_css = km.loc[km['class_label'] == 'CSS' ]
-            css = g_css.loc[g_css['group_label'] == str(group)[3:10]]
+            # print(str(group)[3:10], "group 1"
             # #ok = json_normalize(cookies)
             # #ok = pd.read_json(cookies)
             # ok = pd.DataFrame(cookies)
@@ -1828,87 +1661,6 @@ def init_callbacks(dash_app):
             surv4 = (go.Scatter(x=x/365.25, y=y*100, name="hv",
                                 line_shape='hv'))
 
-            #overall survival Kaplan Meier chart
-            x = os["time"]
-            y = os["estimate"]
-            lower = os["lower"]
-            upper = os["upper"]
-            km_upper = go.Scatter(x=x, y=y*100,
-                fill=None,
-                mode='lines',
-                line_color='indigo',
-                name='Overall Survival',
-            )
-
-            km_lower = go.Scatter( x=x,
-                y=upper*100,
-                fill='tonexty', # fill area between trace0 and trace1
-                mode='lines', 
-                line_color='lightblue',
-                name="{}".format('95% Upper CI'),
-            )
-            km = go.Scatter( x=x,
-                y=lower*100,
-                fill='tonexty', # fill area between trace0 and trace1
-                mode='lines', 
-                line_color='lightblue',
-                name="{}".format("95% Lower CI"),
-            )
-
-            #dfs Kaplan Meier chart 
-            dfs_x = dfs["time"]
-            dfs_y = dfs["estimate"]
-            dfs_lower = dfs["lower"]
-            dfs_upper = dfs["upper"]
-            dfs_km_upper = go.Scatter(x=dfs_x, y=dfs_y*100,
-                fill=None,
-                mode='lines',
-                line_color='indigo',
-                name='Disease Free Survival',
-            )
-
-            dfs_km_lower = go.Scatter(x=dfs_x,
-                y=dfs_upper*100,
-                fill='tonexty', # fill area between trace0 and trace1
-                mode='lines', 
-                line_color='lightblue',
-                name="{}".format('95% Upper CI'),
-            )
-            dfs_km = go.Scatter(x=dfs_x,
-                y=dfs_lower*100,
-                fill='tonexty', # fill area between trace0 and trace1
-                mode='lines', 
-                line_color='lightblue',
-                name="{}".format("95% Lower CI"),
-            )
-
-            #css Kaplan Meier chart
-            css_x = css["time"]
-            css_y = css["estimate"]
-            css_lower = css["lower"]
-            css_upper = css["upper"]
-            css_km_upper = go.Scatter(x=css_x, y=css_y*100,
-                fill=None,
-                mode='lines',
-                line_color='indigo',
-                name='Cancer Specific Survival',
-            )
-
-            css_km_lower = go.Scatter( x=css_x,
-                y=css_upper*100,
-                fill='tonexty', # fill area between trace0 and trace1
-                mode='lines', 
-                line_color='lightblue',
-                name="{}".format('95% Upper CI'),
-            )
-            css_km = go.Scatter( x=css_x,
-                y=css_lower*100,
-                fill='tonexty', # fill area between trace0 and trace1
-                mode='lines', 
-                line_color='lightblue',
-                name="{}".format("95% Lower CI"),
-            )
-
             #doctor's graphs
             doctor_graphs =  html.Div(
                 [
@@ -1919,82 +1671,13 @@ def init_callbacks(dash_app):
                             html.Div(
                                 [
                                     dcc.Graph(
-                                        id="Survival Prediction",
-                                        figure=go.Figure(
-                                                            data=[km_upper,km_lower,km],
-                                                            layout=go.Layout(
-                                                                title="Patient's Overal Survival Kaplan Meier Chart",
-                                                                height=400,
-                                                                width=1200,  
-                                                                xaxis_range=(0, 10),
-                                                                xaxis = {'title': 'Year'},
-                                                                yaxis = {'title': 'Percentage of Survival'}, 
-                                                                hovermode= "closest",
-                                                            ),
-                                                        ),
-                                    ),
-                                ],
-                            ), width = {"offset": 2}
-                        )
-                    ),
-                            dbc.Row(
-                        dbc.Col(
-                            html.Div(
-                                [
-                                    dcc.Graph(
-                                        id="Kaplan Meier",
-                                        figure=go.Figure(
-                                                            data=[dfs_km_upper,dfs_km_lower,dfs_km],
-                                                            layout=go.Layout(
-                                                                title="Patient's Disease-Free Survival Kaplan Meier Chart",
-                                                                height=400,
-                                                                width=1200,
-                                                                xaxis_range=(0, 10),
-                                                                xaxis = {'title': 'Year'},
-                                                                yaxis = {'title': 'Percentage of Survival'}, 
-                                                                hovermode= "closest",
-                                                            ),
-                                                        ),
-                                    ),
-                                ],
-                            ), width = {"offset": 2}
-                        )
-                    ),
-                    dbc.Row(
-                        dbc.Col(
-                            html.Div(
-                                [
-                                    dcc.Graph(
-                                        id="Kaplan Meier",
-                                        figure=go.Figure(
-                                                            data=[css_km_upper,css_km_lower,css_km],
-                                                            layout=go.Layout(
-                                                                title="Patient's Cancer Specific Survival Kaplan Meier Chart",
-                                                                height=400,
-                                                                width=1200,
-                                                                xaxis_range=(0, 10),
-                                                                xaxis = {'title': 'Year'},
-                                                                yaxis = {'title': 'Percentage of Survival'}, 
-                                                                hovermode= "closest",
-                                                            ),
-                                                        ),
-                                    ),
-                                ],
-                            ), width = {"offset": 2}
-                        )
-                    ),
-                    dbc.Row(
-                        dbc.Col(
-                            html.Div(
-                                [
-                                    dcc.Graph(
                                         id="Kaplan Meier",
                                         figure=go.Figure(
                                                             data=[surv4],
                                                             layout=go.Layout(
                                                                 title="Patient's Predicted Kaplan Meier Chart",
-                                                                height=400,
-                                                                width=1200,
+                                                                height=600,
+                                                                width=800,
                                                                 xaxis_range=(0, 10),
                                                                 yaxis_range=(0, 100),
                                                                 xaxis = {'title': 'Year'},
@@ -2006,8 +1689,7 @@ def init_callbacks(dash_app):
                                 ],
                             ), width = {"offset": 2}
                         )
-                    ),
-                    
+                    ),  
                 ]
             )
             
