@@ -18,6 +18,9 @@ import numpy as np
 import operator
 from plotly.subplots import make_subplots
 import plotly
+
+import kaplan_meier as KM2
+
 import base64
 from flask import Blueprint, render_template, request, jsonify, json, redirect, session, url_for
 import flask
@@ -385,8 +388,6 @@ def filter_df_all(df, min1, max1, tnm_select, er_select, pr_select, her2_select,
     output = df[condition]
     return output
 
-from 
-
 def filter_df_wo_stage(df, min1, max1, er_select, pr_select, her2_select, race_select):
     '''
         Same functionality as filter_df_all without tnm stage
@@ -704,7 +705,6 @@ clinical_layout = dbc.Container(
             ),
         ]
     )
-
 
 bills_dashboard = dbc.Container(
     [
@@ -1982,11 +1982,26 @@ def init_callbacks(dash_app):
             dash.dependencies.Input('er_select','value'),
             dash.dependencies.Input('pr_select','value'),
             dash.dependencies.Input('her2_select','value'),
-            dash.dependencies.Input('race_select','value')
+            dash.dependencies.Input('race_select','value'),
+            dash.dependencies.Input('t_select','value'),
+            dash.dependencies.Input('n_select','value'),
+            dash.dependencies.Input('m_select','value')
         ]
     )
 
-    def update_clinical(age_slider,tnm_select, er_select, pr_select, her2_select, race_select):
+    def update_clinical(age_slider,tnm_select, er_select, pr_select, her2_select, race_select,t_select,n_select,m_select ):
+
+        filters_dict = {
+                    "age_lower": age_slider[0],
+                    "age_upper":age_slider[1],
+                    'Race': race_select,
+                    'T': t_select,
+                    'N': n_select,
+                    'M': m_select,
+                    "ER": er_select,
+                    "PR": pr_select,
+                    'Her2':her2_select
+                }
 
         #Slice Df according to inputs in filter
         df = filter_df_all(clinical, age_slider[0], age_slider[1] , tnm_select, er_select, pr_select, her2_select,race_select)
@@ -2008,33 +2023,16 @@ def init_callbacks(dash_app):
         #Overwrite original chart data with sliced dataset according to filters
         epr_df = filter_df_epr_chart(clinical, age_slider[0], age_slider[1] , tnm_select)
         er_dict = generate_epr_chart_data(epr_df)
-        # print(er_dict)
-
-        km = pd.read_csv('data\\kaplan_meier_by_group.csv') #get from justin
-        g_os = km.loc[km['class_label'] == 'OS']
-        os = g_os.loc[g_os['group_label'] == str(group)[3:10]]
-        g_dfs = km.loc[km['class_label'] == 'DFS' ]
-        dfs = g_dfs.loc[g_dfs['group_label'] == str(group)[3:10]]
-        g_css = km.loc[km['class_label'] == 'CSS' ]
-        css = g_css.loc[g_css['group_label'] == str(group)[3:10]]
-        # #ok = json_normalize(cookies)
-        # #ok = pd.read_json(cookies)
-        # ok = pd.DataFrame(cookies)
-        # print(ok)
-        #km hardcode graph 
-        patient = pd.read_csv("..\\middleWomen\\patient_new.csv")
-
-        x = patient["x"]
-        y = patient["y"]
-
-        surv4 = (go.Scatter(x=x/365.25, y=y*100, name="hv",
-                            line_shape='hv'))
 
         #overall survival Kaplan Meier chart
-        x = os["time"]
-        y = os["estimate"]
-        lower = os["lower"]
-        upper = os["upper"]
+        
+        km_os,km_dfs,km_css = KM2.generate_kaplan_meier_with_filters_for_all_survival_types(filters_dict,clinical)
+        
+        x = km_os["time"]
+        y = km_os["estimate"]
+        lower = km_os["lower"]
+        upper = km_os["upper"]
+
         km_upper = go.Scatter(x=x, y=y*100,
             fill=None,
             mode='lines',
@@ -2058,10 +2056,10 @@ def init_callbacks(dash_app):
         )
 
         #dfs Kaplan Meier chart 
-        dfs_x = dfs["time"]
-        dfs_y = dfs["estimate"]
-        dfs_lower = dfs["lower"]
-        dfs_upper = dfs["upper"]
+        dfs_x = km_dfs["time"]
+        dfs_y = km_dfs["estimate"]
+        dfs_lower = km_dfs["lower"]
+        dfs_upper = km_dfs["upper"]
         dfs_km_upper = go.Scatter(x=dfs_x, y=dfs_y*100,
             fill=None,
             mode='lines',
@@ -2085,10 +2083,10 @@ def init_callbacks(dash_app):
         )
 
         #css Kaplan Meier chart
-        css_x = css["time"]
-        css_y = css["estimate"]
-        css_lower = css["lower"]
-        css_upper = css["upper"]
+        css_x = km_css["time"]
+        css_y = km_css["estimate"]
+        css_lower = km_css["lower"]
+        css_upper = km_css["upper"]
         css_km_upper = go.Scatter(x=css_x, y=css_y*100,
             fill=None,
             mode='lines',
@@ -2210,6 +2208,7 @@ def init_callbacks(dash_app):
                             barmode='stack'
                         )
                     }
+
         figure5 = {
                 'data':[km_upper,km_lower,km],
                 'layout':go.Layout(
@@ -2251,7 +2250,7 @@ def init_callbacks(dash_app):
             }
 
             
-        return figure, figure2, figure4, figure5, figure6, figure7
+        return figure, figure2, figure4, figure5, figure6, figure7, filters_dict
 
 
     @dash_app.callback(
