@@ -1,6 +1,5 @@
 import pandas as pd
 import numpy as np
-import scipy.stats
 import pickle
 import fnmatch
 import os
@@ -21,34 +20,60 @@ pd.set_option('display.max_rows',None)
 
 
 
-
 # ========== KAPLAN MEIER FUNCTIONS ==========
+def generate_kaplan_meier_with_filters_for_all_survival_types(filters_dict, input_df):
+    """
+    This Kaplan Meier Function is called to generate Kaplan Meier for all survival types.
+    It returns as 3 separate dfs: 
+    1. OS, 
+    2. DFS,
+    3. CSS
+    """
+
+    survival_types = ["OS","DFS", "CSS"]
+    KM_dfs = []
+    for survival in survival_types:
+        temp = generate_kaplan_meier_with_filters(filters_dict, input_df, survival)
+        KM_dfs.append(temp)
+
+    os_df = KM_dfs[0]
+    dfs_df = KM_dfs[1]
+    css_df = KM_dfs[2]
+    
+    return os_df, dfs_df, css_df
+
 def generate_kaplan_meier_with_filters(filters_dict, input_df, survival_type = "none"):
     """
     This is the main Kaplan Meier function to be called by the application. It builds a dataframe from csv and filters accordingly to generate the kaplan meier chart. 
     """
+    try:
 
-    input_df = input_df
-    #load data from clinical if no df was given.
-    if survival_type == "none":
-        survival_type = "OS"
+        input_df = input_df
+        #load data from clinical if no df was given.
+        if survival_type == "none":
+            survival_type = "OS"
 
-    # build survival obj:
-    survival_obj = build_surv_obj(survival_type="OS" ,filters_dict = filters_dict, input_df=input_df)
-    km = KaplanMeier()
-    km.fit(survival_obj)
+        # print("Making chart for survival type: ", survival_type)
 
-    # Plot Curve
-    plt.figure(figsize=(10, 6))
-    km.plot()
-    plt.show()
-    plt.close()
+        # build survival obj:
+        survival_obj = build_surv_obj(survival_type=survival_type ,filters_dict = filters_dict, input_df=input_df)
+        km = KaplanMeier()
+        km.fit(survival_obj)
 
-    # generate output df:
-    output_df = KM_to_df(km)
-    # display(output_df.head())
+        # Plot Curve
+        # plt.figure(figsize=(10, 6))
+        # km.plot()
+        # plt.show()
+        # plt.close()
 
-    return output_df
+        # generate output df:
+        output_df = KM_to_df(km)
+        # display(output_df.head())
+
+        return output_df
+    
+    except:
+        return pd.DataFrame() # return blank df on fail.
 
 
 def kaplan_meier_drop_by_index(X,indexes):
@@ -130,24 +155,24 @@ def build_surv_obj(survival_type, input_df, filters_dict):
     pr = filters_dict["PR"]
     her_2 = filters_dict["Her2"]
 
-    print("This is the input df shape before filters ", input_df.shape)
+    # print("This is the input df shape before filters ", input_df.shape)
 
     # filter by age range
-    temp_df = input_df[(input_df["Age_@_Dx"] >= age_lower) & (input_df["Age_@_Dx"] <= age_upper)]
+    temp_df = input_df.loc[(input_df["Age_@_Dx"] >= age_lower) & (input_df["Age_@_Dx"] <= age_upper)]
 
     # filter by race if race was selected
-    if race == "all":
-        print("race was selected as 'all'")
+    if race.lower() == "all":
+        # print("race was selected as 'all'")
+        pass
     else:
-        temp_df = input_df[(input_df["Race"] == race)]
-    
+        temp_df = temp_df.loc[(input_df["Race"] == race)]
 
     # filter by TNM
-    temp_df = temp_df[(temp_df["T"] == t_stage) & (temp_df["N"] == n_stage) & (temp_df["M"] == m_stage)]
-    # TODO: FIX THIS BUG filter by er pr her2 (STILL BUGGY)
-    temp_df = temp_df[(temp_df["ER"] == er) & (temp_df["PR"] == pr) & (temp_df["Her2"] == her_2)]
+    temp_df = temp_df.loc[(temp_df["T"] == t_stage) & (temp_df["N"] == n_stage) & (temp_df["M"] == m_stage)]
+    # filter by ER PR HER2
+    temp_df = temp_df.loc[(temp_df["ER"] == er) & (temp_df["PR"] == pr) & (temp_df["Her2"] == her_2)]
 
-    print("This is the input df shape AFTER filters ", temp_df.shape)
+    # print("This is the input df shape AFTER filters ", temp_df.shape)
     
     survival_df = temp_df
     survival_type = str(survival_type)
@@ -156,6 +181,7 @@ def build_surv_obj(survival_type, input_df, filters_dict):
     Time_df[survival_type + "_years"] = Time_df[survival_type + "_days"]/365.25
     Time_df["status"] = survival_df["Count_as_" + survival_type].apply(lambda status: 0 if status in "nN" else 1)
     Time_df["check"] = survival_df["Count_as_" + survival_type]
+    # print(Time_df.head())
 
     return SurvivalData(time= (survival_type+ "_years"), status="status", data=Time_df)
 
