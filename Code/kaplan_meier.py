@@ -23,19 +23,13 @@ pd.set_option('display.max_rows',None)
 
 
 # ========== KAPLAN MEIER FUNCTIONS ==========
-def generate_kaplan_meier_with_filters(filters_dict, input_df = "none", survival_type = "none"):
+def generate_kaplan_meier_with_filters(filters_dict, input_df, survival_type = "none"):
     """
     This is the main Kaplan Meier function to be called by the application. It builds a dataframe from csv and filters accordingly to generate the kaplan meier chart. 
     """
 
+    input_df = input_df
     #load data from clinical if no df was given.
-    if input_df == "none":
-        
-        #load data:
-        listToDrop = ['NRIC','dob','Has Bills?','Side','Hospital','KKH','NCCS','SGH','END_OF_ENTRY']
-        input_df = kaplan_meier_load_clinical_df(listToDrop)
-        # display(clinical.head())
-
     if survival_type == "none":
         survival_type = "OS"
 
@@ -52,7 +46,7 @@ def generate_kaplan_meier_with_filters(filters_dict, input_df = "none", survival
 
     # generate output df:
     output_df = KM_to_df(km)
-    display(output_df)
+    # display(output_df.head())
 
     return output_df
 
@@ -105,6 +99,7 @@ def kaplan_meier_load_clinical_df(dropCol,FILE_FOLDER = "C:\\SMU_v2\\"):
     df["ER"] = df["ER"].apply(lambda x: x.lower() if x.isalpha() else x)
     df["PR"] = df["PR"].apply(lambda x: x.lower() if x.isalpha() == False else x)
     df["Her2"] = df["Her2"].apply(lambda x: x.lower() if x.isalpha() == False else x)
+
     return df
 
 def build_surv_obj(survival_type, input_df, filters_dict):
@@ -141,14 +136,16 @@ def build_surv_obj(survival_type, input_df, filters_dict):
     temp_df = input_df[(input_df["Age_@_Dx"] >= age_lower) & (input_df["Age_@_Dx"] <= age_upper)]
 
     # filter by race if race was selected
-    if race != "all":
+    if race == "all":
+        print("race was selected as 'all'")
+    else:
         temp_df = input_df[(input_df["Race"] == race)]
     
 
     # filter by TNM
     temp_df = temp_df[(temp_df["T"] == t_stage) & (temp_df["N"] == n_stage) & (temp_df["M"] == m_stage)]
     # TODO: FIX THIS BUG filter by er pr her2 (STILL BUGGY)
-    # temp_df = temp_df[(temp_df["ER"] == er) & (temp_df["PR"] == pr) & (temp_df["Her2"] == her_2)]
+    temp_df = temp_df[(temp_df["ER"] == er) & (temp_df["PR"] == pr) & (temp_df["Her2"] == her_2)]
 
     print("This is the input df shape AFTER filters ", temp_df.shape)
     
@@ -195,15 +192,3 @@ def KM_to_df(KM_object):
 
 
 
-filters_dict = {}
-filters_dict["age_lower"] = 25
-filters_dict["age_upper"] = 40
-filters_dict["Race"] = "malay"
-filters_dict["T"] = "tis"
-filters_dict["N"] = "n0"
-filters_dict["M"] = "m0"
-filters_dict["ER"] = "positive"
-filters_dict["PR"] = "positive"
-filters_dict["Her2"] = "negative"
-
-output_df = generate_kaplan_meier_with_filters(filters_dict = filters_dict)
