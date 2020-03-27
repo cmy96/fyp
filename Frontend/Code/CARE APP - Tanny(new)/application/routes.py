@@ -74,7 +74,7 @@ def submit():
         sock.close()
         session['received'] = full_message
         print(session)
-        return redirect('/results/')
+        return redirect('/survival/')
 
 
 # dynamic timestamp variable for static css/ js file to resolve browser cache issue (css doesn't load on app change.)

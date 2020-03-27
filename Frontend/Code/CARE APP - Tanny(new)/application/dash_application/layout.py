@@ -3,6 +3,7 @@ html_layout = '''<!DOCTYPE html>
 
                     <meta name="viewport"  content = "width=device-width, initial-scale=1.0, user-scalable=yes">
                     <script src="https://kit.fontawesome.com/a10c0e47f2.js" crossorigin="anonymous"></script>
+                    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
                         <head>
                             {%metas%}
                             <title>{%title%}</title>
@@ -25,10 +26,10 @@ html_layout = '''<!DOCTYPE html>
                                     <div class="collapse navbar-collapse" id="navbarResponsive">
                                         <ul class="navbar-nav ml-auto">
                                             <li class="nav-item">
-                                                <a class="nav-link js-scroll-trigger" href="/index2.html"><i class="fas fa-calculator"></i> Calculator </a>
+                                                <a class="nav-link js-scroll-trigger" id="prediction" href="/index2.html"><i class="fas fa-robot"></i> Prediction </a>
                                             </li>
                                             <li class="nav-item">
-                                                <a class="nav-link js-scroll-trigger active" href="/dashboard/bills"><i class="fas fa-chart-pie"></i> Dashboard</a>
+                                                <a class="nav-link js-scroll-trigger" id="dashboard" href="/dashboard/bills"><i class="fas fa-chart-pie"></i> Dashboard</a>
                                             </li>
                                         </ul>
                                     </div>
@@ -43,10 +44,45 @@ html_layout = '''<!DOCTYPE html>
                             </div>
 
 
+
+
                             <footer>
                                 {%config%}
                                 {%scripts%}
                                 {%renderer%}
                             </footer>
+
+                            <script>
+                            $('body').append('<div style="" id="loadingDiv"><div class="loader" text-align="center">Loading...</div></div>');
+                                $(window).on('load', function(){
+                                setTimeout(removeLoader, 1000); //wait for page load PLUS two seconds.
+                                });
+                                function removeLoader(){
+                                    $( "#loadingDiv" ).fadeOut(100, function() {
+                                    // fadeOut complete. Remove the loading div
+                                    $( "#loadingDiv" ).hide(); //makes page more lightweight 
+                                });  
+                                };
+                            </script>
+                            <script>
+                            
+                            $(document).ready(function() {
+
+                                var url = location.pathname;
+
+                                    if (url.indexOf('dashboard') > -1) {
+                                        $('#dashboard').addClass("active");
+                                    } else if (url.indexOf('results') > -1) {
+                                        $('#prediction').addClass("active");
+                                    } else {
+                                        $('#prediction').addClass("active");
+                                    }
+
+                                
+
+                                });     
+                            </script>
+                            
+
                         </body>
                     </html>'''
