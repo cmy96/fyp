@@ -1,0 +1,496 @@
+<html>
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+<script src="http://code.jquery.com/ui/1.9.2/jquery-ui.js"></script>
+<script src="{{ url_for('static', filename='dist/js/form-validation.js') }}"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+<script type="text/javascript" src="{{ url_for('static', filename='dist/js/main.js') }}"></script>
+<link rel="stylesheet" media="screen" href = "{{ url_for('static', filename='bootstrap.min.css') }}">
+<link rel="stylesheet" media="screen" href = "{{ url_for('static', filename='dist/css/styles.css') }}">
+<meta name="viewport"  content = "width=device-width, initial-scale=1.0, user-scalable=yes">
+<script src="https://kit.fontawesome.com/a10c0e47f2.js" crossorigin="anonymous"></script>
+<script src="https://ajax.aspnetcdn.com/ajax/jquery.validate/1.11.1/jquery.validate.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.0/jquery.min.js"></script>
+<script src="{{ url_for('static', filename='dist/js/autofill.js') }}"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.0/jquery.validate.min.js"></script>
+
+
+<head>
+</head>
+
+<script>
+    $(function() {
+       $('#nav li a').click(function() {
+          $('#nav li').removeClass();
+          $($(this).attr('href')).addClass('active');
+       });
+    });
+ </script>
+
+<body class = "body fullscreen">
+
+    
+
+    <div class="navbar">
+        <!-- code for navbar in nav.html -->
+        {% include 'nav.html' %}
+    </div>
+
+    <div id="pageloader">
+        <img src="http://cdnjs.cloudflare.com/ajax/libs/semantic-ui/0.16.1/images/loader-large.gif" alt="processing..." />
+    </div>
+
+    <!--<h1 class="site-title">Calculator</h1>-->
+
+<br/>
+<div class="prediction-form">
+    <div class="container-fluid">
+        <div class="card">
+            <div class="card-body">
+                <form name="predictionForm" action="/submit" method="post" id="form">                
+                    
+                    <div class="row form-header prediction_header">      
+                        <div class="col-md-6 offset-md-1"> 
+ 
+                            <h1 class="card-title ">Prediction Tool</h1>
+  
+                        </div>   
+                    </div>
+
+                    <!-- <div class="row">
+                        <div class="col-md-10 offset-md-1">
+
+                            <table style="width:100%">
+                                <tr >
+                                    <td class="form-labels">
+                                        <label for="Age">Age at Diagnosis</label>  
+                                    </td>
+                                    <td colspan="2"> 
+                                        <div class="number-input">
+                                            <button type="button" class="left btn btn-default" onclick="this.parentNode.querySelector('input[type=number]').stepDown()" > - </button>
+                                            <input type="number" value="0" min="0"  class="input_number" id="Age_@_Dx" name="Age_@_Dx" placeholder="0" >
+                
+                                                
+                                            <button type="button" class="right btn btn-default" onclick="this.parentNode.querySelector('input[type=number]').stepUp()" class="plus"> + </button>
+                                        </div>
+                                    </td>
+
+                                    <td>
+                                        
+                                    </td>
+
+                                    <td>
+
+                                    </td>
+                                </tr>
+
+                                <tr>
+                                    <td class="form-labels">
+                                        <label for="size_precise">Size Precise</label>
+                                    </td>
+                                    <td colspan="1" class="form-input">
+                                        <div class="number-input">
+                                            <button type="button" class="left btn btn-default" onclick="this.parentNode.querySelector('input[type=number]').stepDown()" > - </button>
+                                            <input type="number" value="0" min="0"  class="input_number" id="size_precise" name="size_precise" placeholder="0" step="0.1">
+                    
+                                                    
+                                            <button type="button" class="right btn btn-default" onclick="this.parentNode.querySelector('input[type=number]').stepUp()" class="plus"> + </button>
+                                        </div>
+
+                                    </td>
+
+                                    <td class="form-labels">
+                                        <label for="nodespos">Nodes Positive</label>
+                                    </td>
+                                    <td colspan="1">
+                                        <div class="number-input">
+                                            <button type="button" class="left btn btn-default" onclick="this.parentNode.querySelector('input[type=number]').stepDown()" > - </button>
+                                            <input type="number" value="0" min="0"  class="input_number" id="nodespos" name="nodespos" placeholder="0" >
+                
+                                                    
+                                            <button type="button" class="right btn btn-default" onclick="this.parentNode.querySelector('input[type=number]').stepUp()" class="plus"> + </button>
+                                        </div>
+                                    </td>
+                                </tr>
+
+                                <tr>
+                                    <td class="form-labels">
+                                        <label for="tstage"  >T Stage</label>
+                                    </td>
+                                    <td class="form-input">
+                                        <select class="form-control" name="tstage" id="tstage" >
+                                            <option value="t0">T0</option>
+                                            <option value="t1">T1</option>
+                                            <option value="t1a">T1a</option>
+                                            <option value="t1b">T1b</option>
+                                            <option value="t1c">T1c</option>
+                                            <option value="t1mic">T1mic</option>
+                                            <option value="t2">T2</option>
+                                            <option value="t3">T3</option>
+                                            <option value="t4">T4</option>
+                                            <option value="t4a">T4a</option>
+                                            <option value="t4b">T4b</option>
+                                            <option value="t4c">T4c</option>
+                                            <option value="t4d">T4d</option>
+                                            <option value="tis">Tis</option>
+                                            <option value="tx">Tx</option>                                  
+                                        </select>
+                                    </td>
+                                    <td class="form-labels">
+                                        <label for="nstage" >N Stage</label>
+                                    </td>
+                                    <td class="form-input">
+                                        <select class="form-control " name="nstage" id="nstage">
+                                            <option value="n0">N0</option>
+                                            <option value="n0 (i+)">N0 (i+)</option>
+                                            <option value="n1">N1</option>
+                                            <option value="n1a">N1a</option>
+                                            <option value="n1b">N1b</option>
+                                            <option value="n1c">N1c</option>
+                                            <option value="n1mic">N1mic</option>
+                                            <option value="n2">N2</option>
+                                            <option value="n2a">N2a</option>
+                                            <option value="n2b">N2b</option>
+                                            <option value="n3">N3</option>
+                                            <option value="n3a">N3a</option>
+                                            <option value="n3b">N3b</option>
+                                            <option value="n3c">N3c</option>
+                                            <option value="nx">Nx</option>
+                                        </select> 
+                                    </td>
+                                    <td class="form-labels">
+                                        <label for="mstage">M Stage</label>
+                                    </td>
+                                    <td class="form-input">
+                                        <select class="form-control" name="mStage" id="mStage">
+                                            <option value="m0">M0</option>
+                                            <option value="m1">M1</option>
+                                            <option value="mx">Mx</option>
+                                        </select>   
+                                    </td>
+
+                                </tr>
+
+                                <tr>
+                                    <td class="form-labels">
+                                        <label for="diff">Diff Grade</label>
+                                    </td>
+                                    <td class="form-input">
+                                        <select class="form-control" name="diff" id="diff">
+                                            <option value="grade 1">Grade 1</option>
+                                            <option value="grade 2">Grade 2</option>
+                                            <option value="grade 3">Grade 3</option>
+                                            <option value="unknown">Unknown</option>
+                                        </select> 
+                                    </td>
+                                    <td class="form-labels">
+                                        <label for="stage">Stage</label>
+                                    </td>
+                                    <td class="form-input">
+                                        <select class="form-control" name="stage" id="stage">
+                                            <option value="stage 0">Stage 0</option>
+                                            <option value="stage 1">Stage 1</option>
+                                            <option value="stage 1a">Stage 1a</option>
+                                            <option value="stage 1b">Stage 1b</option>
+                                            <option value="stage 2">Stage 2</option>
+                                            <option value="stage 2a">Stage 2a</option>
+                                            <option value="stage 2b">Stage 2b</option>
+                                            <option value="stage 3">Stage 3</option>
+                                            <option value="stage 3a">Stage 3a</option>
+                                            <option value="stage 3b">Stage 3b</option>
+                                            <option value="stage 3c">Stage 3c</option>
+                                            <option value="stage 4">Stage 4</option>
+                                            <option value="unknown">Unknown</option>
+                                            <option value="dcis/lcis non-invasive">Dcis/lcis non-invasive</option>   
+                                        </select> 
+
+                                    </td>
+                                </tr>
+
+                                <tr>
+                                    <td class="form-labels">
+                                        <label for="ER">ER</label> 
+                                    </td>
+                                    <td class="form-input">
+                                        <select class="form-control" name="ER" id="ER">
+                                            <option value="positive">Positive</option>
+                                            <option value="negative">Negative</option>  
+                                            <option value="unknown">Unknown</option>
+                                            <option value="equivocal">Equivocal</option>
+                                        </select>
+                                    </td>
+                                    <td class="form-labels">
+                                        <label for="PR">PR</label>
+                                    </td>
+                                    <td class="form-input">
+                                        <select class="form-control" name="PR" id="PR">
+                                            <option value="positive">Positive</option>
+                                            <option value="negative">Negative</option>  
+                                            <option value="unknown">Unknown</option>
+                                            <option value="equivocal">Equivocal</option>
+                                        </select>
+                                    </td>
+
+                                    <td class="form-labels">
+                                        <label for="Her2">Her2</label>
+                                    </td>
+
+                                    <td class="form-input">
+                                        <select class="form-control" name="Her2" id="Her2">
+                                            <option value="positive">Positive</option>
+                                            <option value="negative">Negative</option>
+                                            <option value="unknown">Unknown</option>
+                                            <option value="equivocal">Equivocal</option>
+                                            <option value="not done">Not done</option> 
+                                        </select>
+                                    </td>
+                                </tr>
+
+                                <tr>
+                                    <td class="submit-button" colspan="6">
+                                        <input type="submit" value="Calculate" class="submitButton">
+                                    </td>
+                                </tr>
+
+
+                            </table>
+                        </div>
+
+                    </div> -->
+
+
+                        <!-- new -->
+
+                        <div class="row row_space">
+                            <label for="Age" class="col-md-1 offset-md-1 input_labels">Age at Diagnosis</label>        
+        
+                            <div class="col-md-2">
+                                <!--<input type="number"  min="0"  class="input_number" id="Age_@_Dx" name="Age_@_Dx">-->
+                                <button type="button" class="btn btn-default button_left" onclick="this.parentNode.querySelector('input[type=number]').stepDown()" > - </button>
+                                <input type="number"  min="0"  class="input_number" id="Age_@_Dx" name="Age_@_Dx">
+                                <button type="button" class="btn btn-default button_right" onclick="this.parentNode.querySelector('input[type=number]').stepUp()" class="plus"> + </button>                                        
+                            </div>
+                       
+
+                        </div>
+
+                        <div class="row row_space">
+                            <label for="size_precise" class="col-md-1 offset-md-1 input_labels">Size Precise (mm)</label>
+   
+                            <div class="col-md-2 extra_space" >
+                                <button type="button" class="btn btn-default button_left" onclick="this.parentNode.querySelector('input[type=number]').stepDown(); getT(this);" > - </button>
+                                <input type="number"  min="0"  class="input_number" id="size_precise" name="size_precise" step="0.1" onchange="getT(this);" required>    
+                                <button type="button" class="btn btn-default button_right" onclick="this.parentNode.querySelector('input[type=number]').stepUp(); getT(this);" class="plus"> + </button>
+                            </div>
+
+
+                            <label for="nodespos" class="col-md-1 input_labels">Nodes Positive</label>        
+                            <div class="col-md-2">
+                                <button type="button" class="btn btn-default button_left" onclick="this.parentNode.querySelector('input[type=number]').stepDown(); getN(this);" > - </button>
+                                <input type="number" min="0"  class="input_number" id="nodespos" name="nodespos" onchange="getN(this);" required >   
+                                <button type="button" class="btn btn-default button_right" onclick="this.parentNode.querySelector('input[type=number]').stepUp(); getN(this);" class="plus"> + </button>
+                            </div>
+
+                        </div>
+
+                        <div class="row row_space">
+                            <label for="tstage" class="col-md-1 offset-md-1 input_labels"">T Stage</label>
+                            <div class="col-md-2 extra_space">
+                                <select class="form-control dropdowns" name="tstage" id="tstage" onchange="getStage(this);" onclick="getStage(this); t_prompt(this);" required>
+                                    <option value=""></option>
+                                    <option value="t0">T0</option>
+                                    <option value="t1">T1</option>
+                                    <option value="t1a">T1a</option>
+                                    <option value="t1b">T1b</option>
+                                    <option value="t1c">T1c</option>
+                                    <option value="t1mic">T1mic</option>
+                                    <option value="t2">T2</option>
+                                    <option value="t3">T3</option>
+                                    <option value="t4">T4</option>
+                                    <option value="t4a">T4a</option>
+                                    <option value="t4b">T4b</option>
+                                    <option value="t4c">T4c</option>
+                                    <option value="t4d">T4d</option>
+                                    <option value="tis">Tis</option>
+                                    <option value="tx">Tx</option>                                  
+                                </select>
+
+                            </div>
+    
+
+                            <label for="nstage" class="col-md-1  input_labels">N Stage</label>
+                            <div class="col-md-2 extra_space">
+                                <select class="form-control dropdowns" name="nstage" id="nstage" onchange="getStage(this);" onclick="getStage(this); n_prompt(this);" required>
+                                    <option value=""></option>
+                                    <option value="n0">N0</option>
+                                    <option value="n0 (i+)">N0 (i+)</option>
+                                    <option value="n1">N1</option>
+                                    <option value="n1a">N1a</option>
+                                    <option value="n1b">N1b</option>
+                                    <option value="n1c">N1c</option>
+                                    <option value="n1mic">N1mic</option>
+                                    <option value="n2">N2</option>
+                                    <option value="n2a">N2a</option>
+                                    <option value="n2b">N2b</option>
+                                    <option value="n3">N3</option>
+                                    <option value="n3a">N3a</option>
+                                    <option value="n3b">N3b</option>
+                                    <option value="n3c">N3c</option>
+                                    <option value="nx">Nx</option>
+                                </select> 
+
+                            </div>
+ 
+
+                            <label for="mstage" class="col-md-1 input_labels">M Stage</label>
+                            <div class="col-md-2 extra_space">
+                                <select class="form-control dropdowns" name="mStage" id="mStage" onchange="getStage(this);" onclick="getStage(this);" required>
+                                    <option value=""></option>
+                                    <option value="m0">M0</option>
+                                    <option value="m1">M1</option>
+                                    <option value="mx">Mx</option>
+                                </select>  
+                            </div>
+
+    
+                        </div>
+
+                        <div class="row row_space">
+                            <label for="diff" class="col-md-1 offset-md-1 input_labels">Diff Grade</label>
+                            <!-- <select class="form-control col-md-2" name="diff" id="diff">
+                                <option value="grade 1">Grade 1</option>
+                                <option value="grade 2">Grade 2</option>
+                                <option value="grade 3">Grade 3</option>
+                                <option value="unknown">Unknown</option>
+                            </select>  -->
+                            <div class="btn-group-toggle col-md-2 extra_space btn-group" data-toggle="buttons">
+                                <label class="btn btn-light">
+                                    <input type="radio" name="diff" id="grade 1" value="grade 1" autocomplete="off" required> 1
+                                </label>
+
+                                <label class="btn btn-light">
+                                    <input type="radio" name="diff" id="grade 2" value="grade 2" autocomplete="off"> 2
+                                </label>
+
+                                <label class="btn btn-light">
+                                    <input type="radio" name="diff" id="grade 3" value="grade 3" autocomplete="off"> 3
+                                </label>
+                            </div>
+        
+                            <label for="stage" class="col-md-1 input_labels">Stage</label>
+                            <div class="col-md-2 extra_space ">
+                                <select class="form-control dropdowns" name="stage" id="stage" onchange="stage_prompt(this);" required>
+                                    <option value=""></option>
+                                    <option value="stage 0">Stage 0</option>
+                                    <option value="stage 1">Stage 1</option>
+                                    <option value="stage 1a">Stage 1a</option>
+                                    <option value="stage 1b">Stage 1b</option>
+                                    <option value="stage 2">Stage 2</option>
+                                    <option value="stage 2a">Stage 2a</option>
+                                    <option value="stage 2b">Stage 2b</option>
+                                    <option value="stage 3">Stage 3</option>
+                                    <option value="stage 3a">Stage 3a</option>
+                                    <option value="stage 3b">Stage 3b</option>
+                                    <option value="stage 3c">Stage 3c</option>
+                                    <option value="stage 4">Stage 4</option>
+                                    <option value="unknown">Unknown</option>
+                                    <option value="dcis/lcis non-invasive">Dcis/lcis non-invasive</option>   
+                                </select>
+                            </div>
+                           
+                        </div>
+
+
+                        <div class="row row_space">
+                            
+                            <label for="ER" class="col-md-1 offset-md-1 input_labels">ER</label>
+                            <div class="btn-group-toggle col-md-2 extra_space btn-group" data-toggle="buttons" >
+                                    
+                                <label class="btn btn-light">
+                                    <input type="radio" name="ER" id="negative" value="positive" autocomplete="off" > Positive
+                                </label>
+
+                                <label class="btn btn-light">
+                                    <input type="radio" name="ER" id="positive" value="negative" autocomplete="off" required> Negative
+                                </label>
+
+    
+                                <label class="btn btn-light">
+                                    <input type="radio" name="ER" id="unknown" value="unknown" autocomplete="off" > Unknown
+                                </label>
+                                </div>
+
+     
+                            <label for="PR" class="col-md-1 input_labels">PR</label>     
+                            <div class="btn-group-toggle col-md-2 extra_space btn-group" data-toggle="buttons">
+
+                                <label class="btn btn-light">
+                                    <input type="radio" name="PR" id="negative" value="positive" autocomplete="off" > Positive
+                                </label>
+                                
+                                <label class="btn btn-light">
+                                    <input type="radio" name="PR" id="positive" value="negative" autocomplete="off" required> Negative
+                                </label>
+    
+        
+                                <label class="btn btn-light">
+                                    <input type="radio" name="PR" id="unknown" value="unknown" autocomplete="off"> Unknown
+                                </label>
+                            </div>
+
+    
+                            <label for="Her2" class="col-md-1  input_labels">Her2</label>
+                 
+                            <div class="btn-group-toggle col-md-2 extra_space btn-group" data-toggle="buttons">
+                                    <div class="form-input-error-msg alert alert-danger">
+                                        <span class="glyphicon glyphicon-exclamation-sign"></span> Select an option
+                                    </div> 
+                                    <label class="btn btn-light">
+                                        <input type="radio" name="Her2" id="negative" value="positive" autocomplete="off"> Positive
+                                    </label>
+
+                                    <label class="btn btn-light">
+                                        <input type="radio" name="Her2" id="positive" value="negative" autocomplete="off" required> Negative
+                                    </label>
+    
+        
+                                    <label class="btn btn-light">
+                                        <input type="radio" name="Her2" id="unknown" value="unknown" autocomplete="off"> Unknown
+                                    </label>
+                                    </div>
+                        </div>
+                          
+
+                            <div class="col-md-10 offset-md-1 submitContainer" align="center">
+                                    <input type="submit" value="Calculate" class="submitButton">
+                            </div>
+                        </div> 
+
+
+                </div> 
+        </form>
+        </div>
+
+
+        </div>
+        </div>
+    </div>
+
+<!-- 
+    <script src="https://code.jquery.com/jquery-2.1.3.min.js"></script>
+    <script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/js/bootstrap.min.js"></script>
+    <script src="https://ajax.aspnetcdn.com/ajax/jquery.validate/1.11.1/jquery.validate.min.js"></script>
+    <script src="{{ url_for('static', filename='dist/js/form-validation.js') }}"></script>
+    <script src="{{ url_for('static', filename='dist/js/autofill.js') }}"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.0/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.0/jquery.validate.min.js"></script> -->
+
+
+
+</body>
+
+
+
+</html>
