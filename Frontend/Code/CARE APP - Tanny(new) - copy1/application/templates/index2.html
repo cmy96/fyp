@@ -59,6 +59,208 @@
                         </div>   
                     </div>
 
+                    <!-- <div class="row">
+                        <div class="col-md-10 offset-md-1">
+
+                            <table style="width:100%">
+                                <tr >
+                                    <td class="form-labels">
+                                        <label for="Age">Age at Diagnosis</label>  
+                                    </td>
+                                    <td colspan="2"> 
+                                        <div class="number-input">
+                                            <button type="button" class="left btn btn-default" onclick="this.parentNode.querySelector('input[type=number]').stepDown()" > - </button>
+                                            <input type="number" value="0" min="0"  class="input_number" id="Age_@_Dx" name="Age_@_Dx" placeholder="0" >
+                
+                                                
+                                            <button type="button" class="right btn btn-default" onclick="this.parentNode.querySelector('input[type=number]').stepUp()" class="plus"> + </button>
+                                        </div>
+                                    </td>
+
+                                    <td>
+                                        
+                                    </td>
+
+                                    <td>
+
+                                    </td>
+                                </tr>
+
+                                <tr>
+                                    <td class="form-labels">
+                                        <label for="size_precise">Size Precise</label>
+                                    </td>
+                                    <td colspan="1" class="form-input">
+                                        <div class="number-input">
+                                            <button type="button" class="left btn btn-default" onclick="this.parentNode.querySelector('input[type=number]').stepDown()" > - </button>
+                                            <input type="number" value="0" min="0"  class="input_number" id="size_precise" name="size_precise" placeholder="0" step="0.1">
+                    
+                                                    
+                                            <button type="button" class="right btn btn-default" onclick="this.parentNode.querySelector('input[type=number]').stepUp()" class="plus"> + </button>
+                                        </div>
+
+                                    </td>
+
+                                    <td class="form-labels">
+                                        <label for="nodespos">Nodes Positive</label>
+                                    </td>
+                                    <td colspan="1">
+                                        <div class="number-input">
+                                            <button type="button" class="left btn btn-default" onclick="this.parentNode.querySelector('input[type=number]').stepDown()" > - </button>
+                                            <input type="number" value="0" min="0"  class="input_number" id="nodespos" name="nodespos" placeholder="0" >
+                
+                                                    
+                                            <button type="button" class="right btn btn-default" onclick="this.parentNode.querySelector('input[type=number]').stepUp()" class="plus"> + </button>
+                                        </div>
+                                    </td>
+                                </tr>
+
+                                <tr>
+                                    <td class="form-labels">
+                                        <label for="tstage"  >T Stage</label>
+                                    </td>
+                                    <td class="form-input">
+                                        <select class="form-control" name="tstage" id="tstage" >
+                                            <option value="t0">T0</option>
+                                            <option value="t1">T1</option>
+                                            <option value="t1a">T1a</option>
+                                            <option value="t1b">T1b</option>
+                                            <option value="t1c">T1c</option>
+                                            <option value="t1mic">T1mic</option>
+                                            <option value="t2">T2</option>
+                                            <option value="t3">T3</option>
+                                            <option value="t4">T4</option>
+                                            <option value="t4a">T4a</option>
+                                            <option value="t4b">T4b</option>
+                                            <option value="t4c">T4c</option>
+                                            <option value="t4d">T4d</option>
+                                            <option value="tis">Tis</option>
+                                            <option value="tx">Tx</option>                                  
+                                        </select>
+                                    </td>
+                                    <td class="form-labels">
+                                        <label for="nstage" >N Stage</label>
+                                    </td>
+                                    <td class="form-input">
+                                        <select class="form-control " name="nstage" id="nstage">
+                                            <option value="n0">N0</option>
+                                            <option value="n0 (i+)">N0 (i+)</option>
+                                            <option value="n1">N1</option>
+                                            <option value="n1a">N1a</option>
+                                            <option value="n1b">N1b</option>
+                                            <option value="n1c">N1c</option>
+                                            <option value="n1mic">N1mic</option>
+                                            <option value="n2">N2</option>
+                                            <option value="n2a">N2a</option>
+                                            <option value="n2b">N2b</option>
+                                            <option value="n3">N3</option>
+                                            <option value="n3a">N3a</option>
+                                            <option value="n3b">N3b</option>
+                                            <option value="n3c">N3c</option>
+                                            <option value="nx">Nx</option>
+                                        </select> 
+                                    </td>
+                                    <td class="form-labels">
+                                        <label for="mstage">M Stage</label>
+                                    </td>
+                                    <td class="form-input">
+                                        <select class="form-control" name="mStage" id="mStage">
+                                            <option value="m0">M0</option>
+                                            <option value="m1">M1</option>
+                                            <option value="mx">Mx</option>
+                                        </select>   
+                                    </td>
+
+                                </tr>
+
+                                <tr>
+                                    <td class="form-labels">
+                                        <label for="diff">Diff Grade</label>
+                                    </td>
+                                    <td class="form-input">
+                                        <select class="form-control" name="diff" id="diff">
+                                            <option value="grade 1">Grade 1</option>
+                                            <option value="grade 2">Grade 2</option>
+                                            <option value="grade 3">Grade 3</option>
+                                            <option value="unknown">Unknown</option>
+                                        </select> 
+                                    </td>
+                                    <td class="form-labels">
+                                        <label for="stage">Stage</label>
+                                    </td>
+                                    <td class="form-input">
+                                        <select class="form-control" name="stage" id="stage">
+                                            <option value="stage 0">Stage 0</option>
+                                            <option value="stage 1">Stage 1</option>
+                                            <option value="stage 1a">Stage 1a</option>
+                                            <option value="stage 1b">Stage 1b</option>
+                                            <option value="stage 2">Stage 2</option>
+                                            <option value="stage 2a">Stage 2a</option>
+                                            <option value="stage 2b">Stage 2b</option>
+                                            <option value="stage 3">Stage 3</option>
+                                            <option value="stage 3a">Stage 3a</option>
+                                            <option value="stage 3b">Stage 3b</option>
+                                            <option value="stage 3c">Stage 3c</option>
+                                            <option value="stage 4">Stage 4</option>
+                                            <option value="unknown">Unknown</option>
+                                            <option value="dcis/lcis non-invasive">Dcis/lcis non-invasive</option>   
+                                        </select> 
+
+                                    </td>
+                                </tr>
+
+                                <tr>
+                                    <td class="form-labels">
+                                        <label for="ER">ER</label> 
+                                    </td>
+                                    <td class="form-input">
+                                        <select class="form-control" name="ER" id="ER">
+                                            <option value="positive">Positive</option>
+                                            <option value="negative">Negative</option>  
+                                            <option value="unknown">Unknown</option>
+                                            <option value="equivocal">Equivocal</option>
+                                        </select>
+                                    </td>
+                                    <td class="form-labels">
+                                        <label for="PR">PR</label>
+                                    </td>
+                                    <td class="form-input">
+                                        <select class="form-control" name="PR" id="PR">
+                                            <option value="positive">Positive</option>
+                                            <option value="negative">Negative</option>  
+                                            <option value="unknown">Unknown</option>
+                                            <option value="equivocal">Equivocal</option>
+                                        </select>
+                                    </td>
+
+                                    <td class="form-labels">
+                                        <label for="Her2">Her2</label>
+                                    </td>
+
+                                    <td class="form-input">
+                                        <select class="form-control" name="Her2" id="Her2">
+                                            <option value="positive">Positive</option>
+                                            <option value="negative">Negative</option>
+                                            <option value="unknown">Unknown</option>
+                                            <option value="equivocal">Equivocal</option>
+                                            <option value="not done">Not done</option> 
+                                        </select>
+                                    </td>
+                                </tr>
+
+                                <tr>
+                                    <td class="submit-button" colspan="6">
+                                        <input type="submit" value="Calculate" class="submitButton">
+                                    </td>
+                                </tr>
+
+
+                            </table>
+                        </div>
+
+                    </div> -->
+
+
                         <!-- new -->
 
                         <div class="row row_space">
@@ -262,7 +464,7 @@
                           
 
                             <div class="col-md-10 offset-md-1 submitContainer" align="center">
-                                    <input type="submit" value="Calculate" class="submitButton" onclick="loader(this);">
+                                    <input type="submit" value="Calculate" class="submitButton">
                             </div>
                         </div> 
 

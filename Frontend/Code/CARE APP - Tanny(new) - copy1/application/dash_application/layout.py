@@ -3,7 +3,6 @@ html_layout = '''<!DOCTYPE html>
 
                     <meta name="viewport"  content = "width=device-width, initial-scale=1.0, user-scalable=yes">
                     <script src="https://kit.fontawesome.com/a10c0e47f2.js" crossorigin="anonymous"></script>
-                    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
                         <head>
                             {%metas%}
                             <title>{%title%}</title>
@@ -53,18 +52,16 @@ html_layout = '''<!DOCTYPE html>
                             </footer>
 
                             <script>
-                            $('body').append('<div style="" id="loadingDiv"><div class="loader" text-align="center">Loading...</div></div>');
+                            $('body').append('<div style="" id="loadingDiv"><div class="loader">Loading...</div></div>');
                                 $(window).on('load', function(){
-                                setTimeout(removeLoader, 1000); //wait for page load PLUS two seconds.
+                                setTimeout(removeLoader, 2000); //wait for page load PLUS two seconds.
                                 });
                                 function removeLoader(){
-                                    $( "#loadingDiv" ).fadeOut(100, function() {
+                                    $( "#loadingDiv" ).fadeOut(500, function() {
                                     // fadeOut complete. Remove the loading div
                                     $( "#loadingDiv" ).hide(); //makes page more lightweight 
                                 });  
                                 };
-                            </script>
-                            <script>
                             
                             $(document).ready(function() {
 
@@ -78,11 +75,9 @@ html_layout = '''<!DOCTYPE html>
                                         $('#prediction').addClass("active");
                                     }
 
-                                
-
                                 });     
                             </script>
-                            
+                            <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
 
                         </body>
                     </html>'''
