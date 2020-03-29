@@ -19,7 +19,7 @@ import operator
 from plotly.subplots import make_subplots
 import plotly
 
-import kaplan_meier as KM2
+import kaplan_meier2 as KM2
 
 import base64
 from flask import Blueprint, render_template, request, jsonify, json, redirect, session, url_for
@@ -59,6 +59,10 @@ bills2 = pd.read_csv(DATA_PATH.joinpath("dropped.csv"))
 bills = pd.read_csv("data/bills.csv")
 # prices = pd.read_csv(DATA_PATH.joinpath("price_master.csv"))
 
+listToDrop = ['NRIC','dob','Has Bills?','Side','Hospital','KKH','NCCS','SGH','END_OF_ENTRY']
+input_df = KM2.kaplan_meier_load_clinical_df(listToDrop)
+
+
 #Set Variables
 tnm_list = clinical["Stage"].dropna().unique()
 ER_list = clinical['ER'].dropna().unique()
@@ -68,6 +72,11 @@ Her2_list = clinical['Her2'].dropna().unique()
 T_list = clinical['T'].unique()
 N_list = clinical['N'].unique()
 M_list = clinical['M'].unique()
+
+TNM_options_dict = {'T': T_list, 'N': N_list, 'M': M_list}
+keys = list(TNM_options_dict.keys())
+nestedOptions = TNM_options_dict[keys[0]]
+
 
 
 clinical.dropna(axis=0,subset=['Age_@_Dx'],inplace=True)
@@ -109,45 +118,6 @@ def generate_waffle_chart():
         parameters: waffle2data should be the output of survival model
         return: waffle chart image in assets folder (for results page to extract)
     '''
- #Data should look like this ={'Disease-free Survival': 61, 'Overall Survival': 34, 'Dead in 10 years':5}
-    km = pd.read_csv('data\\kaplan_meier_by_group.csv') #extract from km prediction model
-    kmdict = {'DFS': 0, 'OS': 0, 'CSS':0} #use this as a template to input ur values
-    
-    #sum of all dfs, os, css values
-    total_rows = km.shape[0]
-
-    #fill kmdict with predicted values
-    for key in kmdict:
-        value = km[km['class_label'] == key].shape[0]
-        kmdict[key] = (value / total_rows)*100
-
-    kmdict = rename_keys(kmdict, ['Disease-Free Survival','Overall Survival', 'Dead in 10 years']) #rename keys in dict
-    print(kmdict)
-
-    plt.figure(
-        FigureClass=Waffle, 
-        rows=5, 
-        values=kmdict, 
-        colors=['#3CB371','#90EE90','#FF0000'],
-        legend={
-            'labels': ["{0} ({1})".format(k, v) for k, v in kmdict.items()],
-            'loc': 'upper left', 'bbox_to_anchor': (1, 1)
-            },
-        icons='child', icon_size=14, 
-        icon_legend=True,
-        figsize=(10, 9),
-        title={
-        'label': 'Survival Rate for DFS, OS ',
-        'loc': 'center',
-        'fontdict':{'fontsize':8}
-        }
-    )
-
-    filename = 'C:\\Users\\Jesslyn\\Documents\\GitHub\\fyp\\Frontend\\Code\\MAINAPP\\application\\assets\\waffle-chart-km.png' #where picture will be stored, replace w ur own
-    if os.path.exists(filename):
-        os.remove(filename) #remove old
-    plt.savefig(filename ,bbox_inches='tight', pad_inches=0) #replace 
-
     #set the vars needed
     populate_this_dict = {'0.5 years': 0, '1 years': 0, '2 years': 0, '5 years':0, '10 years':0} #this is done to set the initial dict. Populate w the actual values to pass the chart printer.
     list_of_dict_keys = list(populate_this_dict.keys()) #retrieve all the keys, convert to list
@@ -202,6 +172,50 @@ def generate_waffle_chart():
         os.remove(filename) #remove old
     plt.savefig(filename ,bbox_inches='tight', pad_inches=0) #replace 
 
+def generate_waffle_km(km_os, km_dfs, km_css):
+    '''
+        :km_dfs, km_os, km_css: input is a dataframe
+    '''
+    km_dfs_num = km_dfs.shape[0]
+    km_css_num = km_css.shape[0]
+    km_os_num = km_os.shape[0]
+    #Data should look like this ={'Disease-free Survival': 61, 'Overall Survival': 34, 'Dead in 10 years':5}
+    # km = pd.read_csv('data\\kaplan_meier_by_group.csv') #extract from km prediction model
+    kmdict = {'DFS': km_dfs_num, 'OS': km_os_num, 'CSS':km_css_num} #use this as a template to input ur values
+    
+    #sum of all dfs, os, css values
+    total_rows = km_dfs_num + km_css_num + km_os_num
+
+    kmdict['DFS'] = (kmdict['DFS'] / total_rows)*100
+    kmdict['OS'] = (kmdict['OS'] / total_rows)*100
+    kmdict['CSS'] = (kmdict['CSS'] / total_rows)*100
+
+    kmdict = rename_keys(kmdict, ['Disease-Free Survival','Overall Survival', 'Dead in 10 years']) #rename keys in dict
+    print(kmdict)
+
+    plt.figure(
+        FigureClass=Waffle, 
+        rows=5, 
+        values=kmdict, 
+        colors=['#3CB371','#90EE90','#FF0000'],
+        legend={
+            'labels': ["{0} ({1})".format(k, v) for k, v in kmdict.items()],
+            'loc': 'upper left', 'bbox_to_anchor': (1, 1)
+            },
+        icons='child', icon_size=14, 
+        icon_legend=True,
+        figsize=(10, 9),
+        title={
+        'label': 'Survival Rate for DFS, OS ',
+        'loc': 'center',
+        'fontdict':{'fontsize':8}
+        }
+    )
+
+    filename = 'C:\\Users\\Jesslyn\\Documents\\GitHub\\fyp\\Frontend\\Code\\MAINAPP\\application\\assets\\waffle-chart-km.png' #where picture will be stored, replace w ur own
+    if os.path.exists(filename):
+        os.remove(filename) #remove old
+    plt.savefig(filename ,bbox_inches='tight', pad_inches=0) #replace 
 
 
 ###########################################   Data manipulation for bills charts    ##########################r###########
@@ -373,6 +387,14 @@ Race_List = clinical['Race'].unique()
 
 ###############################  This Section Is For Filters  ############################################################################################
 
+def filter_options():
+    '''
+        This function populates dropdowns with valid options
+    '''
+
+
+
+
 def filter_df_all(df, min1, max1, tnm_select, er_select, pr_select, her2_select, race_select):
     '''
         df:dataframe
@@ -441,51 +463,6 @@ def description_card():
                 children="The clinical dataset contains past records of breast cancer patients, which doctors can explore with filters for attributes: Age, TNM stage, ER status, PR status and HER2 status.",
             ),
         ],
-    )
-
-# def filter_picker():
-#     """
-#         :return: returns a checkbox list of filters
-#     """
-#     return html.Div(
-#         id="filter-picker",
-#         children=[
-#             html.P("Show filter(s):"),
-#             dcc.Checklist(
-#                 id = 'filters',
-#                 options=[
-#                     {'label': 'age_slider', 'value': 'age_slider'},
-#                     {'label': 'tnm_select', 'value': 'tnm_select'},
-#                     {'label': 'er_select', 'value': 'er_select'},
-#                     {'label': 'pr_select', 'value': 'pr_select'},
-#                     {'label': 'her2_select', 'value': 'her2_select'}
-#                 ],
-#                 values=['age_slider', 'tnm_select', 'er_select',  'pr_select', 'her2_select'],
-#                 labelStyle={'display': 'inline-block'}
-#             )
-#         ],
-#         style={'margin-top':'10'}
-#     )
-
-def filter_checklist():
-    """
-        :return: returns a checkbox list of filters (in a row)
-    """
-    return html.Div(
-        id="checklist-card",
-        children=[
-            html.P("Select Something:"),
-            dcc.Checklist(
-                id = 'checklist_for_filters',
-                options=[
-                    {'label': 'Clinical', 'value': 'Clinical'},
-                    {'label': 'Kaplan-Meier', 'value': 'Kaplan-Meier'},
-                ],
-                value=['Clinical'],
-                labelStyle={'display': 'inline-block'}
-            )
-        ],
-        style={'margin-top':'10'}
     )
 
 
@@ -560,17 +537,17 @@ def generate_clinical_controls():
             html.P("Select N Stage:"),
             dcc.Dropdown(
                 id="n_select",
-                options= [{"label": i, "value": i} for i in N_list],
-                value=N_list[0],
-                disabled=False
+                # options= [{"label": i, "value": i} for i in N_list],
+                # value=N_list[0],
+                # disabled=False
             ),
             html.Br(),
             html.P("Select M Stage:"),
             dcc.Dropdown(
                 id="m_select",
-                options= [{"label": i, "value": i} for i in M_list],
-                value=M_list[0],
-                disabled=False
+                # options= [{"label": i, "value": i} for i in M_list],
+                # value=M_list[0],
+                # disabled=False
             ),
         ],
     )
@@ -866,7 +843,6 @@ clinical_dashboard = dbc.Container(
                                 ),
                                 dbc.CardBody(
                                     [
-                                        filter_checklist(),
                                         generate_clinical_controls()
                                     ]
                                 )
@@ -1009,7 +985,7 @@ clinical_dashboard = dbc.Container(
                                                                                 ),
                                                                                 dbc.Col(
                                                                                     dcc.Graph(
-                                                                                        id="Survival Prediction",
+                                                                                        id="OS_KM",
                                                                                         figure=go.Figure(
                                                                                                             data=[],
                                                                                                             layout=go.Layout(
@@ -1026,7 +1002,7 @@ clinical_dashboard = dbc.Container(
                                                                                 ),
                                                                                 dbc.Col(
                                                                                     dcc.Graph(
-                                                                                        id="Kaplan Meier",
+                                                                                        id="CSS_KM",
                                                                                         figure=go.Figure(
                                                                                                             data=[],
                                                                                                             layout=go.Layout(
@@ -1043,7 +1019,7 @@ clinical_dashboard = dbc.Container(
                                                                                 ),
                                                                                 dbc.Col(
                                                                                     dcc.Graph(
-                                                                                        id="Kaplan Meier 2",
+                                                                                        id="DFS_KM",
                                                                                         figure=go.Figure(
                                                                                                             data=[],
                                                                                                             layout=go.Layout(
@@ -1057,8 +1033,23 @@ clinical_dashboard = dbc.Container(
                                                                                                             ),
                                                                                                         ),
                                                                                     ),
+                                                                                ),
+                                                                                dbc.Col(
+                                                                                    html.Div([
+                                                                                    html.Img(
+                                                                                            src=app.get_asset_url('waffle-chart-km.png'),
+                                                                                            id="waffle-1",
+                                                                                            style={
+                                                                                                "height": "200px",
+                                                                                                "width": "1000px",
+                                                                                                "margin-bottom": "25px",
+                                                                                                "margin-left":"px"
+                                                                                            },
+                                                                                        ),
+                                                                                        html.P('Out of a 100 random women, X will be dead within 10 years... ')
+                                                                                        ]
+                                                                                    )
                                                                                 )
-                                                                        
                                                                             ]
                                                                         )
                                                                     ]
@@ -1929,18 +1920,7 @@ def init_callbacks(dash_app):
                         dbc.Col(
                             html.Div(
                             [ 
-                                html.Img(
-                                    src=app.get_asset_url('waffle-chart-km.png'),
-                                    id="waffle-1",
-                                    style={
-                                        "height": "200px",
-                                        "width": "1000px",
-                                        "margin-bottom": "25px",
-                                        "margin-left":"px"
-                                    },
-                                ),
                                 
-                                html.P('Out of a 100 random women, X will be dead within 10 years... '),
                                 html.Br(),
                                 html.Img(
                                     src=dash_app.get_asset_url('waffle-chart-survived.png'),
@@ -1970,11 +1950,38 @@ def init_callbacks(dash_app):
             
             return survival_layout, doctor_button, doctor_graphs
 
+    #Dynamic Dropdown
+    @dash_app.callback(
+        dash.dependencies.Output('n_select', 'options'),
+        [dash.dependencies.Input('t_select', 'value')]
+    )
+    def update_n_dropdown(t_value):
+        #This Is Filtered according to available values in dataset
+        #filter full dataset by selected val, get available values in N column
+        #Assuming T, N, M stages that were entered were all vald and according to ajcc staging
+        slice_df = clinical[clinical['T'] == t_value]
+        valid = slice_df['N'].unique() #Get valid N based on  T values entered
+        TNM_options_dict['N'] = valid #replace dictionary with list of valid N stages
+        return [{'label': i, 'value': i} for i in TNM_options_dict['N']] #populate N dropdown with new n values
+
+    @dash_app.callback(
+    dash.dependencies.Output('m_select', 'options'),
+    [dash.dependencies.Input('n_select', 'value')])
+    def update_m_dropdown(n_value):
+        slice_df = clinical[clinical['N'] == n_value]
+        valid = slice_df['M'].unique()
+        TNM_options_dict['M'] = list(valid)
+        return [{'label': i, 'value': i} for i in TNM_options_dict['M']]
+
+
     @dash_app.callback(
         [
             dash.dependencies.Output('age-distribution-hist', 'figure'),
             dash.dependencies.Output('alive_dead_bar','figure'),
-            dash.dependencies.Output('er_pr_chart','figure')
+            dash.dependencies.Output('er_pr_chart','figure'),
+            dash.dependencies.Output('OS_KM','figure'),
+            dash.dependencies.Output('CSS_KM','figure'),
+            dash.dependencies.Output('DFS_KM','figure')
         ],
         [
             dash.dependencies.Input('age_slider', 'value'),
@@ -2014,24 +2021,30 @@ def init_callbacks(dash_app):
         dcdict = rename_keys(dcdict_new,\
                                 ['Alive', 'Dead- Breast Cancer', 'Dead- Others', 'Dead- Unknown'])
         print(dcdict_new)
-        #Overwrite initial tnm chart
-        # tnm_df = filter_df_wo_stage(clinical,age_slider[0], age_slider[1] , er_select, pr_select, her2_select )
         
-        # fdict = generate_tnm_chart_data(tnm_df, cause, death_cause_dict_old)
-        # print(fdict)
-
         #Overwrite original chart data with sliced dataset according to filters
         epr_df = filter_df_epr_chart(clinical, age_slider[0], age_slider[1] , tnm_select)
         er_dict = generate_epr_chart_data(epr_df)
 
+        
+        
         #overall survival Kaplan Meier chart
         
-        km_os,km_dfs,km_css = KM2.generate_kaplan_meier_with_filters_for_all_survival_types(filters_dict,clinical)
+        km_os,km_dfs,km_css = KM2.generate_kaplan_meier_with_filters_for_all_survival_types(filters_dict,input_df ) #all filters wo tnm stage
+        print(km_os,km_dfs,km_css)
+
         
-        x = km_os["time"]
-        y = km_os["estimate"]
-        lower = km_os["lower"]
-        upper = km_os["upper"]
+        
+        if km_os.shape[0] == 0:
+            x = [0]
+            y = [0]
+            lower = [0]
+            upper = [0]
+        else:
+            x = km_os["time"]
+            y = km_os["estimate"]
+            lower = km_os["lower"]
+            upper = km_os["upper"]
 
         km_upper = go.Scatter(x=x, y=y*100,
             fill=None,
@@ -2056,10 +2069,18 @@ def init_callbacks(dash_app):
         )
 
         #dfs Kaplan Meier chart 
-        dfs_x = km_dfs["time"]
-        dfs_y = km_dfs["estimate"]
-        dfs_lower = km_dfs["lower"]
-        dfs_upper = km_dfs["upper"]
+        if km_dfs.shape[0] == 0:
+            dfs_x = [0]
+            dfs_y = [0]
+            dfs_lower = [0]
+            dfs_upper = [0]
+        else:
+            dfs_x = km_dfs["time"]
+            dfs_y = km_dfs["estimate"]
+            dfs_lower = km_dfs["lower"]
+            dfs_upper = km_dfs["upper"]
+
+
         dfs_km_upper = go.Scatter(x=dfs_x, y=dfs_y*100,
             fill=None,
             mode='lines',
@@ -2083,10 +2104,17 @@ def init_callbacks(dash_app):
         )
 
         #css Kaplan Meier chart
-        css_x = km_css["time"]
-        css_y = km_css["estimate"]
-        css_lower = km_css["lower"]
-        css_upper = km_css["upper"]
+        if km_css.shape[0] == 0:
+            css_x = [0]
+            css_y = [0]
+            css_lower = [0]
+            css_upper = [0]
+        else:
+            css_x = km_css["time"]
+            css_y = km_css["estimate"]
+            css_lower = km_css["lower"]
+            css_upper = km_css["upper"]
+
         css_km_upper = go.Scatter(x=css_x, y=css_y*100,
             fill=None,
             mode='lines',
@@ -2108,6 +2136,11 @@ def init_callbacks(dash_app):
             line_color='lightblue',
             name="{}".format("95% Lower CI"),
         )
+
+        if km_os.empty or km_dfs.empty or km_css.empty:
+            print('no records found for such values. pls check filter inputs again.')
+        else:
+            generate_waffle_km(km_os, km_dfs, km_css)
         
         figure={
             'data': 
@@ -2250,7 +2283,7 @@ def init_callbacks(dash_app):
             }
 
             
-        return figure, figure2, figure4, figure5, figure6, figure7, filters_dict
+        return figure, figure2, figure4, figure5, figure6, figure7
 
 
     @dash_app.callback(
@@ -2316,32 +2349,7 @@ def init_callbacks(dash_app):
         return fig
 
 
-    # # Disable TNM Stage filter if KM checkbox is selected
-    # @dash_app.callback(
-    #     dash.dependencies.Output("tnm_select","disabled"),
-    #     [dash.dependencies.Input("checklist_for_filters", "value")],
-    # )
-    # def disable_you(val):
-    #     if val not in ["Clinical"]:
-    #         return dcc.Dropdown(
-    #             id="tnm_select",
-    #             options= [{"label": i, "value": i} for i in tnm_list],
-    #             value=tnm_list[1],
-    #             disabled=True
-    #         )
-    
-    # # @dash_app.callback(
-    # #     dash.dependencies.Output("t_select","disabled"),
-    # #     [dash.dependencies.Input("checklist_for_filters", "value")],
-    # # )
-    # # def disable_two(val):
-    # #     if val not in ["Kaplan-Meier"]:
-    # #         return dcc.Dropdown(
-    # #             id="tnm_select",
-    # #             options= [{"label": i, "value": i} for i in tnm_list],
-    # #             value=tnm_list[1],
-    # #             disabled=True
-    # #         )
+
         
 
 
