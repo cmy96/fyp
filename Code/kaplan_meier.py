@@ -4,14 +4,12 @@ import pickle
 import fnmatch
 import os
 import matplotlib.pyplot as plt
-import seaborn as sns
-sns.set(style="darkgrid", palette="colorblind", color_codes=True)
+# import seaborn as sns
+# sns.set(style="darkgrid", palette="colorblind", color_codes=True)
 
 from survive import datasets
 from survive import SurvivalData
 from survive import KaplanMeier, Breslow, NelsonAalen
-from sksurv.preprocessing import OneHotEncoder
-from sklearn.model_selection import train_test_split
 
 from pprint import pprint
 pd.set_option('display.width', None)
