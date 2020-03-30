@@ -52,22 +52,24 @@
                 <form name="predictionForm" action="/submit" method="post" id="form">                
                     
                     <div class="row form-header prediction_header">      
-                        <div class="col-md-6 offset-md-1"> 
+                        <div class="col-md-6 "> 
  
                             <h1 class="card-title ">Prediction Tool</h1>
   
                         </div>   
                     </div>
 
+                    
+
                         <!-- new -->
 
                         <div class="row row_space">
-                            <label for="Age" class="col-md-1 offset-md-1 input_labels">Age at Diagnosis</label>        
+                            <label for="Age" class="col-md-2 first_input_labels">Age at Diagnosis</label>        
         
                             <div class="col-md-2">
                                 <!--<input type="number"  min="0"  class="input_number" id="Age_@_Dx" name="Age_@_Dx">-->
                                 <button type="button" class="btn btn-default button_left" onclick="this.parentNode.querySelector('input[type=number]').stepDown()" > - </button>
-                                <input type="number"  min="0"  class="input_number" id="Age_@_Dx" name="Age_@_Dx">
+                                <input type="number"  min="0"  class="input_number more_space" id="Age_@_Dx" name="Age_@_Dx">
                                 <button type="button" class="btn btn-default button_right" onclick="this.parentNode.querySelector('input[type=number]').stepUp()" class="plus"> + </button>                                        
                             </div>
                        
@@ -75,27 +77,27 @@
                         </div>
 
                         <div class="row row_space">
-                            <label for="size_precise" class="col-md-1 offset-md-1 input_labels">Size Precise (mm)</label>
+                            <label for="size_precise" class="col-md-2 first_input_labels">Size Precise (mm)</label>
    
                             <div class="col-md-2 extra_space" >
                                 <button type="button" class="btn btn-default button_left" onclick="this.parentNode.querySelector('input[type=number]').stepDown(); getT(this);" > - </button>
-                                <input type="number"  min="0"  class="input_number" id="size_precise" name="size_precise" step="0.1" onchange="getT(this);" required>    
+                                <input type="number"  min="0"  class="input_number more_space" id="size_precise" name="size_precise" step="0.1" onchange="getT(this);" required>    
                                 <button type="button" class="btn btn-default button_right" onclick="this.parentNode.querySelector('input[type=number]').stepUp(); getT(this);" class="plus"> + </button>
                             </div>
 
 
-                            <label for="nodespos" class="col-md-1 input_labels">Nodes Positive</label>        
+                            <label for="nodespos" class="col-md-2 input_labels">Nodes Positive</label>        
                             <div class="col-md-2">
                                 <button type="button" class="btn btn-default button_left" onclick="this.parentNode.querySelector('input[type=number]').stepDown(); getN(this);" > - </button>
-                                <input type="number" min="0"  class="input_number" id="nodespos" name="nodespos" onchange="getN(this);" required >   
+                                <input type="number" min="0"  class="input_number more_space" id="nodespos" name="nodespos" onchange="getN(this);" required >   
                                 <button type="button" class="btn btn-default button_right" onclick="this.parentNode.querySelector('input[type=number]').stepUp(); getN(this);" class="plus"> + </button>
                             </div>
 
                         </div>
 
                         <div class="row row_space">
-                            <label for="tstage" class="col-md-1 offset-md-1 input_labels"">T Stage</label>
-                            <div class="col-md-2 extra_space">
+                            <label for="tstage" class="col-md-2 first_input_labels"">T Stage</label>
+                            <div class="col-md-2 extra_space more_space">
                                 <select class="form-control dropdowns" name="tstage" id="tstage" onchange="getStage(this);" onclick="getStage(this); t_prompt(this);" required>
                                     <option value=""></option>
                                     <option value="t0">T0</option>
@@ -118,8 +120,8 @@
                             </div>
     
 
-                            <label for="nstage" class="col-md-1  input_labels">N Stage</label>
-                            <div class="col-md-2 extra_space">
+                            <label for="nstage" class="col-md-2  input_labels">N Stage</label>
+                            <div class="col-md-2 extra_space more_space">
                                 <select class="form-control dropdowns" name="nstage" id="nstage" onchange="getStage(this);" onclick="getStage(this); n_prompt(this);" required>
                                     <option value=""></option>
                                     <option value="n0">N0</option>
@@ -142,8 +144,8 @@
                             </div>
  
 
-                            <label for="mstage" class="col-md-1 input_labels">M Stage</label>
-                            <div class="col-md-2 extra_space">
+                            <label for="mstage" class="col-md-2 input_labels">M Stage</label>
+                            <div class="col-md-2 extra_space more_space">
                                 <select class="form-control dropdowns" name="mStage" id="mStage" onchange="getStage(this);" onclick="getStage(this);" required>
                                     <option value=""></option>
                                     <option value="m0">M0</option>
@@ -156,14 +158,14 @@
                         </div>
 
                         <div class="row row_space">
-                            <label for="diff" class="col-md-1 offset-md-1 input_labels">Diff Grade</label>
+                            <label for="diff" class="col-md-2 first_input_labels">Diff Grade</label>
                             <!-- <select class="form-control col-md-2" name="diff" id="diff">
                                 <option value="grade 1">Grade 1</option>
                                 <option value="grade 2">Grade 2</option>
                                 <option value="grade 3">Grade 3</option>
                                 <option value="unknown">Unknown</option>
                             </select>  -->
-                            <div class="btn-group-toggle col-md-2 extra_space btn-group" data-toggle="buttons">
+                            <div class="btn-group-toggle col-md-2 extra_space btn-group more_space" data-toggle="buttons">
                                 <label class="btn btn-light">
                                     <input type="radio" name="diff" id="grade 1" value="grade 1" autocomplete="off" required> 1
                                 </label>
@@ -177,7 +179,7 @@
                                 </label>
                             </div>
         
-                            <label for="stage" class="col-md-1 input_labels">Stage</label>
+                            <label for="stage" class="col-md-2 input_labels">Stage</label>
                             <div class="col-md-2 extra_space ">
                                 <select class="form-control dropdowns" name="stage" id="stage" onchange="stage_prompt(this);" required>
                                     <option value=""></option>
@@ -203,7 +205,7 @@
 
                         <div class="row row_space">
                             
-                            <label for="ER" class="col-md-1 offset-md-1 input_labels">ER</label>
+                            <label for="ER" class="col-md-2 first_input_labels">ER</label>
                             <div class="btn-group-toggle col-md-2 extra_space btn-group" data-toggle="buttons" >
                                     
                                 <label class="btn btn-light">
@@ -221,7 +223,7 @@
                                 </div>
 
      
-                            <label for="PR" class="col-md-1 input_labels">PR</label>     
+                            <label for="PR" class="col-md-2 input_labels">PR</label>     
                             <div class="btn-group-toggle col-md-2 extra_space btn-group" data-toggle="buttons">
 
                                 <label class="btn btn-light">
@@ -239,7 +241,7 @@
                             </div>
 
     
-                            <label for="Her2" class="col-md-1  input_labels">Her2</label>
+                            <label for="Her2" class="col-md-2  input_labels">Her2</label>
                  
                             <div class="btn-group-toggle col-md-2 extra_space btn-group" data-toggle="buttons">
                                     <div class="form-input-error-msg alert alert-danger">
@@ -261,7 +263,7 @@
                         </div>
                           
 
-                            <div class="col-md-10 offset-md-1 submitContainer" align="center">
+                            <div class="col-md-5 offset-md-5 submitContainer" align="center">
                                     <input type="submit" value="Calculate" class="submitButton" onclick="loader(this);">
                             </div>
                         </div> 

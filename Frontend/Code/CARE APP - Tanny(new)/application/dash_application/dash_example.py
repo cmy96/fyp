@@ -186,16 +186,6 @@ layout = dict(
     title="Satellite Overview"
 )
 
-#python codes for survival
-s_output = {"6 months before":100.0, "6 months after":96.20, "1 year after":90.10, 
-    "2 years after":86.90, "5 years after":80.09, "10 years after":71.22}
-df2 = pd.DataFrame(s_output.items(), columns=['Years', 'Survival'])
-#python codes for cost
-c_output = {"6 months before":3882.80, "6 months after":13112.54, "1 year after":2230.19, 
-    "2 years after":1736.58, "5 years after":11600.33, "10 years after":14917.57}
-df = pd.DataFrame(c_output.items(), columns=['Years', 'Cost'])
-
-
 #################################### END OF ORIGINAL DFS FOR RESULTS AND BILLS DASHBOARD ####################################
 
 
@@ -598,8 +588,9 @@ bills_dashboard = dbc.Container(
                                 ),
                                 dbc.CardBody(
                                     [
-                                        generate_bills_controls()
-                                    ]
+                                        generate_bills_controls(),
+                                        
+                                    ], className="bill_cardbody_layout"
                                 )
                             ], className="filter_layout"
                         )
@@ -714,7 +705,7 @@ clinical_dashboard = dbc.Container(
                                 dbc.CardBody(
                                     [
                                         generate_controls()
-                                    ]
+                                    ], className="clinical_cardbody_layout"
                                 )
                             ], className="filter_layout"
                         )
@@ -1082,9 +1073,7 @@ doctor_button = dbc.Container(
             [
                 dbc.Col(
                     html.Div(
-                    [
-                        html.Br(),
-                        html.Br(),
+                        [       
                         html.Div(
                             [
                                 dbc.DropdownMenu(
@@ -1109,8 +1098,7 @@ patient_button = dbc.Container(
                 dbc.Col(
                     html.Div(
                     [
-                        html.Br(),
-                        html.Br(),
+
                         html.Div(
                             [
                                 dbc.DropdownMenu(
@@ -1220,12 +1208,12 @@ def init_callbacks(dash_app):
                                                             data=[surv4],
                                                             layout=go.Layout(
                                                                 #title="Patient's Predicted Kaplan Meier Chart",
-                                                                height=700,
+                                                                height=650,
                                                                 #width=700,
                                                                 xaxis_range=(0, 10),
                                                                 yaxis_range=(0, 100),
-                                                                xaxis = {'title': 'Year'},
-                                                                yaxis = {'title': 'Percentage of Survival'}, 
+                                                                xaxis = {'title': 'Year(s)'},
+                                                                yaxis = {'title': 'Percentage of Survival (%)'}, 
                                                                 hovermode= "closest",
                                                             ),
                                                         ),
@@ -1235,7 +1223,7 @@ def init_callbacks(dash_app):
                                             )
                                         ]
                                     )
-                                ), width={"size":10, "offset":1}
+                                ), width={"size":8, "offset":1}
                             )
                         ]
   
@@ -1285,7 +1273,7 @@ def init_callbacks(dash_app):
                                                             figure={
                                                             'data': [
                                                                 go.Table(
-                                                                    header=dict(values=["<b>Years</b>","<b>Cost($)</b>"],
+                                                                    header=dict(values=["<b>Year(s)</b>","<b>Cost($)</b>"],
                                                                     fill_color='paleturquoise',
                                                                     align='center'),
                                                                     cells=dict(
@@ -1319,6 +1307,8 @@ def init_callbacks(dash_app):
                                                     figure=go.Figure(
                                                         data=[trace1,trace2],
                                                         layout=go.Layout(
+                                                            xaxis = {'title': 'Year(s)'},
+                                                            yaxis = {'title': 'Fees Prediction ($)'},                                                             
                                                             #title="Patient's Cost Prediction ($)",
                                                             #height =600,
                                                             #width=800,
@@ -1388,7 +1378,7 @@ def init_callbacks(dash_app):
                                                                 'data': [
                                                                     go.Table(
                                                                         header=dict(
-                                                                                values=["<b>Years</b>","<b>Survival Rate</b>"],
+                                                                                values=["<b>Year(s)</b>","<b>Survival Rate (%)</b>"],
                                                                         fill_color='paleturquoise',
                                                                         align='center'),
                                                                         cells=dict(
@@ -1414,7 +1404,7 @@ def init_callbacks(dash_app):
                                         dbc.Card(
                                             [
                                                 dbc.CardHeader(
-                                                    html.H2("Survival Rate Table")
+                                                    html.H2("Survival Rate Chart")
                                                 ),
                                                 dbc.CardBody(
                                                     dcc.Graph(
@@ -1425,6 +1415,8 @@ def init_callbacks(dash_app):
                                                             #title="Patient's Survival Rates Prediction (%)",
                                                             #height=600,
                                                             #width=800,
+                                                            xaxis = {'title': 'Year(s)'},
+                                                            yaxis = {'title': 'Percentage of Survival (%)'}, 
                                                             )
                                                         ),
                                                     )
@@ -1443,56 +1435,39 @@ def init_callbacks(dash_app):
                                         dbc.Card(
                                             [
                                                 dbc.CardHeader(
-                                                    html.H2("Chart Title")
+                                                    html.H2("Breast Cancer Patients Survival Rate")
                                                 ),
                                                 dbc.CardBody(
                                                     [
-                                                    
-                                                        html.Img(
-                                                            src=app.get_asset_url('waffle1.png'),
-                                                            id="waffle-1",
-                                                            style={
-                                                                "height": "300px",
-                                                                "width": "400px",
-                                                                "margin-bottom": "25px",
-                                                                "margin-left":"px"
-                                                            },
-                                                        ),
-                                                        html.P("Out of 100 random breast cancer patients, 95 will survive within the 10 year time period.")
+                                                        html.Div(
+                                                            [
+                                                                html.Img(
+                                                                    src=app.get_asset_url('waffle2.png'),
+                                                                    id="waffle-2",
+                                                                    style={
+                                                                        "height": "400px",
+                                                                        "width": "80%",
+                                                                        "margin-bottom": "50px",
+                                                                        "margin-left": "10%",
+                                                                        "margin-right": "10%",
+                                                                        "margin-top": "50px",
+                                                                        "textAlign": "center"
+                                                                    },
+                                                                ),
+                                                                html.P(
+                                                                    "Out of 100 random breast cancer patients, 95 will survive within the 10 year time period.",
+                                                                    style={"margin-left":"10%"}
+                                                                )
+                                                            ]
+                                                        )
+                                                
                                                     ]                                              
                                                 )
                                             ]
                                         )
                             
-                                    ), width ={"size":5, "offset":1}
+                                    ), width ={"size":10, "offset":1}
                                 ),
-                                dbc.Col(
-                                    html.Div(
-                                        dbc.Card(
-                                            [
-                                                dbc.CardHeader(
-                                                    html.H2("Chart Title")
-                                                ),
-                                                dbc.CardBody(
-                                                    [
-                                                    
-                                                        html.Img(
-                                                            src=app.get_asset_url('waffle2.png'),
-                                                            id="waffle-2",
-                                                            style={
-                                                                "height": "300px",
-                                                                "width": "400px",
-                                                                "margin-bottom": "25px",
-                                                                "margin-left":"px"
-                                                            },
-                                                        ),
-                                                        html.P("Out of 100 random breast cancer patients, 95 will survive within the 10 year time period.")
-                                                    ]
-                                                )
-                                            ]
-                                        )
-                                    ), width={"size":5}
-                                )
   
                             ]
                         )
@@ -1505,58 +1480,6 @@ def init_callbacks(dash_app):
             )
  
             return survival_layout, patient_button, patient_graphs
-
-        # elif pathname =="/survival/doctor":
-        #     cookies = session['received']
-        #     cookies = cookies.decode("utf-8")
-        #     group =cookies.split(",")
-        #     # # # cookie = html.H1(cookies)
-        #     # print(str(group)[3:10], "group 1"
-        #     # #ok = json_normalize(cookies)
-        #     # #ok = pd.read_json(cookies)
-        #     # ok = pd.DataFrame(cookies)
-        #     # print(ok)
-        #     patient = pd.read_csv("..\\middleWomen\\patient_new.csv")
-
-        #     x = patient["x"]
-        #     y = patient["y"]
-
-        #     surv4 = (go.Scatter(x=x/365.25, y=y*100, name="hv",
-        #                         line_shape='hv'))
-
-        #     #doctor's graphs
-        #     doctor_graphs =  html.Div(
-        #         [
-        #             html.Br(),
-        #             html.Br(),
-        #             dbc.Row(
-        #                 dbc.Col(
-        #                     html.Div(
-        #                         [
-        #                             dcc.Graph(
-        #                                 id="Kaplan Meier",
-        #                                 figure=go.Figure(
-        #                                                     data=[surv4],
-        #                                                     layout=go.Layout(
-        #                                                         title="Patient's Predicted Kaplan Meier Chart",
-        #                                                         height=800,
-        #                                                         width=1000,
-        #                                                         xaxis_range=(0, 10),
-        #                                                         yaxis_range=(0, 100),
-        #                                                         xaxis = {'title': 'Year'},
-        #                                                         yaxis = {'title': 'Percentage of Survival'}, 
-        #                                                         hovermode= "closest",
-        #                                                     ),
-        #                                                 ),
-        #                             ),
-        #                         ],
-        #                     ), width = {"offset": 2}
-        #                 )
-        #             ),  
-        #         ]
-        #     )
-            
-        #     return survival_layout, doctor_button, doctor_graphs
 
     @dash_app.callback(
         [
