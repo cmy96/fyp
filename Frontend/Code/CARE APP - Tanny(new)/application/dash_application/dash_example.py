@@ -68,13 +68,9 @@ input_df = KM2.kaplan_meier_load_clinical_df(listToDrop)
 
 #Set Variables
 tnm_list = clinical["Stage"].dropna().unique()
-tnm_list = list(tnm_list) + ['All']
 ER_list = clinical['ER'].dropna().unique()
-ER_list = list(ER_list) + ['All']
 pr_list = clinical['PR'].dropna().unique()
-pr_list = list(pr_list) + ['All']
 Her2_list = clinical['Her2'].dropna().unique()
-Her2_list = list(Her2_list) + ['All']
 
 T_list = clinical['T'].unique()
 N_list = clinical['N'].unique()
@@ -174,6 +170,7 @@ def generate_waffle_chart():
     if os.path.exists(filename):
         os.remove(filename) #remove old
     plt.savefig(filename ,bbox_inches='tight', pad_inches=0) #replace 
+
 
 
 ###########################################   Data manipulation for bills charts    ######################################
@@ -294,7 +291,6 @@ bins = np.arange(clinical['Age_@_Dx'].min(),clinical['Age_@_Dx'].max() + 4, 4)
 clinical['binned'] = np.searchsorted(bins, clinical['Age_@_Dx'].values)
 age_bin_count = clinical.groupby(pd.cut(clinical['Age_@_Dx'], bins=19, precision = 0, right = False)).size()
 
-finalized_dict = generate_tnm_chart_data(clinical, death_cause,death_cause_dict_old)
 er_finalized_dict = generate_epr_chart_data(clinical)
 
 #Column Race containing unusual vals - replc
@@ -302,9 +298,9 @@ clinical['Race'].replace('9', 'Unknown', inplace=True)
 clinical['Race'].replace('#N/A', 'Unknown',inplace=True)
 clinical['Race'].fillna('Unknown', inplace=True)
 Race_List = clinical['Race'].unique()
-Race_List = list(Race_List) + ['All']
+Race_List = list(Race_List) + ['All'] #Keep because makes sense to display All
 
-
+generate_waffle_chart()
 
 
 ###########################################################################################################################
@@ -398,7 +394,8 @@ def display_radio_btns():
         {'label': 'Kaplan Meier', 'value': 'Kaplan Meier'},
         {'label': 'Clinical', 'value': 'Clinical'},
     ],
-    value='Clinical'
+        value='Clinical',
+        inputStyle={"margin-right": "5px", 'margin-left':'10px'}
     )  
 
 
@@ -423,6 +420,13 @@ def generate_clinical_controls():
                     80: '80'
                 },
                 className="dcc_control",
+            ),
+            html.Br(),
+            html.P("Filter By Race:"),
+            dcc.Dropdown(
+                id="race_select",
+                options=[{"label":i, "value":i} for i in Race_List],
+                value=Race_List[0]
             ),
             html.Div([
                 html.Br(),
@@ -453,13 +457,6 @@ def generate_clinical_controls():
                 id="her2_select",
                 options=[{"label": i, "value": i} for i in Her2_list],
                 value=Her2_list[0]
-            ),
-            html.Br(),
-            html.P("Filter By Race:"),
-            dcc.Dropdown(
-                id="race_select",
-                options=[{"label":i, "value":i} for i in Race_List],
-                value=Race_List[0]
             ),
             html.Div([
                     html.Br(),
@@ -528,10 +525,6 @@ def generate_bills_controls():
             ),
 
             html.Br(),
-            # html.Div(
-            #     id="reset-btn-outer",
-            #     children=html.Button(id="reset-btn", children="Reset", n_clicks=0),
-            # ),
             html.Br()
         ],
     )
@@ -722,16 +715,10 @@ bills_dashboard = dbc.Container(
                                                                                             go.Pie(
                                                                                                 labels = list(gross_list.keys()),
                                                                                                 values = list(gross_list.values())
-
-
-                                                                                                #marker = dict(color = '#97B2DE')
                                                                                             )
                                                                                         ],
                                                                                         'layout': go.Layout(
-                                                                                            title='Gross Expenditure b Category',
-
-                                                                                            #width = 500,
-                                                                                            #height = 530,
+                                                                                            title='Gross Expenditure by Category',
                                                                                             hovermode='closest'
                                                                                         ),
                                                                                         
@@ -757,10 +744,6 @@ bills_dashboard = dbc.Container(
                                                                                         ],
                                                                                         'layout': go.Layout(
                                                                                             title='Average Expenditure by Category',
-                                                                                            #xaxis = {'title': "Patient's Medical Service Types", 'automargin': True},
-                                                                                            #yaxis = {'title': 'Total Cost ($)'},
-                                                                                            #width = 500,
-                                                                                            #height = 530,
                                                                                             hovermode='closest'
                                                                                         ),
                                                                                         
@@ -1080,10 +1063,6 @@ survival_layout = dbc.Container(
                     html.H1("Survival Prediction")
                 ], align="center", justify="center",
             ),   
-            
-  
-
-
         dbc.Row(
             [
                 dbc.Col(
@@ -1225,8 +1204,7 @@ def Add_Dash(server):
                         
     dash_app = dash.Dash(server=server,
                          external_stylesheets=external_stylesheets,
-                         external_scripts=external_scripts,
-                         #routes_pathname_prefix='/dashapp/'
+                         external_scripts=external_scripts
                          )
 
     dash_app.config.suppress_callback_exceptions = True
@@ -1237,15 +1215,11 @@ def Add_Dash(server):
 
     #Create Dash Layout 
     dash_app.layout = html.Div([
-
         dcc.Location(id='url', refresh=False),
         html.Div(id='page-content'),
         html.Div(id='output-graph'),
         html.Div(id='input'),
         html.Div(id='output'),
-        #dcc.Graph(id='graph-with-slider'),
-    
-
     ])
 
     #Initialize callbacks after our app is loaded
@@ -1321,7 +1295,7 @@ def init_callbacks(dash_app):
                                             )
                                         ]
                                     )
-                                ), width={"size":10, "offset":1}
+                                ), width={"size":8, "offset":1}
                             )
                         ]
   
@@ -1777,10 +1751,7 @@ def init_callbacks(dash_app):
         #overall survival Kaplan Meier chart
         km_os,km_dfs,km_css = KM2.generate_kaplan_meier_with_filters_for_all_survival_types(filters_dict,input_df) #all filters wo tnm stage
 
-<<<<<<< HEAD
         km_os.to_csv("C:\\Users\\Jesslyn\\Desktop\\tst.csv",index=False)
-=======
->>>>>>> b3a7b9f1b8dc28d39e917975b45a33d996f74ae9
         if km_os.shape[0] == 0:
             x = [0]
             y = [0]
@@ -2085,105 +2056,6 @@ def init_callbacks(dash_app):
         return fig
 
 
-        figure5 = {
-                'data':os_new,
-                'layout':go.Layout(
-                        title="Patient's Overall Survival Kaplan Meier Chart",
-                        height=400,
-                        width=1200,  
-                        xaxis = {'title': 'Year'},
-                        yaxis = {'title': 'Percentage of Survival'}, 
-                        hovermode= "closest",
-                    )
-            }
-
-        figure6 = {
-                'data': dfs_new,
-                'layout':go.Layout(
-                        title="Patient's Disease-Free Survival Kaplan Meier Chart",
-                        height=400,
-                        width=1200,
-                        xaxis = {'title': 'Year'},
-                        yaxis = {'title': 'Percentage of Survival'}, 
-                        hovermode= "closest",
-                    )
-
-            }
-
-        figure7 = {
-                'data': css_new,
-                'layout':go.Layout(
-                    title="Patient's Cancer Specific Survival Kaplan Meier Chart",
-                    height=400,
-                    width=1200,
-                    xaxis = {'title': 'Year'},
-                    yaxis = {'title': 'Percentage of Survival'}, 
-                    hovermode= "closest",
-                )
-            }
-
-            
-        return figure, figure2, figure4, figure5, figure6, figure7
 
 
-    @dash_app.callback(
-            dash.dependencies.Output('expenditure-scatter', 'figure'),
-            [dash.dependencies.Input('cost_slider', 'value')]
-            )
-    def update_cost(cost_slider):
-        data = []
-        # print(cost_slider)
-        min_patient_num = cost_slider[0]
-        max_patient_num = cost_slider[1]
-        patient_spend = cost_scatter_data(min_patient_num, max_patient_num)
-        patient_spend[cost_slider[0]: cost_slider[1]]
-        patient_id = list(patient_spend['Case.No'])
-        total_spent = list(patient_spend['Gross..exclude.GST.'])
-        data.append(
-            go.Scatter(
-                x=patient_id,
-                y=total_spent,
-                mode='markers',
-                marker=dict(
-                size=12,
-                color=np.random.randn(100000), #set color equal to a variable
-                colorscale='Viridis', # one of plotly colorscales
-                showscale=True
-            )
-            )
-        )
-        figure={
-                            'data': data,
-                            'layout': go.Layout(
-                                title = "Distribution of patient expenditure",
-                                xaxis = {'title': 'Patient ID'},
-                                yaxis = {'title': 'Patient expenditure ($)'})
-            }
-        return figure
 
-    @dash_app.callback(
-        dash.dependencies.Output('svc-pie-chart', 'figure'),
-   
-        [dash.dependencies.Input('category_check', 'value')]
-    )
-    def update_pie_chart(category_check):
-        print(category_check)
-        new_vals_list = []
-
-        for c in category_check:
-            new_vals_list.append(gross_list[c])
-
-        fig = {
-            'data':[
-                    go.Pie(
-                        labels = category_check,
-                        values = new_vals_list
-                        #marker = dict(color = '#97B2DE')
-                    )
-            ],
-            'layout': go.Layout(
-                    title='Gross Expenditure by Category',
-                    hovermode='closest'
-                )
-            }
-        return fig
