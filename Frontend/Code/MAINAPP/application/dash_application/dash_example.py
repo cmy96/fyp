@@ -34,6 +34,7 @@ import os, shutil
 from plotly.tools import mpl_to_plotly
 import dash_table
 
+
 #external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
 
 external_stylesheets = [
@@ -48,7 +49,6 @@ external_stylesheets = [
 app = dash.Dash(__name__,external_stylesheets=external_stylesheets)
 app.scripts.config.serve_locally = True
 app.css.config.serve_locally = True
-# app.config.suppress_callback_exceptions = True
 
 filename = 'C:\\Users\\Jesslyn\\Documents\\GitHub\\fyp\\Frontend\\Code\\MAINAPP\\application\\assets\\waffle-chart-km.png' #where picture will be stored, replace w ur own
 if os.path.exists(filename):
@@ -68,13 +68,9 @@ input_df = KM2.kaplan_meier_load_clinical_df(listToDrop)
 
 #Set Variables
 tnm_list = clinical["Stage"].dropna().unique()
-tnm_list = list(tnm_list) + ['All']
 ER_list = clinical['ER'].dropna().unique()
-ER_list = list(ER_list) + ['All']
 pr_list = clinical['PR'].dropna().unique()
-pr_list = list(pr_list) + ['All']
 Her2_list = clinical['Her2'].dropna().unique()
-Her2_list = list(Her2_list) + ['All']
 
 T_list = clinical['T'].unique()
 N_list = clinical['N'].unique()
@@ -111,7 +107,6 @@ layout = dict(
         hovermode="closest",
         showlegend=False,
 )
-
 
 
 ###########################################   Prediction model visualisations    ######################################
@@ -177,7 +172,8 @@ def generate_waffle_chart():
     plt.savefig(filename ,bbox_inches='tight', pad_inches=0) #replace 
 
 
-###########################################   Data manipulation for bills charts    ##########################r###########
+
+###########################################   Data manipulation for bills charts    ######################################
 
 #PIE CHART DE DONGXI
 gross = bills2.groupby(['Consolidated.Main.Group']).sum()
@@ -197,14 +193,16 @@ for row in average.itertuples():
 for value in list(average_list.values()):
     display_values.append("$ " + str(round(value,2)))
 
-###########################################   Data manipulation for clinical charts    ######################################
 
+
+###########################################   Data manipulation for clinical charts    ######################################
 def rename_keys(dict_, new_keys):
     """
      new_keys: type List(), must match length of dict_
     """
     d1 = dict( zip( list(dict_.keys()), new_keys) )
     return {d1[oldK]: value for oldK, value in dict_.items()}
+
 
 def calPercent(df1,columnDF,nullExist=False, *replaceWith):
     dict_list = {}
@@ -230,53 +228,11 @@ def calPercent(df1,columnDF,nullExist=False, *replaceWith):
 
     return dict_list
 
+
+
 def df_func(output,column1,column2):
     tmp = pd.DataFrame(output.items(), columns=[column1, column2])
     return tmp
-    
-def generate_tnm_chart_data(df, dc,death_cause_dict_old):
-    # for every stage in TNM_stage, it becomes the key for the MAIN dictionary
-    #assuming no nan data
-    TNM = df['Stage']
-    # TNM_Stage = TNM.dropna().unique()
-    TNM_dict={}
-
-    for stage in clinical['Stage'].unique():
-        status_dict = {}
-        # tnm_death_cause_dict = calPercent(df,dc,True,"Alive")
-
-        #every stage in Stage will have a dictionary that holds death_status as key and number of death as value
-        for life_status in death_cause_dict_old.keys():
-            tmp = df[['Stage','cause_of_death']]
-            condition1 = df[TNM==stage]
-            condition2 = tmp[(tmp['cause_of_death']==life_status) & (tmp['Stage']==stage)]
-            condition3 = tmp[(tmp['cause_of_death'].isnull()) & (tmp['Stage'] == stage)]
-            NumRecord = 0
-
-            if life_status == "Alive":
-                if len(condition1) > 0 or len(condition2) > 0:
-                    NumRecord = len(condition3)/len(condition1)*100
-            else:
-                if len(condition1) > 0 or len(condition2) > 0:
-                    NumRecord  = len(condition2)/len(condition1)*100
-                else:
-                   NumRecord = 0
-
-            status_dict[life_status] = round(NumRecord,2)
-        TNM_dict[stage] = status_dict
-
-    TNM_dict = dict(sorted(TNM_dict.items(), key=lambda x:operator.getitem(x[1],'breast cancer related')))
-    
-    # reorganize the previous dict into status for every stage
-    finalized_dict = {}
-    for status in death_cause_dict_old.keys():
-        for stage in clinical['Stage'].unique():
-            finalized_dict[status] = [v[status] for k,v in TNM_dict.items()]
-    # print(finalized_dict)
-    # print('tnm')
-    # print(TNM_dict)
-    return finalized_dict
-
 
 def generate_epr_chart_data(df):
     '''
@@ -318,8 +274,9 @@ def generate_epr_chart_data(df):
         # print(item)
         final[item[0]] = list(item[1].values())
     # print(final)
-    return final 
+    return final  
 
+###########################################################################################################################
 
 #Execution of functions for clinical
 
@@ -334,7 +291,6 @@ bins = np.arange(clinical['Age_@_Dx'].min(),clinical['Age_@_Dx'].max() + 4, 4)
 clinical['binned'] = np.searchsorted(bins, clinical['Age_@_Dx'].values)
 age_bin_count = clinical.groupby(pd.cut(clinical['Age_@_Dx'], bins=19, precision = 0, right = False)).size()
 
-finalized_dict = generate_tnm_chart_data(clinical, death_cause,death_cause_dict_old)
 er_finalized_dict = generate_epr_chart_data(clinical)
 
 #Column Race containing unusual vals - replc
@@ -342,13 +298,12 @@ clinical['Race'].replace('9', 'Unknown', inplace=True)
 clinical['Race'].replace('#N/A', 'Unknown',inplace=True)
 clinical['Race'].fillna('Unknown', inplace=True)
 Race_List = clinical['Race'].unique()
-Race_List = list(Race_List) + ['All']
+Race_List = list(Race_List) + ['All'] #Keep because makes sense to display All
+
+generate_waffle_chart()
 
 
-
-
-###############################  This Section Is For Filters  ############################################################################################
-
+###########################################################################################################################
 
 def filter_df_all(df, min1, max1, tnm_select, er_select, pr_select, her2_select, race_select):
     '''
@@ -439,7 +394,8 @@ def display_radio_btns():
         {'label': 'Kaplan Meier', 'value': 'Kaplan Meier'},
         {'label': 'Clinical', 'value': 'Clinical'},
     ],
-    value='Clinical'
+        value='Clinical',
+        inputStyle={"margin-right": "5px", 'margin-left':'10px'}
     )  
 
 
@@ -464,6 +420,13 @@ def generate_clinical_controls():
                     80: '80'
                 },
                 className="dcc_control",
+            ),
+            html.Br(),
+            html.P("Filter By Race:"),
+            dcc.Dropdown(
+                id="race_select",
+                options=[{"label":i, "value":i} for i in Race_List],
+                value=Race_List[0]
             ),
             html.Div([
                 html.Br(),
@@ -494,13 +457,6 @@ def generate_clinical_controls():
                 id="her2_select",
                 options=[{"label": i, "value": i} for i in Her2_list],
                 value=Her2_list[0]
-            ),
-            html.Br(),
-            html.P("Filter By Race:"),
-            dcc.Dropdown(
-                id="race_select",
-                options=[{"label":i, "value":i} for i in Race_List],
-                value=Race_List[0]
             ),
             html.Div([
                     html.Br(),
@@ -569,13 +525,27 @@ def generate_bills_controls():
             ),
 
             html.Br(),
-            # html.Div(
-            #     id="reset-btn-outer",
-            #     children=html.Button(id="reset-btn", children="Reset", n_clicks=0),
-            # ),
             html.Br()
         ],
     )
+
+layout = dict(
+        margin=dict(l=70, b=50, t=50, r=50),
+        modebar={"orientation": "v"},
+        font=dict(family="Open Sans"),
+        xaxis=dict(
+            side="top",
+            ticks="",
+            ticklen=2,
+            tickfont=dict(family="sans-serif"),
+            tickcolor="#ffffff",
+        ),
+        yaxis=dict(
+            side="left", ticks="", tickfont=dict(family="sans-serif"), ticksuffix=" "
+        ),
+        hovermode="closest",
+        showlegend=False,
+)
 
 
 bills_layout = dbc.Container(
@@ -666,6 +636,7 @@ clinical_layout = dbc.Container(
         ]
     )
 
+
 bills_dashboard = dbc.Container(
     [
         dbc.Row(
@@ -680,8 +651,9 @@ bills_dashboard = dbc.Container(
                                 ),
                                 dbc.CardBody(
                                     [
-                                        generate_bills_controls()
-                                    ]
+                                        generate_bills_controls(),
+                                        
+                                    ], className="bill_cardbody_layout"
                                 )
                             ], className="filter_layout"
                         )
@@ -710,7 +682,6 @@ bills_dashboard = dbc.Container(
                                                                         [
                                                                             dbc.Col(
                                                                                 #Graph 1 - Top 5 Service Departments for dataset
-                                                        
                                                                                 dcc.Graph(
                                                                                     id='expenditure-scatter',
                                                                                         figure={
@@ -744,16 +715,10 @@ bills_dashboard = dbc.Container(
                                                                                             go.Pie(
                                                                                                 labels = list(gross_list.keys()),
                                                                                                 values = list(gross_list.values())
-
-
-                                                                                                #marker = dict(color = '#97B2DE')
                                                                                             )
                                                                                         ],
                                                                                         'layout': go.Layout(
-                                                                                            title='Gross Expenditure b Category',
-
-                                                                                            #width = 500,
-                                                                                            #height = 530,
+                                                                                            title='Gross Expenditure by Category',
                                                                                             hovermode='closest'
                                                                                         ),
                                                                                         
@@ -779,10 +744,6 @@ bills_dashboard = dbc.Container(
                                                                                         ],
                                                                                         'layout': go.Layout(
                                                                                             title='Average Expenditure by Category',
-                                                                                            #xaxis = {'title': "Patient's Medical Service Types", 'automargin': True},
-                                                                                            #yaxis = {'title': 'Total Cost ($)'},
-                                                                                            #width = 500,
-                                                                                            #height = 530,
                                                                                             hovermode='closest'
                                                                                         ),
                                                                                         
@@ -829,7 +790,8 @@ clinical_dashboard = dbc.Container(
                                         html.Div([display_radio_btns()], style={'display': "inline-block"}),
                                         html.Br(),
                                         generate_clinical_controls()
-                                    ]
+
+                                    ], className="clinical_cardbody_layout"
                                 )
                             ], className="filter_layout"
                         )
@@ -1021,6 +983,7 @@ clinical_dashboard = dbc.Container(
                                                                                 )
                                                                             ]
                                                                         )
+
                                                                     ]
                                                                 )
                                                                                                 
@@ -1096,16 +1059,10 @@ card = html.Div(
 survival_layout = dbc.Container(
     [        
         dbc.Row(
-             #dbc.Col(
                 [
                     html.H1("Survival Prediction")
                 ], align="center", justify="center",
             ),   
-            
-        #),
-        html.Br(),
-        html.Br(),
-
         dbc.Row(
             [
                 dbc.Col(
@@ -1140,8 +1097,6 @@ cost_layout = dbc.Container(
             ], align="center", justify="center",
         ),  
 
-        html.Br(),
-        html.Br(),
 
         dbc.Row(
             [
@@ -1170,12 +1125,12 @@ cost_layout = dbc.Container(
 )
 
 doctor_items = [
-    dbc.DropdownMenuItem("Doctor View", href="/survival/doctor", active=True),
+    dbc.DropdownMenuItem("Doctor View", href="/survival/", active=True),
     dbc.DropdownMenuItem("Patient View", href="/survival/patient"),
 ]
 
 patient_items = [
-    dbc.DropdownMenuItem("Doctor View", href="/survival/doctor"),
+    dbc.DropdownMenuItem("Doctor View", href="/survival/"),
     dbc.DropdownMenuItem("Patient View", href="/survival/patient", active=True),
 ]
 
@@ -1189,18 +1144,13 @@ jumbotron =  '''
     </div>
     '''
 
-
-
-
 doctor_button = dbc.Container(
     [
         dbc.Row(
             [
                 dbc.Col(
                     html.Div(
-                    [
-                        html.Br(),
-                        html.Br(),
+                        [       
                         html.Div(
                             [
                                 dbc.DropdownMenu(
@@ -1225,8 +1175,7 @@ patient_button = dbc.Container(
                 dbc.Col(
                     html.Div(
                     [
-                        html.Br(),
-                        html.Br(),
+
                         html.Div(
                             [
                                 dbc.DropdownMenu(
@@ -1255,8 +1204,7 @@ def Add_Dash(server):
                         
     dash_app = dash.Dash(server=server,
                          external_stylesheets=external_stylesheets,
-                         external_scripts=external_scripts,
-                         #routes_pathname_prefix='/dashapp/'
+                         external_scripts=external_scripts
                          )
 
     dash_app.config.suppress_callback_exceptions = True
@@ -1267,15 +1215,11 @@ def Add_Dash(server):
 
     #Create Dash Layout 
     dash_app.layout = html.Div([
-
         dcc.Location(id='url', refresh=False),
         html.Div(id='page-content'),
         html.Div(id='output-graph'),
         html.Div(id='input'),
         html.Div(id='output'),
-        #dcc.Graph(id='graph-with-slider'),
-    
-
     ])
 
     #Initialize callbacks after our app is loaded
@@ -1300,72 +1244,13 @@ def init_callbacks(dash_app):
             return bills_layout, bills_dashboard
         elif pathname =="/dashboard/clinical":
             return clinical_layout, clinical_dashboard
-        elif pathname == "/results/":
-            cookies = session['received']
-            cookies = cookies.decode("utf-8")
-            group =cookies.split(",")
 
-            km = pd.read_csv('data\\kaplan_meier_by_group.csv')
-            g_os = km.loc[km['class_label'] == 'OS']
-            os = g_os.loc[g_os['group_label'] == str(group)[3:10]]
-            g_dfs = km.loc[km['class_label'] == 'DFS' ]
-            dfs = g_dfs.loc[g_dfs['group_label'] == str(group)[3:10]]
-            g_css = km.loc[km['class_label'] == 'CSS' ]
-            css = g_css.loc[g_css['group_label'] == str(group)[3:10]]
-
-            generate_waffle_chart()
-            patient = pd.read_csv("..\\middleWomen\\patient_new.csv")
-            x = patient["x"]
-            y = patient["y"]
-
-            surv4 = (go.Scatter(x=x/365.25, y=y*100, name="hv",
-                                line_shape='hv'))
-
-            #doctor's graphs
-            doctor_graphs =  html.Div(
-                [
-                    dbc.Row(
-                        dbc.Col(
-                            html.Div(
-                                [
-                                    dcc.Graph(
-                                        id="Kaplan Meier",
-                                        figure=go.Figure(
-                                                            data=[surv4],
-                                                            layout=go.Layout(
-                                                                title="Patient's Predicted Kaplan Meier Chart",
-                                                                height=400,
-                                                                width=1200,
-                                                                xaxis_range=(0, 10),
-                                                                yaxis_range=(0, 100),
-                                                                xaxis = {'title': 'Year'},
-                                                                yaxis = {'title': 'Percentage of Survival'}, 
-                                                                hovermode= "closest",
-                                                            ),
-                                                        ),
-                                    ),
-                                ],
-                            ), width = {"offset": 2}
-                        )
-                    ),
-                    
-                ]
-            )
-            
-            return survival_layout, doctor_button, doctor_graphs
-            # return something
         elif pathname == "/survival/":
             cookies = session['received']
             cookies = cookies.decode("utf-8")
-            group =cookies.split(",")
-
-            km = pd.read_csv('data\\kaplan_meier_by_group.csv')
-            g_os = km.loc[km['class_label'] == 'OS']
-            os = g_os.loc[g_os['group_label'] == str(group)[3:10]]
-            g_dfs = km.loc[km['class_label'] == 'DFS' ]
-            dfs = g_dfs.loc[g_dfs['group_label'] == str(group)[3:10]]
-            g_css = km.loc[km['class_label'] == 'CSS' ]
-            css = g_css.loc[g_css['group_label'] == str(group)[3:10]]
+            # group =cookies.split(",")
+            # # # cookie = html.H1(cookies)
+            # print(str(group)[3:10], "group 1")
 
             patient = pd.read_csv("..\\middleWomen\\patient_new.csv")
 
@@ -1379,30 +1264,42 @@ def init_callbacks(dash_app):
             doctor_graphs =  html.Div(
                 [
                     dbc.Row(
-                        dbc.Col(
-                            html.Div(
-                                [
-                                    dcc.Graph(
-                                        id="Kaplan Meier",
-                                        figure=go.Figure(
+                        [
+                            dbc.Col(
+                                html.Div(
+                                    dbc.Card(
+                                        [
+                                            dbc.CardHeader(
+                                                html.H1("Patient's Predicted Kaplan Meier Chart")
+                                            ),
+                                            dbc.CardBody(
+                                                [
+                                                    dcc.Graph(
+                                                        id="Kaplan Meier",
+                                                        figure=go.Figure(
                                                             data=[surv4],
                                                             layout=go.Layout(
-                                                                title="Patient's Predicted Kaplan Meier Chart",
-                                                                height=400,
-                                                                width=1200,
+                                                                #title="Patient's Predicted Kaplan Meier Chart",
+                                                                height=650,
+                                                                #width=700,
                                                                 xaxis_range=(0, 10),
                                                                 yaxis_range=(0, 100),
-                                                                xaxis = {'title': 'Year'},
-                                                                yaxis = {'title': 'Percentage of Survival'}, 
+                                                                xaxis = {'title': 'Year(s)'},
+                                                                yaxis = {'title': 'Percentage of Survival (%)'}, 
                                                                 hovermode= "closest",
                                                             ),
                                                         ),
-                                    ),
-                                ],
-                            ), width = {"offset": 2}
-                        )
-                    ),
-                    
+                                                    ),                                                
+                                     
+                                                ]
+                                            )
+                                        ]
+                                    )
+                                ), width={"size":8, "offset":1}
+                            )
+                        ]
+  
+                    ),                
                 ]
             )
             return survival_layout, doctor_button, doctor_graphs
@@ -1410,16 +1307,16 @@ def init_callbacks(dash_app):
             #cost outputs
             my_bills = pd.read_csv("..\\middleWomen\\bills_new.csv")
             # key = ["6 months after","1 year after","2 year after","5 years after","10 years after"]
-            key = my_bills.columns.tolist()[1:-1] #to be edited!!!!!!!!!!!!!!!!!!!!!1
+            key = my_bills.columns.tolist()[1:] #to be edited!!!!!!!!!!!!!!!!!!!!!1
             values = [my_bills[k].tolist() for k in key]
 
             #cost graphs for FC
             trace1 = go.Bar(
-                x=key,
-                y=[round(x[0],2) for x in values],
-                text=[round(x[0],2) for x in values],
-                textposition='auto',
-                name = "predicted cost"
+                                x=key,
+                                y=[round(x[0],2) for x in values],
+                                text=[round(x[0],2) for x in values],
+                                textposition='auto',
+                                name = "predicted cost"
             )
 
             trace2= go.Scatter(
@@ -1427,70 +1324,82 @@ def init_callbacks(dash_app):
             y=[round(x[0],2) for x in values],
             name = "prediction line"
             )
-
-            trace2= go.Scatter(
-            x=key,
-            y=values,
-            name = "prediction line"
-            )
             
             cost_graphs =  html.Div(
                 [
-                    
-                    dbc.Row(
-                        dbc.Col(
-                            
-                            html.Div(
+                    dbc.Container(
+                        [
+                        dbc.Row(
                             [
-                                dcc.Graph(
-                                    id='Cost Table',
-                                    figure={
-                                    'data': [
-                                        go.Table(
-                                            header=dict(values=["<b>Years</b>","<b>Cost($)</b>"],
-                                            fill_color='paleturquoise',
-                                            align='center'),
-                                            cells=dict(
-                                                values=[key, [[round(x[0],2)] for x in values]],
-                                                fill_color='white',
-                                                align='center'
-                                            )
+                                dbc.Col(
+                                    html.Div(
+                                        dbc.Card(
+                                            [
+                                                dbc.CardHeader(
+                                                    html.H2("Predicted Cost Table")
+                                                ),
+                                                dbc.CardBody(
+                                                    [
+                                                        dcc.Graph(
+                                                            id='Cost Table',
+                                                            figure={
+                                                            'data': [
+                                                                go.Table(
+                                                                    header=dict(values=["<b>Year(s)</b>","<b>Cost($)</b>"],
+                                                                    fill_color='paleturquoise',
+                                                                    align='center'),
+                                                                    cells=dict(
+                                                                        values=[key, [[round(x[0],2)] for x in values]],
+                                                                        fill_color='white',
+                                                                        align='center'
+                                                                    )
+                                                                )
+                                                            ],
+                                                            'layout':go.Layout(
+                                                                #title="Predicted Cost Table",
+                                                                #height=600,
+                                                                #width=800,
+                                                            )
+                                                        })                                                        
+                                                    ]
+                                                )
+                                            ]
                                         )
-                                    ],
-                                    'layout':go.Layout(
-                                        title="Table",
-                                        height=400,
-                                        width=1200,
-                                    )
-                                }), 
-                                ],
-                            ), width = {"size":4, "offset": 2}
-                            
-                        ),
-                    ),
-                    dbc.Row(
-                        dbc.Col(
-                            html.Div(
-                            [ 
-                                #cost bar chart
-                                dcc.Graph(
-                                    id="Cost Prediction",
-                                    figure=go.Figure(
-                                        data=[trace1,trace2],
-                                        layout=go.Layout(
-                                            title="Patient's Cost Prediction ($)",
-                                            height =400,
-                                            width=1200,
+                                    ),width = {"size":5, "offset": 1}           
+                                ),
+                                dbc.Col(
+                                    html.Div(
+                                        dbc.Card(
+                                            [
+                                                dbc.CardHeader(
+                                                    html.H2("Patient's Cost Prediction ($)")
+                                                ),
+                                                dcc.Graph(
+                                                    id="Cost Prediction",
+                                                    figure=go.Figure(
+                                                        data=[trace1,trace2],
+                                                        layout=go.Layout(
+                                                            xaxis = {'title': 'Year(s)'},
+                                                            yaxis = {'title': 'Fees Prediction ($)'},                                                             
+                                                            #title="Patient's Cost Prediction ($)",
+                                                            #height =600,
+                                                            #width=800,
 
-                                    
+                                                    
+                                                        )
+                                                    ),
+                                                )
+                                            ]
                                         )
-                                    ),
+                                    ), width={"size":5}
                                 )
-                            ],
-                            ), width = {"size":4, "offset": 2}
-                        )
+                            ]
+                        ),
+                        ]
+
                     )
                 ]
+
             )
 
         
@@ -1499,109 +1408,148 @@ def init_callbacks(dash_app):
 
             #survival outputs
             surv = pd.read_csv("..\\middleWomen\\survival.csv")
-            #Execute for waffle
+            # key = ["6 months after","1 year after","2 year after","5 years after","10 years after"]
             surv_key = surv.columns.tolist()[1:]
             surv_values = [surv[k].tolist() for k in surv_key]
-
+#HERE CHANGE !!!!!!!!!!!!!!!11
 
             trace1s = go.Bar(
                 x=surv_key,
-                y=[round(n[0],2)*100 for n in surv_values],
-                text=[round(n[0],2)*100 for n in surv_values],
+                y=[round(n[0]*100,2) for n in surv_values],
+                text=[round(n[0]*100,2) for n in surv_values],
                 textposition='auto',
                 name = "survival rate"
             )
 
             trace2s= go.Scatter(
                 x=surv_key,
-                y=[round(n[0],2)*100 for n in surv_values],
+                y=[round(n[0]*100,2) for n in surv_values],
                 name = "survival trendline"
-            )
+                )
 
 
             #patient's graphs
             patient_graphs =  html.Div(
                 [
-
-                    dbc.Row(
-                        dbc.Col(
-                            html.Div(
+                    dbc.Container(
+                        [
+                        dbc.Row(
                             [
-                                dcc.Graph(
-                                    id='Survivability Rate Table',
-                                    figure={
-                                    'data': [
-                                    go.Table(
-                                        header=dict(
-                                                values=["<b>Years</b>","<b>Survivability Rate</b>"],
-                                        fill_color='paleturquoise',
-                                        align='center'),
-                                        cells=dict(
-                                            values=[surv_key, [[round(x[0],2)*100] for x in surv_values]],
-                                            fill_color='white',
-                                            align='center')
-                                    )],
-                                    'layout': go.Layout(
-                                        height=400,
-                                        width=1200,
-                                    )
-
-
-                            }),
-                            ], 
-                        ),  width={"offset":2},
-                    ),
-                    ),
-                    dbc.Row(
-                        dbc.Col(
-                            html.Div(
-                            [
-                                dcc.Graph(
-                                    id="Survival Prediction",
-                                    figure=go.Figure(
-                                        data=[trace1s,trace2s],
-                                    layout=go.Layout(
-                                        title="Patient's Survival Rates Prediction (%)"
-                                    ),
-                                    ),
+                                dbc.Col(
+                                    html.Div(
+                                        dbc.Card(
+                                            [
+                                                dbc.CardHeader(
+                                                    html.H2("Survival Rate Table")
+                                                ),
+                                                dbc.CardBody(
+                                                    [
+                                                        dcc.Graph(
+                                                            id='Survival Rate Table',
+                                                            figure={
+                                                                'data': [
+                                                                    go.Table(
+                                                                        header=dict(
+                                                                                values=["<b>Year(s)</b>","<b>Survival Rate (%)</b>"],
+                                                                        fill_color='paleturquoise',
+                                                                        align='center'),
+                                                                        cells=dict(
+                                                                            values=[surv_key, [[round(x[0]*100,2)] for x in surv_values]],
+                                                                            fill_color='white',
+                                                                            align='center')
+                                                                    )],
+                                                                    'layout': go.Layout(
+                                                                        #title="Survival Rate Table",
+                                                                        #height=600,
+                                                                        #width=800,
+                                                                    )
+                                                                }
+                                                        ),                                                        
+                                                    ]
+                                                )
+                                            ]
+                                        )
+                                    ),width = {"size":5, "offset": 1}           
                                 ),
-                            ], 
-                            ),  width={"offset":2},
+                                dbc.Col(
+                                    html.Div(
+                                        dbc.Card(
+                                            [
+                                                dbc.CardHeader(
+                                                    html.H2("Survival Rate Chart")
+                                                ),
+                                                dbc.CardBody(
+                                                    dcc.Graph(
+                                                        id="Survival Prediction",
+                                                        figure=go.Figure(
+                                                            data=[trace1s,trace2s],
+                                                            layout=go.Layout(
+                                                            #title="Patient's Survival Rates Prediction (%)",
+                                                            #height=600,
+                                                            #width=800,
+                                                            xaxis = {'title': 'Year(s)'},
+                                                            yaxis = {'title': 'Percentage of Survival (%)'}, 
+                                                            )
+                                                        ),
+                                                    )
+                                                )
+                                            ]
+                                        )
+                                    ), width={"size":5}
+                                )
+                            ]
                         ),
-                    ),
-                    dbc.Row(
-                        dbc.Col(
-                            html.Div(
-                            [ 
-                                
-                                html.Br(),
-                                html.Img(
-                                    src=dash_app.get_asset_url('waffle-chart-survived.png'),
-                                    id="waffle-2",
-                                    style={
-                                        "height": "200px",
-                                        "width": "1000px",
-                                        "margin-bottom": "25px",
-                                        "margin-left":"px"
-                                    },
+                        dbc.Row(
+                            [
+                                dbc.Col(
+                                    
+                                    html.Div(
+                                        dbc.Card(
+                                            [
+                                                dbc.CardHeader(
+                                                    html.H2("Breast Cancer Patients Survival Rate")
+                                                ),
+                                                dbc.CardBody(
+                                                    [
+                                                        html.Div(
+                                                            [
+                                                                    html.Img(
+                                                                    src=dash_app.get_asset_url('waffle-chart-survived.png'),
+                                                                    id="waffle-2",
+                                                                    style={
+                                                                    "height": "200px",
+                                                                    "width": "1000px",
+                                                                    "margin-bottom": "25px",
+                                                                    "margin-left":"px"
+                                                                    },
+                                                                    ),
+                                                                html.P(
+                                                                    "Out of 100 random breast cancer patients, X will survive within the 10 year time period.",
+                                                                    style={"margin-left":"10%"}
+                                                                )
+                                                            ]
+                                                        )
+                                                
+                                                    ]                                              
+                                                )
+                                            ]
+                                        )
+                            
+                                    ), width ={"size":10, "offset":1}
                                 ),
-                                html.Div([
-                                    html.P("Out of 100 random breast cancer patients, X will survive within the 10 year time period.")
-                                ]), 
-                                
-                            ], 
-                            ),  width={"offset":2},
-                        ), 
-                    ),        
+  
+                            ]
+                        )
+
+                        ]
+
+                    )
                 ]
-            )  
+
+            )
+ 
             return survival_layout, patient_button, patient_graphs
-        elif pathname =="/survival/doctor":
-            cookies = session['received']
-            cookies = cookies.decode("utf-8")
-            # # # cookie = html.H1(cookies)
-            
-            return survival_layout, doctor_button, doctor_graphs
+
     #Dynamic Dropdown
     @dash_app.callback(
         dash.dependencies.Output('t_select', 'options'),
@@ -2041,10 +1989,6 @@ def init_callbacks(dash_app):
                 )
             }
 
-        # if km_os.empty or km_dfs.empty or km_css.empty:
-        #     print('no records found for such values. pls check filter inputs again.')
-        # else:
-        #     generate_waffle_km(km_os, km_dfs, km_css)
             
         return figure, figure2, figure4, figure5, figure6, figure7
 
@@ -2111,8 +2055,7 @@ def init_callbacks(dash_app):
             }
         return fig
 
-    
 
-        
+
 
 

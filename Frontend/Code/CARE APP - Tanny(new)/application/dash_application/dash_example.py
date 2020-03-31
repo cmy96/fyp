@@ -18,11 +18,21 @@ import numpy as np
 import operator
 from plotly.subplots import make_subplots
 import plotly
+
+import kaplan_meier2 as KM2
+
 import base64
 from flask import Blueprint, render_template, request, jsonify, json, redirect, session, url_for
 import flask
 import logging
 from logging.handlers import RotatingFileHandler
+import matplotlib.pyplot as plt
+from matplotlib import cm
+from pywaffle import Waffle
+import math
+import os, shutil
+from plotly.tools import mpl_to_plotly
+import dash_table
 
 
 #external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
@@ -40,178 +50,151 @@ app = dash.Dash(__name__,external_stylesheets=external_stylesheets)
 app.scripts.config.serve_locally = True
 app.css.config.serve_locally = True
 
-################## ORIGINAL DFS FOR RESULTS PAGE + BILLS DASHBOARD ##############################
-
-def rename_keys(dict_, new_keys):
-    """
-     new_keys: type List(), must match length of dict_
-    """
-    d1 = dict( zip( list(dict_.keys()), new_keys) )
-    return {d1[oldK]: value for oldK, value in dict_.items()}
-
-def calPercent(df1,columnDF,nullExist=False, *replaceWith):
-    dict_list = {}
-    values = columnDF.unique()
-    if nullExist:
-        values = np.insert(values,0,replaceWith)
-        values = np.delete(values,np.argwhere(pd.isna(values))[0][0])
-    for v in values:
-        if nullExist:
-            dict_list[v] = round((len(columnDF) - columnDF.count())/len(columnDF)*100,2)
-            nullExist = False
-            continue
-        dict_list[v] = round(len(df1[columnDF==v])/len(columnDF)*100,2)
-    
-    #sort values descendingly
-    dict_list = dict(sorted(dict_list.items(),key=operator.itemgetter(1),reverse = True))
-
-    return dict_list
-
-
-
-def df_func(output,column1,column2):
-    tmp = pd.DataFrame(output.items(), columns=[column1, column2])
-    return tmp
-
-#Create df from .csv file
-url = 'data/bills1.csv'
-url2 = 'data/OldFaithful.csv'
-df_bills = pd.read_csv(url, index_col=0)
-df_A = pd.read_csv(url2, index_col=0)
-# df = pd.read_csv("C:\\Users\\User\\Documents\\fyp\\clinical.csv")
-df = pd.read_csv('data\\clinical.csv')
-
-# rename columns
-death_cause = df['cause_of_death']
-death_cause_dict_old = calPercent(df,death_cause,True,"Alive")
-death_cause_dict = rename_keys(death_cause_dict_old,\
-                        ['Alive', 'Dead- Breast Cancer', 'Dead- Others', 'Dead- Unknown'])
-
-                        
-#Data manipulation for graph dataset
-
-##Jess's Graphs
-graph2_data = df_bills['Service.Summary..Description'].value_counts(ascending = False).head(5)
-graph2_data = graph2_data.rename_axis('unique_values').reset_index(name='counts')
-
-graph3_data = df_bills.groupby('Service.Department.Description')['Gross..exclude.GST.'].sum()
-graph3_data = graph3_data.rename_axis('Service Department').reset_index(name='Treatment Gross')
-graph3_data = graph3_data.sort_values('Treatment Gross',ascending=False).head(10)
-
-
-
-##Tanny's Graphs
-
-
-#assuming no nan data
-TNM = df['TNM_Stage']
-TNM_dict = {}
-TNM_Stage = TNM.unique()
-
-for stage in TNM_Stage:
-    status_dict = {}
-    for life_status in death_cause_dict_old.keys():
-        
-        tmp = df[['TNM_Stage','cause_of_death']]
-          
-        if life_status == "Alive":
-            if len(df[TNM==stage]) > 0 or len(tmp[(tmp['cause_of_death']==life_status) & (tmp['TNM_Stage']==stage)]) > 0:
-                NumRecord = len(tmp[(tmp['cause_of_death'].isnull()) & (tmp['TNM_Stage'] == stage)])/len(df[TNM == stage])*100
-        else:
-            if len(df[TNM==stage]) > 0 or len(tmp[(tmp['cause_of_death']==life_status) & (tmp['TNM_Stage']==stage)]) > 0:
-                NumRecord  = len(tmp[(tmp['cause_of_death']==life_status) & (tmp['TNM_Stage']==stage)])/len(df[TNM == stage])*100
-            else:
-                pass
-
-        status_dict[life_status] = round(NumRecord,2)
-    TNM_dict[stage] = status_dict
-TNM_dict = dict(sorted(TNM_dict.items(), key=lambda x:operator.getitem(x[1],'breast cancer related')))
-
-# reorganize the previous dict into status for every stage
-finalized_dict = {}
-for status in death_cause_dict_old.keys():
-    for stage in TNM_Stage:
-        finalized_dict[status] = [v[status] for k,v in TNM_dict.items()] 
-
-#Binning of diagnosed age - Tanny
-age = pd.Series(df['Age_@_Dx'])
-
-bins = np.arange(df['Age_@_Dx'].min(),df['Age_@_Dx'].max() + 4, 4)
-df['binned'] = np.searchsorted(bins, df['Age_@_Dx'].values)
-age_bin_count = df.groupby(pd.cut(df['Age_@_Dx'], bins=19, precision = 0, right = False)).size()
-
-df_age = df['Age_@_Dx']
-
-##Data for Graph 8
-ER_dict = {}
-
-ERlist = list(['positive','negative','equivocal','unknown'])
-PRlist = list(['positive','negative','equivocal','unknown'])
-for status_er in ERlist:
-    status_dict = {}
-    for status_pr in PRlist:
-        tmp = df[['ER','PR']]
-        
-        if len(df[df.ER==status_er]) > 0 or len(tmp[(tmp['ER']==status_er) & (tmp['PR']==status_pr)]) > 0:
-            NumRecord  = len(tmp[(tmp['ER']==status_er) & (tmp['PR']==status_pr)])/len(df[df['ER'] == status_er])*100
-        else:
-            pass
-
-        status_dict[status_pr] = round(NumRecord,2)
-    ER_dict[status_er] = status_dict
-
-ER_dict = dict(sorted(ER_dict.items(),key=lambda i:ERlist.index(i[0])))
-
-er_finalized_dict = {}
-for key in ER_dict.keys():
-    for value in ER_dict[key].keys():
-        er_finalized_dict[key] = [v for k,v in ER_dict[key].items()] 
-##Styling settings
-
-styles = {
-    'pre': {
-        'border': 'thin lightgrey solid',
-        'overflowX': 'scroll'
-    }
-}
-
-layout = dict(
-    autosize=True,
-    automargin=True,
-    margin=dict(l=30, r=30, b=20, t=40),
-    hovermode="closest",
-    plot_bgcolor="#F9F9F9",
-    paper_bgcolor="#F9F9F9",
-    legend=dict(font=dict(size=10), orientation="h"),
-    title="Satellite Overview"
-)
-
-#################################### END OF ORIGINAL DFS FOR RESULTS AND BILLS DASHBOARD ####################################
-
+filename = 'C:\\Users\\Jesslyn\\Documents\\GitHub\\fyp\\Frontend\\Code\\MAINAPP\\application\\assets\\waffle-chart-km.png' #where picture will be stored, replace w ur own
+if os.path.exists(filename):
+    os.remove(filename) #remove old
 
 # Path
 BASE_PATH = pathlib.Path(__file__).parent.resolve()
 DATA_PATH = BASE_PATH.joinpath("data").resolve()
 
 # Read data
-clinical = pd.read_csv(DATA_PATH.joinpath("clinical.csv"))
-bills = pd.read_csv(DATA_PATH.joinpath("dropped.csv"))
+clinical = pd.read_csv(DATA_PATH.joinpath("clinical_full_data.csv"))
+bills2 = pd.read_csv(DATA_PATH.joinpath("dropped.csv"))
+bills = pd.read_csv("data/bills.csv")
 
+listToDrop = ['NRIC','dob','Has Bills?','Side','Hospital','KKH','NCCS','SGH','END_OF_ENTRY']
+input_df = KM2.kaplan_meier_load_clinical_df(listToDrop)
 
-#Get unique vals of each col for filters
-tnm_list = clinical["TNM_Stage"].dropna().unique()
+#Set Variables
+tnm_list = clinical["Stage"].dropna().unique()
+tnm_list = list(tnm_list) + ['All']
 ER_list = clinical['ER'].dropna().unique()
+ER_list = list(ER_list) + ['All']
 pr_list = clinical['PR'].dropna().unique()
+pr_list = list(pr_list) + ['All']
 Her2_list = clinical['Her2'].dropna().unique()
+Her2_list = list(Her2_list) + ['All']
+
+T_list = clinical['T'].unique()
+N_list = clinical['N'].unique()
+M_list = clinical['M'].unique()
+
+TNM_options_dict = {'T': T_list, 'N': [], 'M': []}
+
+
+clinical.dropna(axis=0,subset=['Age_@_Dx'],inplace=True)
 clinical['Age_@_Dx'] = clinical['Age_@_Dx'].astype(int)
+max_patient_num = len(bills2['Case.No'])
+jumbotron =  '''
+    <div class="jumbotron jumbo">
+        <h1 class="display-4">Filters</h1>
+        <p><h4>Filter by:</h4></p>
+        </br>
+        <p><h6>Service</h6></p>
+    </div>
+    '''
+layout = dict(
+        margin=dict(l=70, b=50, t=50, r=50),
+        modebar={"orientation": "v"},
+        font=dict(family="Open Sans"),
+        xaxis=dict(
+            side="top",
+            ticks="",
+            ticklen=2,
+            tickfont=dict(family="sans-serif"),
+            tickcolor="#ffffff",
+        ),
+        yaxis=dict(
+            side="left", ticks="", tickfont=dict(family="sans-serif"), ticksuffix=" "
+        ),
+        hovermode="closest",
+        showlegend=False,
+)
+
+
+###########################################   Prediction model visualisations    ######################################
+
+
+def generate_waffle_chart():
+    '''
+        parameters: waffle2data should be the output of survival model
+        return: waffle chart image in assets folder (for results page to extract)
+    '''
+    #set the vars needed
+    populate_this_dict = {'0.5 years': 0, '1 years': 0, '2 years': 0, '5 years':0, '10 years':0} #this is done to set the initial dict. Populate w the actual values to pass the chart printer.
+    list_of_dict_keys = list(populate_this_dict.keys()) #retrieve all the keys, convert to list
+    to_sum = []
+
+    waffle2data = pd.read_csv("..\\middleWomen\\survival.csv") #extract model predictions survival csv
+    waffle2data.drop("Unnamed: 0", axis=1, inplace=True) #drop extra col
+    print("WAFFLE DATA")
+    print(waffle2data)
+
+    #Arithmetics - still need old cols, replace old cols at end.
+    # all values in waffle2data(survival rate in deci) * 100 to convert to % 
+    # Here we will take prev num minus next num and absolute it
+    # find out who is left out of the original pool of 100%
+    for i in range(len(list_of_dict_keys)):
+        if i == 0:
+            populate_this_dict[list_of_dict_keys[i]] = int(abs(100 - (waffle2data[list_of_dict_keys[i]]*100)))
+            to_sum.append(populate_this_dict[list_of_dict_keys[i]])
+        elif i < len(list_of_dict_keys)-1:
+            populate_this_dict[list_of_dict_keys[i]] = int(abs((waffle2data[list_of_dict_keys[i-1]]*100)- (waffle2data[list_of_dict_keys[i]] * 100)))
+            to_sum.append(populate_this_dict[list_of_dict_keys[i]])
+        elif i == len(list_of_dict_keys)-1:
+            survived = 100 - sum(to_sum) #100% - sum of all values in dict, note tt current value of survived10yrs = 0
+            populate_this_dict[list_of_dict_keys[i]] = survived
+        else:
+            print('i is an invalid value')
+        
+    print("this will be passed to the chart gen", populate_this_dict)
+    populate_this_dict = rename_keys(populate_this_dict, ['Dead - in 6 months', 'Dead - 1 year', 'Dead - 2 years', 'Dead - 5 years', 'Survived - 10 years'])
+    output = populate_this_dict
+
+    plt.figure(
+            FigureClass=Waffle, 
+            rows=5, 
+            values=output, 
+            colors= ['#800000', '#FF0000', '#F08080', '#FFA07A', '#3CB371'],
+            legend={
+                'labels': ["{0} ({1})".format(k, v) for k, v in output.items()],
+                'loc': 'upper left', 'bbox_to_anchor': (1, 1)},
+            icons='child', icon_size=14, 
+            icon_legend=True,
+            figsize=(10, 9)
+            ,
+            title={
+            'label': 'Survival Rates for Breast Cancer Patients ',
+            'loc': 'center',
+            'fontdict':{'fontsize':8
+            }}
+    )
+    filename = 'C:\\Users\\Jesslyn\\Documents\\GitHub\\fyp\\Frontend\\Code\\MAINAPP\\application\\assets\\waffle-chart-survived.png' #where picture will be stored
+    if os.path.exists(filename):
+        os.remove(filename) #remove old
+    plt.savefig(filename ,bbox_inches='tight', pad_inches=0) #replace 
+
 
 ###########################################   Data manipulation for bills charts    ######################################
-gross = bills.groupby(['Consolidated.Main.Group']).sum()
+
+#PIE CHART DE DONGXI
+gross = bills2.groupby(['Consolidated.Main.Group']).sum()
 gross_list = {}
 for row in gross.itertuples():
-    gross_list[row.Index] = row[2]
+    gross_list[row.Index] = row[1]
 
 category_list = list(gross_list.keys())
+
+#BAR CHART DE DONGXI
+average = bills2.groupby(['Consolidated.Main.Group']).mean()
+average_list = {}
+display_values = []
+for row in average.itertuples():
+    average_list[row.Index] = row[1]
+
+for value in list(average_list.values()):
+    display_values.append("$ " + str(round(value,2)))
 
 
 
@@ -229,79 +212,30 @@ def calPercent(df1,columnDF,nullExist=False, *replaceWith):
     values = columnDF.unique()
     if nullExist:
         values = np.insert(values,0,replaceWith)
-        values = np.delete(values,np.argwhere(pd.isna(values))[0][0])
+        checker = False
+        for i in range(len(values)):
+            if isinstance(values[i],float):
+                checker = True
+        if checker:
+            values = np.delete(values,np.argwhere(pd.isna(values))[0][0])
+
     for v in values:
         if nullExist:
             dict_list[v] = round((len(columnDF) - columnDF.count())/len(columnDF)*100,2)
             nullExist = False
             continue
-        newdf= df1[columnDF == v]
-        dict_list[v] = round(len(newdf)/len(columnDF)*100,2)
-
+        dict_list[v] = round(len(df1[columnDF==v])/len(columnDF)*100,2)
+    
     #sort values descendingly
     dict_list = dict(sorted(dict_list.items(),key=operator.itemgetter(1),reverse = True))
 
     return dict_list
 
-# # this has null
-death_cause = clinical['cause_of_death']
-death_cause_dict_old = calPercent(clinical,death_cause,True,"Alive")
-death_cause_dict = rename_keys(death_cause_dict_old,\
-                       death_cause.unique())
 
 
-#Binning of diagnosed age - Tanny
-bins = np.arange(clinical['Age_@_Dx'].min(),clinical['Age_@_Dx'].max() + 4, 4)
-clinical['binned'] = np.searchsorted(bins, clinical['Age_@_Dx'].values)
-age_bin_count = clinical.groupby(pd.cut(clinical['Age_@_Dx'], bins=19, precision = 0, right = False)).size()
-
-
-
-
-
-def generate_tnm_chart_data(df, dc):
-    # for every stage in TNM_stage, it becomes the key for the MAIN dictionary
-    #assuming no nan data
-    TNM = df['TNM_Stage']
-    # TNM_Stage = TNM.dropna().unique()
-    TNM_dict={}
-
-    for stage in clinical['TNM_Stage'].dropna().unique():
-        status_dict = {}
-        # tnm_death_cause_dict = calPercent(df,dc,True,"Alive")
-
-        #every stage in tnm_stage will have a dictionary that holds death_status as key and number of death as value
-        for life_status in death_cause_dict_old.keys():
-            tmp = df[['TNM_Stage','cause_of_death']]
-            condition1 = df[TNM==stage]
-            condition2 = tmp[(tmp['cause_of_death']==life_status) & (tmp['TNM_Stage']==stage)]
-            condition3 = tmp[(tmp['cause_of_death'].isnull()) & (tmp['TNM_Stage'] == stage)]
-            NumRecord = 0
-
-            if life_status == "Alive":
-                if len(condition1) > 0 or len(condition2) > 0:
-                    NumRecord = len(condition3)/len(condition1)*100
-            else:
-                if len(condition1) > 0 or len(condition2) > 0:
-                    NumRecord  = len(condition2)/len(condition1)*100
-                else:
-                   NumRecord = 0
-
-            status_dict[life_status] = round(NumRecord,2)
-        TNM_dict[stage] = status_dict
-
-    TNM_dict = dict(sorted(TNM_dict.items(), key=lambda x:operator.getitem(x[1],'breast cancer related')))
-    
-    # reorganize the previous dict into status for every stage
-    finalized_dict = {}
-    for status in death_cause_dict_old.keys():
-        for stage in clinical['TNM_Stage'].dropna().unique():
-            finalized_dict[status] = [v[status] for k,v in TNM_dict.items()]
-    # print(finalized_dict)
-    # print('tnm')
-    # print(TNM_dict)
-    return finalized_dict
-
+def df_func(output,column1,column2):
+    tmp = pd.DataFrame(output.items(), columns=[column1, column2])
+    return tmp
 
 def generate_epr_chart_data(df):
     '''
@@ -343,47 +277,137 @@ def generate_epr_chart_data(df):
         # print(item)
         final[item[0]] = list(item[1].values())
     # print(final)
-    return final 
+    return final  
 
 ###########################################################################################################################
 
-def filter_df(df, min1, max1, tnm_select, er_select, pr_select, her2_select):
+#Execution of functions for clinical
+
+# # this has null
+death_cause = clinical['cause_of_death']
+death_cause_dict_old = calPercent(clinical,death_cause,True,"Alive")
+death_cause_dict = rename_keys(death_cause_dict_old,\
+                       death_cause.unique())
+
+# (Hover) Binning of diagnosed age - Tanny
+bins = np.arange(clinical['Age_@_Dx'].min(),clinical['Age_@_Dx'].max() + 4, 4)
+clinical['binned'] = np.searchsorted(bins, clinical['Age_@_Dx'].values)
+age_bin_count = clinical.groupby(pd.cut(clinical['Age_@_Dx'], bins=19, precision = 0, right = False)).size()
+
+finalized_dict = generate_tnm_chart_data(clinical, death_cause,death_cause_dict_old)
+er_finalized_dict = generate_epr_chart_data(clinical)
+
+#Column Race containing unusual vals - replc
+clinical['Race'].replace('9', 'Unknown', inplace=True)
+clinical['Race'].replace('#N/A', 'Unknown',inplace=True)
+clinical['Race'].fillna('Unknown', inplace=True)
+Race_List = clinical['Race'].unique()
+Race_List = list(Race_List) + ['All']
+
+
+
+
+###########################################################################################################################
+
+def filter_df_all(df, min1, max1, tnm_select, er_select, pr_select, her2_select, race_select):
     '''
         df:dataframe
         age_slider: slider values in a tuple (min, max) - use age_slider[0 or 1] to extract
         er_status: str
         pr_status: str
         her2_status: str
-
+        race_selec: str
         Purpose of this function filters the full dataset, clinical, using the variables given in the filter panel of the application.
 
     '''
-    condition = (df['Age_@_Dx'] < max1) & (df['Age_@_Dx'] > min1) & (df['ER'] == er_select) & (df['PR'] == pr_select) & (df['TNM_Stage'] == tnm_select) & (df['Her2'] == her2_select)
+    #checking for parameter == 'All' in params
+    dict_tmp = {
+                    'ER': er_select,
+                    'PR': pr_select,
+                    'Stage': tnm_select,
+                    'Her2': her2_select,
+                    'Race': race_select
+                }
+    condition = (df['Age_@_Dx'] <= max1) & (df['Age_@_Dx'] >= min1) 
     output = df[condition]
+    for k,v in dict_tmp.items():
+        if v != "All":
+            output = output[(output[k] == v)]
+
     return output
 
-def description_card():
-    """
-    :return: A Div containing dashboard title & descriptions.
-    """
-    return html.Div(
-        id="description-card",
-        children=[
-            html.H5("Clinical Dataset Analysis"),
-            html.H3("Welcome to the Summary Dashboard"),
-            html.Div(
-                id="intro",
-                children="The clinical dataset contains past records of breast cancer patients, which doctors can explore with filters for attributes: Age, TNM stage, ER status, PR status and HER2 status.",
-            ),
-        ],
-    )
+def filter_df_wo_stage(df, min1, max1, er_select, pr_select, her2_select, race_select):
+    '''
+        Same functionality as filter_df_all without tnm stage
+        This is for a specific graph - TNM Stage Alive VS Dead
+    '''
+    dict_tmp = {
+                    'ER': er_select,
+                    'PR': pr_select,
+                    'Her2': her2_select,
+                    'Race': race_select
+    }
+    condition = (df['Age_@_Dx'] <= max1) & (df['Age_@_Dx'] >= min1) 
+    output = df[condition]
+    for k,v in dict_tmp.items():
+        if v != "All":
+            output = output[(output[k] == v)]
+    return output
 
-def generate_controls():
+def filter_df_epr_chart(df, min1, max1, tnm_select):
+    '''
+        Same function as filter_df_all as well.
+        This is for the relationship between er & pr chart.
+    
+    '''
+    dict_tmp = {'Stage': tnm_select}
+    condition = (df['Age_@_Dx'] <= max1) & (df['Age_@_Dx'] >= min1) 
+    output = df[condition]
+    for k,v in dict_tmp.items():
+        if v != "All":
+            output = output[(output[k] == v)]
+    return output
+
+
+
+def cost_scatter_data(min_n, max_n):
+    '''
+        Total Gross Cost Dataset Generator.
+        For selected number of patients, show scatter plot
+    ''' 
+    scatter = bills2.groupby(['Case.No']).sum()
+    scatter = scatter.reset_index()
+    # print(scatter)
+    new_scatter = scatter[min_n:max_n]
+    
+    scatter_list = {} #convert new_scatter to dictionary
+    for row in new_scatter.itertuples():
+        scatter_list[row.Index] = row[1]
+
+    # pd.DataFrame.from_dict(scatter_list)
+
+    return new_scatter
+
+def display_radio_btns():
+    '''
+        returns radio buttons selector to show TNM filter for Kaplan
+    '''
+    return dcc.RadioItems(
+    id='radio-list',
+    options=[
+        {'label': 'Kaplan Meier', 'value': 'Kaplan Meier'},
+        {'label': 'Clinical', 'value': 'Clinical'},
+    ],
+    value='Clinical'
+    )  
+
+
+def generate_clinical_controls():
     """
     :return: A Div containing controls for graphs.
     """
     return html.Div(
-        id="control-card",
+        id="control-card-clinical",
         children=[
             html.P("Filter by Age"),
             dcc.RangeSlider(
@@ -400,13 +424,15 @@ def generate_controls():
                 },
                 className="dcc_control",
             ),
-            html.Br(),
-            html.P("Select TNM Stage"),
-            dcc.Dropdown(
-                id="tnm_select",
-                options= [{"label": i, "value": i} for i in tnm_list],
-                value=tnm_list[1],
-            ),
+            html.Div([
+                html.Br(),
+                html.P("Select TNM Stage"),
+                dcc.Dropdown(
+                    id="tnm_select",
+                    options= [{"label": i, "value": i} for i in tnm_list],
+                    value=tnm_list[1]
+                ),
+            ],style={'display':'block'}),
             html.Br(),
             html.P("Select ER status"),
             dcc.Dropdown(
@@ -429,21 +455,52 @@ def generate_controls():
                 value=Her2_list[0]
             ),
             html.Br(),
-            html.Div(
-                id="reset-btn-outer",
-                children=html.Button(id="reset-btn", children="Reset", n_clicks=0),
+            html.P("Filter By Race:"),
+            dcc.Dropdown(
+                id="race_select",
+                options=[{"label":i, "value":i} for i in Race_List],
+                value=Race_List[0]
             ),
-            html.Br()
+            html.Div([
+                    html.Br(),
+                    html.P("Select T Stage:"),
+                    dcc.Dropdown(
+                        id="t_select",
+                        value=[],
+                        style={'display': 'none'}
+                    )
+                ]
+            ),
+            html.Div([
+                    html.Br(),
+                    html.P("Select N Stage:"),
+                    dcc.Dropdown(
+                        id="n_select",
+                        value=[],
+                        style={'display':'none'}
+                    )
+                ]
+            ),
+            html.Div([
+                html.Br(),
+                html.P("Select M Stage:"),
+                dcc.Dropdown(
+                    id="m_select",
+                    value=[],
+                    style={'display':'none'}
+                ),
+            ]),
+            
         ],
     )
 
 
 def generate_bills_controls():
     """
-    :return: A Div containing controls for graphs.
+    :return: A Div containing controls for graphs. (Bills)
     """
     return html.Div(
-        id="control-card",
+        id="control-card-bills",
         children=[
 
             html.Br(),
@@ -454,12 +511,27 @@ def generate_bills_controls():
                 value=category_list,
                 labelStyle={'display': 'block'}
             ),
+            html.Br(),
+            html.P('Select Sample Size For Scatter Plot:'),
+            dcc.RangeSlider(
+                            id="cost_slider",
+                            min=0,
+                            max=10000,
+                            value=[3000, 6500],
+                            marks={
+                                0: '0',
+                                2000: '2000',
+                                4000: '4000',
+                                6000: '6000',
+                                8000: '8000'
+                            }
+            ),
 
             html.Br(),
-            html.Div(
-                id="reset-btn-outer",
-                children=html.Button(id="reset-btn", children="Reset", n_clicks=0),
-            ),
+            # html.Div(
+            #     id="reset-btn-outer",
+            #     children=html.Button(id="reset-btn", children="Reset", n_clicks=0),
+            # ),
             html.Br()
         ],
     )
@@ -482,8 +554,6 @@ layout = dict(
         showlegend=False,
 )
 
-finalized_dict = generate_tnm_chart_data(clinical, death_cause)
-er_finalized_dict = generate_epr_chart_data(clinical)
 
 bills_layout = dbc.Container(
         [
@@ -614,39 +684,39 @@ bills_dashboard = dbc.Container(
                                                         dbc.CardBody(
                                                             [
                                                                 dbc.Container(
+                                                                    [
                                                                     dbc.Row(
                                                                         [
                                                                             dbc.Col(
                                                                                 #Graph 1 - Top 5 Service Departments for dataset
-                                                                                dcc.Graph( 
-                                                                                    id='service_5',
-                                                                                    figure = {
-                                                                                        
-                                                                                        'data':[
-                                                                                            go.Bar(
-                                                                                                y= graph2_data['counts'],
-                                                                                                x= graph2_data['unique_values'],
-                                                                                                text= list(graph2_data['counts']),
-                                                                                                textposition='inside',
-                                                                                                marker = dict(color = '#97B2DE')
-                                                                                            )
-                                                                                        ],
-                                                                                        'layout': go.Layout(
-                                                                                            title = 'Top 5 Patient Expenditures By Service',
-                                                                                            xaxis = {'title': 'Number of patients','automargin': True},
-                                                                                            yaxis=go.layout.YAxis(
-                                                                                                title="Patient's Medical Service Types",
-                                                                                                automargin=True,
-                                                                                                titlefont=dict(size=15.5),
-                                                                                            ),
-                                                                                            hovermode='closest'
-                                                                                        )
-                                                                                    }
-                                                                                )
+                                                                                dcc.Graph(
+                                                                                    id='expenditure-scatter',
+                                                                                        figure={
+                                                                                            'data':
+                                                                                                [
+                                                                                                    go.Scatter(                
+                                                                                                        x= [],
+                                                                                                        y=[],
+                                                                                                        mode='markers',
+                                                                                                        marker=dict(
+                                                                                                            size=12,
+                                                                                                            color=np.random.randn(100000), #set color equal to a variable
+                                                                                                            colorscale='Viridis', # one of plotly colorscales
+                                                                                                            showscale=True
+                                                                                                        )
+                                                                                                    ),
+                                                                                                ],
+                                                                                            'layout': go.Layout(
+                                                                                                title = "Distribution of patient expenditure",
+                                                                                                xaxis = {'title': 'Patient ID'},
+                                                                                                yaxis = {'title': 'Patient expenditure ($)'})
+                                                                                            },                
+                                                                                    )
+                                                                                
                                                                             ),
                                                                             dbc.Col(
                                                                                 dcc.Graph(
-                                                                                    id='gros_service',
+                                                                                    id='svc-pie-chart',
                                                                                     figure={
                                                                                         'data': [
                                                                                             go.Pie(
@@ -669,7 +739,37 @@ bills_dashboard = dbc.Container(
                                                                                 )
                                                                             )
                                                                         ]
+                                                                    ),
+                                                                    dbc.Row(
+                                                                        [
+                                                                            dbc.Col(
+                                                                                dcc.Graph(
+                                                                                    id='average_service',
+                                                                                    figure={
+                                                                                        'data': [
+                                                                                            go.Bar(
+                                                                                                x= list(average_list.keys()),
+                                                                                                y= list(average_list.values()),
+                                                                                                text=display_values,
+                                                                                                textposition='auto',
+                                                                                                marker={'color': list(average_list.values()),'colorscale': 'RdBu'}
+                                                                                            )
+                                                                                        ],
+                                                                                        'layout': go.Layout(
+                                                                                            title='Average Expenditure by Category',
+                                                                                            #xaxis = {'title': "Patient's Medical Service Types", 'automargin': True},
+                                                                                            #yaxis = {'title': 'Total Cost ($)'},
+                                                                                            #width = 500,
+                                                                                            #height = 530,
+                                                                                            hovermode='closest'
+                                                                                        ),
+                                                                                        
+                                                                                    }
+                                                                                ),
+                                                                            )
+                                                                        ]
                                                                     )
+                                                                    ]
                                                                 )
                                                             ]
                                                         )
@@ -704,7 +804,10 @@ clinical_dashboard = dbc.Container(
                                 ),
                                 dbc.CardBody(
                                     [
-                                        generate_controls()
+                                        html.Div([display_radio_btns()], style={'display': "inline-block"}),
+                                        html.Br(),
+                                        generate_clinical_controls()
+
                                     ], className="clinical_cardbody_layout"
                                 )
                             ], className="filter_layout"
@@ -790,63 +893,6 @@ clinical_dashboard = dbc.Container(
                                                                             [
                                                                                 dbc.Col(
                                                                                     dcc.Graph(
-                                                                                        id="tnm-stage-stacked-bar",
-                                                                                        figure={
-                                                                                            'data': [
-                                                                                            go.Bar(
-                                                                                                    x= finalized_dict['Alive'],
-                                                                                                    y= clinical['TNM_Stage'].dropna().unique(),
-                                                                                                    name='Alive',
-                                                                                                    orientation='h',
-                                                                                                    marker=dict(
-                                                                                                    color='lightgreen',
-                                                                                                    line=dict(color='lightgreen', width=3)
-                                                                                                    )
-                                                                                                ),
-                                                                                                go.Bar(
-                                                                                                    x= finalized_dict['breast cancer related'],
-                                                                                                    y= clinical['TNM_Stage'].dropna().unique(),
-                                                                                                    name='Dead- Breast cancer related',
-                                                                                                    orientation='h',
-                                                                                                    marker=dict(
-                                                                                                    color='lightcoral',
-                                                                                                    line=dict(color='lightcoral', width=3)
-                                                                                                    )
-                                                                                                ),
-                                                                                                go.Bar(
-                                                                                                    x=finalized_dict['n'],
-                                                                                                    y= clinical['TNM_Stage'].dropna().unique(),
-                                                                                                    name='Dead',
-                                                                                                    orientation='h',
-                                                                                                    marker=dict(
-                                                                                                    color='indianred',
-                                                                                                    line=dict(color='indianred', width=3)
-                                                                                                    )
-                                                                                                ),
-                                                                                                go.Bar(
-                                                                                                    x= finalized_dict['unknown'],
-                                                                                                    y= clinical['TNM_Stage'].dropna().unique(),
-                                                                                                    name='Unknown',
-                                                                                                    orientation='h',
-                                                                                                    marker=dict(
-                                                                                                    color='lightslategrey',
-                                                                                                    line=dict(color='lightslategrey', width=3)
-                                                                                                    )
-                                                                                                )
-                                                                                            ],
-                                                                                            'layout': go.Layout(
-                                                                                                title = "TNM Stage Alive Vs Dead",
-                                                                                                xaxis = {'title': 'Percentage of Patients'},
-                                                                                                yaxis = {'title': 'Cancer Stages'},
-                                                                                                hovermode='closest',
-                                                                                                barmode='stack',
-                                                                                                showlegend=False
-                                                                                            )
-                                                                                        }
-                                                                                    ),
-                                                                                ),
-                                                                                dbc.Col(
-                                                                                    dcc.Graph(
                                                                                         id='er_pr_chart',
                                                                                         figure={
                                                                                             'data': [
@@ -902,7 +948,59 @@ clinical_dashboard = dbc.Container(
                                                                                     ),
                                                                                 )
                                                                             ]
+                                                                        ),
+                                                                        dbc.Row([
+                                                                                dbc.Col(
+                                                                                    dcc.Graph(
+                                                                                        id="OS_KM",
+                                                                                        figure=go.Figure(
+                                                                                                            data=[],
+                                                                                                            layout=go.Layout(
+                                                                                                                title="Patient's Overall Survival Kaplan Meier Chart",
+                                                                                                                height=400,
+                                                                                                                width=1200,  
+                                                                                                                xaxis = {'title': 'Year'},
+                                                                                                                yaxis = {'title': 'Percentage of Survival'},
+                                                                                                                hovermode= "closest",
+                                                                                                            ),
+                                                                                                        ),
+                                                                                    ),
+                                                                                ),
+                                                                                dbc.Col(
+                                                                                    dcc.Graph(
+                                                                                        id="CSS_KM",
+                                                                                        figure=go.Figure(
+                                                                                                            data=[],
+                                                                                                            layout=go.Layout(
+                                                                                                                title="Patient's Cancer Specific Survival Kaplan Meier Chart",
+                                                                                                                height=400,
+                                                                                                                width=1200,
+                                                                                                                xaxis = {'title': 'Year'},
+                                                                                                                yaxis = {'title': 'Percentage of Survival'}, 
+                                                                                                                hovermode= "closest",
+                                                                                                            ),
+                                                                                                        ),
+                                                                                    ),
+                                                                                ),
+                                                                                dbc.Col(
+                                                                                    dcc.Graph(
+                                                                                        id="DFS_KM",
+                                                                                        figure=go.Figure(
+                                                                                                            data=[],
+                                                                                                            layout=go.Layout(
+                                                                                                                title="Patient's Disease-Free Survival Kaplan Meier Chart",
+                                                                                                                height=400,
+                                                                                                                width=1200,
+                                                                                                                xaxis = {'title': 'Year'},
+                                                                                                                yaxis = {'title': 'Percentage of Survival'},                                                                
+                                                                                                                hovermode= "closest",
+                                                                                                            ),
+                                                                                                        ),
+                                                                                    )
+                                                                                )
+                                                                            ]
                                                                         )
+
                                                                     ]
                                                                 )
                                                                                                 
@@ -1223,7 +1321,7 @@ def init_callbacks(dash_app):
                                             )
                                         ]
                                     )
-                                ), width={"size":8, "offset":1}
+                                ), width={"size":10, "offset":1}
                             )
                         ]
   
@@ -1441,21 +1539,18 @@ def init_callbacks(dash_app):
                                                     [
                                                         html.Div(
                                                             [
-                                                                html.Img(
-                                                                    src=app.get_asset_url('waffle2.png'),
+                                                                    html.Img(
+                                                                    src=dash_app.get_asset_url('waffle-chart-survived.png'),
                                                                     id="waffle-2",
                                                                     style={
-                                                                        "height": "400px",
-                                                                        "width": "80%",
-                                                                        "margin-bottom": "50px",
-                                                                        "margin-left": "10%",
-                                                                        "margin-right": "10%",
-                                                                        "margin-top": "50px",
-                                                                        "textAlign": "center"
+                                                                    "height": "200px",
+                                                                    "width": "1000px",
+                                                                    "margin-bottom": "25px",
+                                                                    "margin-left":"px"
                                                                     },
-                                                                ),
+                                                                    ),
                                                                 html.P(
-                                                                    "Out of 100 random breast cancer patients, 95 will survive within the 10 year time period.",
+                                                                    "Out of 100 random breast cancer patients, X will survive within the 10 year time period.",
                                                                     style={"margin-left":"10%"}
                                                                 )
                                                             ]
@@ -1481,42 +1576,311 @@ def init_callbacks(dash_app):
  
             return survival_layout, patient_button, patient_graphs
 
+    #Dynamic Dropdown
+    @dash_app.callback(
+        dash.dependencies.Output('t_select', 'options'),
+        [
+            dash.dependencies.Input('age_slider', 'value'),
+            dash.dependencies.Input('er_select','value'),
+            dash.dependencies.Input('pr_select','value'),
+            dash.dependencies.Input('her2_select','value'),
+            dash.dependencies.Input('race_select','value')
+        ]
+    )
+    def update_t_dropdown(age_slider, er_select, pr_select, her2_select, race_select):
+        #This Is Filtered according to available values in dataset
+        #filter full dataset by selected val, get available values in N column
+        #Assuming T, N, M stages that were entered were all vald and according to ajcc staging
+        max1=age_slider[1]
+        min1 = age_slider[0]
+
+        condition = (input_df['Age_@_Dx'] <= max1) & (input_df['Age_@_Dx'] >= min1)
+        output = input_df[condition]
+
+        dict_tmp2 = {
+            'ER': er_select,
+            'PR': pr_select,
+            'Her2': her2_select,
+            'Race': race_select,
+        }
+
+        for k,v in dict_tmp2.items():
+    
+            if v != "All":
+                output = output[(output[k] == v)]
+
+        valid = list(output['T'].unique()) 
+        return [{'label': i, 'value': i} for i in valid] 
+
+    #Dynamic Dropdown
+    @dash_app.callback(
+        dash.dependencies.Output('n_select', 'options'),
+        [
+            dash.dependencies.Input('age_slider', 'value'),
+            dash.dependencies.Input('er_select','value'),
+            dash.dependencies.Input('pr_select','value'),
+            dash.dependencies.Input('her2_select','value'),
+            dash.dependencies.Input('race_select','value'),
+            dash.dependencies.Input('t_select', 'value')
+        ]
+    )
+    def update_n_dropdown(age_slider, er_select, pr_select, her2_select, race_select,t_value):
+        #This Is Filtered according to available values in dataset
+        #filter full dataset by selected val, get available values in N column
+        #Assuming T, N, M stages that were entered were all vald and according to ajcc staging
+        max1=age_slider[1]
+        min1 = age_slider[0]
+
+        condition = (input_df['Age_@_Dx'] <= max1) & (input_df['Age_@_Dx'] >= min1)
+        output = input_df[condition]
+
+        dict_tmp2 = {
+            'ER': er_select,
+            'PR': pr_select,
+            'Her2': her2_select,
+            'Race': race_select,
+            'T': t_value
+        }
+
+        for k,v in dict_tmp2.items():
+            if v != "All":
+                output = output[(output[k] == v)]
+        valid = list(output['N'].unique()) #Get valid N based on  T values entered
+        return [{'label': i, 'value': i} for i in valid] #populate N dropdown with new n values
+
+    @dash_app.callback(
+        dash.dependencies.Output('m_select', 'options'),
+        [
+            dash.dependencies.Input('age_slider', 'value'),
+            dash.dependencies.Input('er_select','value'),
+            dash.dependencies.Input('pr_select','value'),
+            dash.dependencies.Input('her2_select','value'),
+            dash.dependencies.Input('race_select','value'),
+            dash.dependencies.Input('t_select', 'value'),
+            dash.dependencies.Input('n_select', 'value'),
+        ])
+    def update_m_dropdown(age_slider, er_select, pr_select, her2_select, race_select,t_value, n_value ):
+        #optimise code later - delete repeated code
+        max1=age_slider[1]
+        min1 = age_slider[0]
+
+        condition = (input_df['Age_@_Dx'] <= max1) & (input_df['Age_@_Dx'] >= min1)
+        output = input_df[condition]
+
+        dict_tmp = {
+            'ER': er_select,
+            'PR': pr_select,
+            'Her2': her2_select,
+            'Race': race_select,
+            'T': t_value,
+            'N': n_value
+        }
+
+        for k,v in dict_tmp.items():
+            if v != "All":
+                output = output[(output[k] == v)]
+
+        valid = list(output['M'].unique())
+        return [{'label': i, 'value': i} for i in valid]
+    
+    @dash_app.callback(
+        dash.dependencies.Output('t_select', 'style'),
+        [dash.dependencies.Input('radio-list','value')]
+    )
+    def toggle_dd_visibility(visible):
+        if visible == 'Kaplan Meier':
+            return {'display':'block'}
+        if visible == 'Clinical':
+            return {'display':'none'}
+    
+    @dash_app.callback(
+        dash.dependencies.Output(component_id='n_select', component_property='style'),
+        [dash.dependencies.Input('radio-list','value')]
+    )
+    def toggle_d2_visibility(vi):
+        if vi == 'Kaplan Meier':
+            return {'display':'block'}
+        if vi == 'Clinical':
+            return {'display':'none'}
+
+    @dash_app.callback(
+        dash.dependencies.Output(component_id='m_select', component_property='style'),
+        [dash.dependencies.Input('radio-list','value')]
+    )
+    def toggle_d3_visibility(vis):
+        if vis == 'Kaplan Meier':
+            return {'display':'block'}
+        if vis == 'Clinical':
+            return {'display':'none'}
+    
+
+    @dash_app.callback(
+        dash.dependencies.Output('tnm_select','style'),
+        [dash.dependencies.Input('radio-list','value')]
+    )
+    def toggle_dropdown(v):
+        if v == 'Kaplan Meier':
+            return {'display':'none'}
+        if v == 'Clinical':
+            return {'display':'block'}
+
     @dash_app.callback(
         [
             dash.dependencies.Output('age-distribution-hist', 'figure'),
             dash.dependencies.Output('alive_dead_bar','figure'),
-            dash.dependencies.Output('tnm-stage-stacked-bar', 'figure'),
-            dash.dependencies.Output('er_pr_chart','figure')
+            dash.dependencies.Output('er_pr_chart','figure'),
+            dash.dependencies.Output('OS_KM','figure'),
+            dash.dependencies.Output('CSS_KM','figure'),
+            dash.dependencies.Output('DFS_KM','figure')
         ],
         [
             dash.dependencies.Input('age_slider', 'value'),
             dash.dependencies.Input('tnm_select','value'),
             dash.dependencies.Input('er_select','value'),
             dash.dependencies.Input('pr_select','value'),
-            dash.dependencies.Input('her2_select','value')
+            dash.dependencies.Input('her2_select','value'),
+            dash.dependencies.Input('race_select','value'),
+            dash.dependencies.Input('t_select','value'),
+            dash.dependencies.Input('n_select','value'),
+            dash.dependencies.Input('m_select','value')
         ]
     )
 
-    
-    def update_all(age_slider,tnm_select, er_select, pr_select, her2_select):
+    def update_clinical(age_slider,tnm_select, er_select, pr_select, her2_select, race_select,t_select,n_select,m_select ):
+
+        filters_dict = {
+                    "age_lower": age_slider[0],
+                    "age_upper":age_slider[1],
+                    'Race': race_select,
+                    'T': t_select,
+                    'N': n_select,
+                    'M': m_select,
+                    "ER": er_select,
+                    "PR": pr_select,
+                    'Her2':her2_select
+                }
+
         #Slice Df according to inputs in filter
-        df = filter_df(clinical, age_slider[0], age_slider[1] , tnm_select, er_select, pr_select, her2_select)
-        # df = clinical[(clinical['Age_@_Dx'] > age_slider[0]) & (clinical['Age_@_Dx'] < age_slider[1]) & (clinical['ER'] == er_select) ]
+        df = filter_df_all(clinical, age_slider[0], age_slider[1] , tnm_select, er_select, pr_select, her2_select,race_select)
 
         #editing alive vs dead bar chart - overwrite initial version
         cause = df['cause_of_death']
         dcdict_new = calPercent(df,cause,True,"Alive")
-        # print(calPercent(df, df['cause_of_death'], True, "Alive"))
+
         dcdict = rename_keys(dcdict_new,\
                                 ['Alive', 'Dead- Breast Cancer', 'Dead- Others', 'Dead- Unknown'])
 
-        #Overwrite initial tnm chart
-        fdict = generate_tnm_chart_data(df, cause)
-
         #Overwrite original chart data with sliced dataset according to filters
-        er_dict = generate_epr_chart_data(df)
-        # print(er_dict)
+        epr_df = filter_df_epr_chart(clinical, age_slider[0], age_slider[1] , tnm_select)
+        er_dict = generate_epr_chart_data(epr_df)
+
+        #overall survival Kaplan Meier chart
+        km_os,km_dfs,km_css = KM2.generate_kaplan_meier_with_filters_for_all_survival_types(filters_dict,input_df) #all filters wo tnm stage
+
+<<<<<<< HEAD
+        km_os.to_csv("C:\\Users\\Jesslyn\\Desktop\\tst.csv",index=False)
+=======
+>>>>>>> b3a7b9f1b8dc28d39e917975b45a33d996f74ae9
+        if km_os.shape[0] == 0:
+            x = [0]
+            y = [0]
+            lower = [0]
+            upper = [0]
+        else:
+            x = km_os["time"].tolist()
+            y = km_os["estimate"].tolist()
+            lower = km_os["lower"].tolist()
+            upper = km_os["upper"].tolist()
         
+        km_upper = go.Scatter(x=x, y=y*100,
+            fill=None,
+            mode='lines',
+            line_color='indigo',
+            name='Overall Survival',
+        )
+
+        km_lower = go.Scatter( x=x, y=upper*100,
+            fill='tonexty', # fill area between trace0 and trace1
+            mode='lines', 
+            line_color='lightblue',
+            name="{}".format('95% Upper CI'),
+        )
+        km = go.Scatter( x=x, y=lower*100,
+            fill='tonexty', # fill area between trace0 and trace1
+            mode='lines', 
+            line_color='lightblue',
+            name="{}".format("95% Lower CI"),
+        )
+        os_new = [km_upper,km_lower,km]
+
+        #dfs Kaplan Meier chart 
+        if km_dfs.shape[0] == 0:
+            dfs_x = [0]
+            dfs_y = [0]
+            dfs_lower = [0]
+            dfs_upper = [0]
+        else:
+            dfs_x = km_dfs["time"].tolist()
+            dfs_y = km_dfs["estimate"].tolist()
+            dfs_lower = km_dfs["lower"].tolist()
+            dfs_upper = km_dfs["upper"].tolist()
+
+        dfs_km_upper = go.Scatter(x=dfs_x, y=dfs_y*100,
+            fill=None,
+            mode='lines',
+            line_color='indigo',
+            name='Disease Free Survival',
+        )
+
+        dfs_km_lower = go.Scatter(x=dfs_x,
+            y=dfs_upper*100,
+            fill='tonexty', # fill area between trace0 and trace1
+            mode='lines', 
+            line_color='lightblue',
+            name="{}".format('95% Upper CI'),
+        )
+        dfs_km = go.Scatter(x=dfs_x,
+            y=dfs_lower*100,
+            fill='tonexty', # fill area between trace0 and trace1
+            mode='lines', 
+            line_color='lightblue',
+            name="{}".format("95% Lower CI"),
+        )
+        dfs_new = [dfs_km_upper,dfs_km_lower,dfs_km]
+        #css Kaplan Meier chart
+        if km_css.shape[0] == 0:
+            css_x = [0]
+            css_y = [0]
+            css_lower = [0]
+            css_upper = [0]
+        else:
+            css_x = km_css["time"].tolist()
+            css_y = km_css["estimate"].tolist()
+            css_lower = km_css["lower"].tolist()
+            css_upper = km_css["upper"].tolist()
+
+        css_km_upper = go.Scatter(x=css_x, y=css_y*100,
+            fill=None,
+            mode='lines',
+            line_color='indigo',
+            name='Cancer Specific Survival',
+        )
+
+        css_km_lower = go.Scatter( x=css_x,
+            y=css_upper*100,
+            fill='tonexty', # fill area between trace0 and trace1
+            mode='lines', 
+            line_color='lightblue',
+            name="{}".format('95% Upper CI'),
+        )
+        css_km = go.Scatter( x=css_x,
+            y=css_lower*100,
+            fill='tonexty', # fill area between trace0 and trace1
+            mode='lines', 
+            line_color='lightblue',
+            name="{}".format("95% Lower CI"),
+        )
+        css_new = [css_km_upper,css_km_lower,css_km]
         figure={
             'data': 
             [
@@ -1533,7 +1897,12 @@ def init_callbacks(dash_app):
                         'size': 5
                     }
                 }
-            ]
+            ],
+            'layout': go.Layout(
+                        title = "Patient's Diagnosed Age Distribution",
+                        xaxis = {'title': 'Diagnosed Age'},
+                        yaxis = {'title': 'Percentage of Patients'},
+                    )
         }
 
         figure2 ={
@@ -1547,63 +1916,15 @@ def init_callbacks(dash_app):
                     'textposition':'auto', 
                     'marker': dict(color=['lightgreen','lightcoral','indianred','lightslategray' ])
                 }
-            ]
+            ],
+            'layout': go.Layout(
+                    title = "Proportion of Patients Alive Vs Dead",
+                    xaxis = {'title': 'Cause of Death'},
+                    yaxis = {'title': 'Percentage of Patients'},
+                    hovermode='closest'
+            )
         }
 
-        figure3 ={
-                'data': [
-                        dict(
-                            x= fdict['Alive'],
-                            y= clinical['TNM_Stage'].dropna().unique(),
-                            type='bar',
-                            name='Alive',
-                            orientation='h',
-                            marker=dict(
-                            color='lightgreen',
-                            line=dict(color='lightgreen', width=3))
-                        ),
-                        dict(
-                            x= fdict['breast cancer related'],
-                            y= clinical['TNM_Stage'].dropna().unique(),
-                            type='bar',
-                            name='Dead- Breast cancer related',
-                            orientation='h',
-                            marker=dict(
-                            color='lightcoral',
-                            line=dict(color='lightcoral', width=3)
-                            )
-                        ),
-                        dict(
-                            x= fdict['n'],
-                            y= clinical['TNM_Stage'].dropna().unique(),
-                            type='bar',
-                            name='Dead',
-                            orientation='h',
-                            marker=dict(
-                            color='indianred',
-                            line=dict(color='indianred', width=3)
-                            )
-                        ),
-                        dict(
-                            x= fdict['unknown'],
-                            y= clinical['TNM_Stage'].dropna().unique(),
-                            type='bar',
-                            name='Unknown',
-                            orientation='h',
-                            marker=dict(
-                            color='lightslategrey',
-                            line=dict(color='lightslategrey', width=3)
-                            )
-                        )
-                    ],
-                    'layout': go.Layout(
-                        title = "TNM Stage Alive Vs Dead",
-                        xaxis = {'title': 'Percentage of Patients'},
-                        yaxis = {'title': 'Cancer Stages'},
-                        hovermode='closest',
-                        barmode='stack',
-                    )
-                }
         figure4 = {
                     'data': [
                             dict(
@@ -1655,12 +1976,214 @@ def init_callbacks(dash_app):
                             title = "Relationship between ER & PR",
                             xaxis = {'title': 'Percentage of ER & PR'},
                             yaxis = {'title': 'ER/PR Status'},
-                            hovermode='closest',
+                            hovermode='event+closest',
                             barmode='stack'
                         )
                     }
-        return figure, figure2, figure3, figure4
+
+        figure5 = {
+                'data':os_new,
+                'layout':go.Layout(
+                        title="Patient's Overall Survival Kaplan Meier Chart",
+                        height=400,
+                        width=1200,  
+                        xaxis = {'title': 'Year'},
+                        yaxis = {'title': 'Percentage of Survival'}, 
+                        hovermode= "closest",
+                    )
+            }
+
+        figure6 = {
+                'data': dfs_new,
+                'layout':go.Layout(
+                        title="Patient's Disease-Free Survival Kaplan Meier Chart",
+                        height=400,
+                        width=1200,
+                        xaxis = {'title': 'Year'},
+                        yaxis = {'title': 'Percentage of Survival'}, 
+                        hovermode= "closest",
+                    )
+
+            }
+
+        figure7 = {
+                'data': css_new,
+                'layout':go.Layout(
+                    title="Patient's Cancer Specific Survival Kaplan Meier Chart",
+                    height=400,
+                    width=1200,
+                    xaxis = {'title': 'Year'},
+                    yaxis = {'title': 'Percentage of Survival'}, 
+                    hovermode= "closest",
+                )
+            }
+
+            
+        return figure, figure2, figure4, figure5, figure6, figure7
 
 
+    @dash_app.callback(
+            dash.dependencies.Output('expenditure-scatter', 'figure'),
+            [dash.dependencies.Input('cost_slider', 'value')]
+            )
+    def update_cost(cost_slider):
+        data = []
+        # print(cost_slider)
+        min_patient_num = cost_slider[0]
+        max_patient_num = cost_slider[1]
+        patient_spend = cost_scatter_data(min_patient_num, max_patient_num)
+        patient_spend[cost_slider[0]: cost_slider[1]]
+        patient_id = list(patient_spend['Case.No'])
+        total_spent = list(patient_spend['Gross..exclude.GST.'])
+        data.append(
+            go.Scatter(
+                x=patient_id,
+                y=total_spent,
+                mode='markers',
+                marker=dict(
+                size=12,
+                color=np.random.randn(100000), #set color equal to a variable
+                colorscale='Viridis', # one of plotly colorscales
+                showscale=True
+            )
+            )
+        )
+        figure={
+                            'data': data,
+                            'layout': go.Layout(
+                                title = "Distribution of patient expenditure",
+                                xaxis = {'title': 'Patient ID'},
+                                yaxis = {'title': 'Patient expenditure ($)'})
+            }
+        return figure
+
+    @dash_app.callback(
+        dash.dependencies.Output('svc-pie-chart', 'figure'),
+   
+        [dash.dependencies.Input('category_check', 'value')]
+    )
+    def update_pie_chart(category_check):
+        print(category_check)
+        new_vals_list = []
+
+        for c in category_check:
+            new_vals_list.append(gross_list[c])
+
+        fig = {
+            'data':[
+                    go.Pie(
+                        labels = category_check,
+                        values = new_vals_list
+                        #marker = dict(color = '#97B2DE')
+                    )
+            ],
+            'layout': go.Layout(
+                    title='Gross Expenditure by Category',
+                    hovermode='closest'
+                )
+            }
+        return fig
 
 
+        figure5 = {
+                'data':os_new,
+                'layout':go.Layout(
+                        title="Patient's Overall Survival Kaplan Meier Chart",
+                        height=400,
+                        width=1200,  
+                        xaxis = {'title': 'Year'},
+                        yaxis = {'title': 'Percentage of Survival'}, 
+                        hovermode= "closest",
+                    )
+            }
+
+        figure6 = {
+                'data': dfs_new,
+                'layout':go.Layout(
+                        title="Patient's Disease-Free Survival Kaplan Meier Chart",
+                        height=400,
+                        width=1200,
+                        xaxis = {'title': 'Year'},
+                        yaxis = {'title': 'Percentage of Survival'}, 
+                        hovermode= "closest",
+                    )
+
+            }
+
+        figure7 = {
+                'data': css_new,
+                'layout':go.Layout(
+                    title="Patient's Cancer Specific Survival Kaplan Meier Chart",
+                    height=400,
+                    width=1200,
+                    xaxis = {'title': 'Year'},
+                    yaxis = {'title': 'Percentage of Survival'}, 
+                    hovermode= "closest",
+                )
+            }
+
+            
+        return figure, figure2, figure4, figure5, figure6, figure7
+
+
+    @dash_app.callback(
+            dash.dependencies.Output('expenditure-scatter', 'figure'),
+            [dash.dependencies.Input('cost_slider', 'value')]
+            )
+    def update_cost(cost_slider):
+        data = []
+        # print(cost_slider)
+        min_patient_num = cost_slider[0]
+        max_patient_num = cost_slider[1]
+        patient_spend = cost_scatter_data(min_patient_num, max_patient_num)
+        patient_spend[cost_slider[0]: cost_slider[1]]
+        patient_id = list(patient_spend['Case.No'])
+        total_spent = list(patient_spend['Gross..exclude.GST.'])
+        data.append(
+            go.Scatter(
+                x=patient_id,
+                y=total_spent,
+                mode='markers',
+                marker=dict(
+                size=12,
+                color=np.random.randn(100000), #set color equal to a variable
+                colorscale='Viridis', # one of plotly colorscales
+                showscale=True
+            )
+            )
+        )
+        figure={
+                            'data': data,
+                            'layout': go.Layout(
+                                title = "Distribution of patient expenditure",
+                                xaxis = {'title': 'Patient ID'},
+                                yaxis = {'title': 'Patient expenditure ($)'})
+            }
+        return figure
+
+    @dash_app.callback(
+        dash.dependencies.Output('svc-pie-chart', 'figure'),
+   
+        [dash.dependencies.Input('category_check', 'value')]
+    )
+    def update_pie_chart(category_check):
+        print(category_check)
+        new_vals_list = []
+
+        for c in category_check:
+            new_vals_list.append(gross_list[c])
+
+        fig = {
+            'data':[
+                    go.Pie(
+                        labels = category_check,
+                        values = new_vals_list
+                        #marker = dict(color = '#97B2DE')
+                    )
+            ],
+            'layout': go.Layout(
+                    title='Gross Expenditure by Category',
+                    hovermode='closest'
+                )
+            }
+        return fig
