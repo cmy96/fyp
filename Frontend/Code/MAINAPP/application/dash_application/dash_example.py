@@ -50,6 +50,10 @@ app = dash.Dash(__name__,external_stylesheets=external_stylesheets)
 app.scripts.config.serve_locally = True
 app.css.config.serve_locally = True
 
+filename = 'application\\assets\\waffle-chart-km.png' #where picture will be stored, replace w ur own
+if os.path.exists(filename):
+    os.remove(filename) #remove old
+
 # Path
 BASE_PATH = pathlib.Path(__file__).parent.resolve()
 DATA_PATH = BASE_PATH.joinpath("data").resolve()
@@ -162,7 +166,7 @@ def generate_waffle_chart():
             'fontdict':{'fontsize':8
             }}
     )
-    filename = 'C:\\Users\\Jesslyn\\Documents\\GitHub\\fyp\\Frontend\\Code\\MAINAPP\\application\\assets\\waffle-chart-survived.png' #where picture will be stored
+    filename = 'application\\assets\\waffle-chart-survived.png' #where picture will be stored
     if os.path.exists(filename):
         os.remove(filename) #remove old
     plt.savefig(filename ,bbox_inches='tight', pad_inches=0) #replace 
@@ -408,6 +412,7 @@ def generate_clinical_controls():
     return html.Div(
         id="control-card-clinical",
         children=[
+            display_radio_btns(),
             html.P("Filter by Age"),
             dcc.RangeSlider(
                 id="age_slider",
@@ -432,7 +437,7 @@ def generate_clinical_controls():
             ),
             html.Div([
                 html.Br(),
-                html.P("Select TNM Stage:"),
+                html.Div(id='hide-this',children=[html.P("Select TNM Stage")]),
                 dcc.Dropdown(
                     id="tnm_select",
                     options= [{"label": i, "value": i} for i in tnm_list],
@@ -462,7 +467,7 @@ def generate_clinical_controls():
             ),
             html.Div([
                     html.Br(),
-                    html.P("Select T Stage:"),
+                    html.Div(id="hide-me-1",children=[html.P("Select T Stage:")],),
                     dcc.Dropdown(
                         id="t_select",
                         value=['t0'], #default values
@@ -472,7 +477,7 @@ def generate_clinical_controls():
             ),
             html.Div([
                     html.Br(),
-                    html.P("Select N Stage:"),
+                    html.Div(id="hide-me-2",children=[html.P("Select N Stage:")]),
                     dcc.Dropdown(
                         id="n_select",
                         value=['n0'], #default values
@@ -482,14 +487,14 @@ def generate_clinical_controls():
             ),
             html.Div([
                 html.Br(),
-                html.P("Select M Stage:"),
+                html.Div(id="hide-me-3",children=[html.P("Select M Stage:")]),
                 dcc.Dropdown(
                     id="m_select",
                     value=['m0'], #default values
                     style={'display':'none'}
                 ),
             ]),
-            
+            html.Br() 
         ],
     )
 
@@ -703,8 +708,9 @@ bills_dashboard = dbc.Container(
                                                                                                 ],
                                                                                             'layout': go.Layout(
                                                                                                 title = "Distribution of patient expenditure",
-                                                                                                xaxis = {'title': 'Patient ID'},
-                                                                                                yaxis = {'title': 'Patient expenditure ($)'})
+                                                                                                xaxis = {'title': 'Patient ID','automargin': True},
+                                                                                                yaxis = {'title': 'Patient expenditure ($)','automargin': True}
+                                                                                            )
                                                                                             },                
                                                                                     )
                                                                                 
@@ -746,8 +752,8 @@ bills_dashboard = dbc.Container(
                                                                                         ],
                                                                                         'layout': go.Layout(
                                                                                             title='Average Expenditure by Category',
-                                                                                            xaxis = {'title': 'Category'},
-                                                                                            yaxis = {'title': 'Average Patient expenditure ($)'},
+                                                                                            xaxis = {'title':'Category'},
+                                                                                            yaxis={'title':'Average Patient Expenditure ($)'},
                                                                                             hovermode='closest'
                                                                                         ),
                                                                                         
@@ -791,7 +797,7 @@ clinical_dashboard = dbc.Container(
                                 ),
                                 dbc.CardBody(
                                     [
-                                        html.Div([display_radio_btns()], style={'display': "inline-block"}),
+                                        #html.Div([display_radio_btns()], style={'display': "inline-block"}),
                                         html.Br(),
                                         generate_clinical_controls()
 
@@ -866,7 +872,7 @@ clinical_dashboard = dbc.Container(
                                                                                             ],
                                                                                             'layout': go.Layout(
                                                                                                 title = "Proportion of Patients Alive Vs Dead",
-                                                                                                xaxis = {'title': 'Cause of Death'},
+                                                                                                xaxis = {'title': 'Cause of Death', 'automargin': True},
                                                                                                 yaxis = {'title': 'Percentage of Patients'},
                                                                                                 hovermode='closest'
                                                                                             )
@@ -936,57 +942,77 @@ clinical_dashboard = dbc.Container(
                                                                                 )
                                                                             ]
                                                                         ),
-                                                                        dbc.Row([
+
+                                                                        dbc.Row(
+                                                                            [
                                                                                 dbc.Col(
+                                                                                    [
                                                                                     dcc.Graph(
                                                                                         id="OS_KM",
                                                                                         figure=go.Figure(
-                                                                                                            data=[],
-                                                                                                            layout=go.Layout(
-                                                                                                                title="Patient's Overall Survival Kaplan Meier Chart",
-                                                                                                                height=400,
-                                                                                                                width=1200,  
-                                                                                                                xaxis = {'title': 'Year'},
-                                                                                                                yaxis = {'title': 'Percentage of Survival'},
-                                                                                                                hovermode= "closest",
-                                                                                                            ),
-                                                                                                        ),
+                                                                                            data=[],
+                                                                                            layout=go.Layout(
+                                                                                                title="Patient's Overall Survival Kaplan Meier Chart",
+                                                                                                #height=400,
+                                                                                                #width=1200,  
+                                                                                                xaxis = {'title': 'Year'},
+                                                                                                yaxis = {'title': 'Percentage of Survival'},
+                                                                                                hovermode= "closest",
+                                                                                            ),
+                                                                                        ),
                                                                                     ),
-                                                                                ),
+                                                                                    ], 
+                                                                                ),  
+                                                                            ], 
+                                                                        ),
+                                                                        dbc.Row(
+                                                                            [
                                                                                 dbc.Col(
+                                                                                    [
                                                                                     dcc.Graph(
                                                                                         id="CSS_KM",
                                                                                         figure=go.Figure(
-                                                                                                            data=[],
-                                                                                                            layout=go.Layout(
-                                                                                                                title="Patient's Cancer Specific Survival Kaplan Meier Chart",
-                                                                                                                height=400,
-                                                                                                                width=1200,
-                                                                                                                xaxis = {'title': 'Year'},
-                                                                                                                yaxis = {'title': 'Percentage of Survival'}, 
-                                                                                                                hovermode= "closest",
-                                                                                                            ),
-                                                                                                        ),
+                                                                                            data=[],
+                                                                                            layout=go.Layout(
+                                                                                                title="Patient's Cancer Specific Survival Kaplan Meier Chart",
+                                                                                                #height=400,
+                                                                                                #width=1200,
+                                                                                                xaxis = {'title': 'Year'},
+                                                                                                yaxis = {'title': 'Percentage of Survival'}, 
+                                                                                                hovermode= "closest",
+                                                                                            ),
+                                                                                        ),
                                                                                     ),
-                                                                                ),
+                                                                                    ],
+                                                                                ), 
+                                                                            ], 
+                                                                        ),
+                                                                        dbc.Row(
+                                                                            [
                                                                                 dbc.Col(
+                                                                                    [
                                                                                     dcc.Graph(
                                                                                         id="DFS_KM",
                                                                                         figure=go.Figure(
-                                                                                                            data=[],
-                                                                                                            layout=go.Layout(
-                                                                                                                title="Patient's Disease-Free Survival Kaplan Meier Chart",
-                                                                                                                height=400,
-                                                                                                                width=1200,
-                                                                                                                xaxis = {'title': 'Year'},
-                                                                                                                yaxis = {'title': 'Percentage of Survival'},                                                                
-                                                                                                                hovermode= "closest",
-                                                                                                            ),
-                                                                                                        ),
+                                                                                            data=[],
+                                                                                            layout=go.Layout(
+                                                                                                title="Patient's Disease-Free Survival Kaplan Meier Chart",
+                                                                                                #height=400,
+                                                                                                #width=1200,
+                                                                                                xaxis = {'title': 'Year'},
+                                                                                                yaxis = {'title': 'Percentage of Survival'},                                                                
+                                                                                                hovermode= "closest",
+                                                                                            ),
+                                                                                        ),
                                                                                     )
-                                                                                )
-                                                                            ]
-                                                                        )
+                                                                                    ],
+                                                                                ), 
+                                                                            ], 
+                                                                        ),
+
+
+                                                    
+                                        
 
                                                                     ]
                                                                 )
@@ -1299,7 +1325,7 @@ def init_callbacks(dash_app):
                                             )
                                         ]
                                     )
-                                ), width={"size":8, "offset":1}
+                                ), width={"size":10, "offset":1}
                             )
                         ]
   
@@ -1310,6 +1336,7 @@ def init_callbacks(dash_app):
         elif pathname == "/cost/":
             #cost outputs
             my_bills = pd.read_csv("..\\middleWomen\\bills_new.csv")
+            my_bills = my_bills.iloc[:,:-1]
             # key = ["6 months after","1 year after","2 year after","5 years after","10 years after"]
             key = my_bills.columns.tolist()[1:] #to be edited!!!!!!!!!!!!!!!!!!!!!1
             values = [my_bills[k].tolist() for k in key]
@@ -1521,15 +1548,18 @@ def init_callbacks(dash_app):
                                                                     src=dash_app.get_asset_url('waffle-chart-survived.png'),
                                                                     id="waffle-2",
                                                                     style={
-                                                                    "height": "200px",
-                                                                    "width": "1000px",
-                                                                    "margin-bottom": "25px",
-                                                                    "margin-left":"px"
+                                                                    "height": "300px",
+                                                                    "width": "95%",
+                                                                    "margin-bottom": "3%",
+                                                                    "margin-left":"3%",
+                                                                    "margin-right":"3%",
+                                                                    "margin-top":"3%"
+                                                                
                                                                     },
                                                                     ),
                                                                 html.P(
                                                                     "Out of 100 random breast cancer patients, X will survive within the 10 year time period.",
-                                                                    style={"margin-left":"10%"}
+                                                                    style={"margin-left":"3%", "margin-bottom":"3%"}
                                                                 )
                                                             ]
                                                         )
@@ -1587,10 +1617,8 @@ def init_callbacks(dash_app):
             if v != "All":
                 output = output[(output[k] == v)]
 
-        valid = list(output['T'].unique())
-        valid = sorted(valid)
-
-        return [{'label': i, 'value': i} for i in valid] 
+        valid = list(output['T'].unique()) 
+        return [{'label': i, 'value': i} for i in sorted(valid)] 
 
     #Dynamic Dropdown
     @dash_app.callback(
@@ -1626,8 +1654,7 @@ def init_callbacks(dash_app):
             if v != "All":
                 output = output[(output[k] == v)]
         valid = list(output['N'].unique()) #Get valid N based on  T values entered
-        valid = sorted(valid)
-        return [{'label': i, 'value': i} for i in valid] #populate N dropdown with new n values
+        return [{'label': i, 'value': i} for i in sorted(valid)] #populate N dropdown with new n values
 
     @dash_app.callback(
         dash.dependencies.Output('m_select', 'options'),
@@ -1647,7 +1674,7 @@ def init_callbacks(dash_app):
 
         condition = (input_df['Age_@_Dx'] <= max1) & (input_df['Age_@_Dx'] >= min1)
         output = input_df[condition]
-
+        print(input_df.head())
         dict_tmp = {
             'ER': er_select,
             'PR': pr_select,
@@ -1662,11 +1689,10 @@ def init_callbacks(dash_app):
                 output = output[(output[k] == v)]
 
         valid = list(output['M'].unique())
-        valid = sorted(valid)
-        return [{'label': i, 'value': i} for i in valid]
+        return [{'label': i, 'value': i} for i in sorted(valid)]
     
     @dash_app.callback(
-        dash.dependencies.Output('t_select', 'style'),
+        [dash.dependencies.Output('hide-me-1','style'), dash.dependencies.Output('t_select','style')],
         [dash.dependencies.Input('radio-list','value')]
     )
     def toggle_dd_visibility(visible):
@@ -1676,7 +1702,7 @@ def init_callbacks(dash_app):
             return {'display':'none'}
     
     @dash_app.callback(
-        dash.dependencies.Output(component_id='n_select', component_property='style'),
+        [dash.dependencies.Output('hide-me-2','style'), dash.dependencies.Output('n_select','style')],
         [dash.dependencies.Input('radio-list','value')]
     )
     def toggle_d2_visibility(vi):
@@ -1686,7 +1712,8 @@ def init_callbacks(dash_app):
             return {'display':'none'}
 
     @dash_app.callback(
-        dash.dependencies.Output(component_id='m_select', component_property='style'),
+        
+        [dash.dependencies.Output('hide-me-3','style'), dash.dependencies.Output('m_select','style')],
         [dash.dependencies.Input('radio-list','value')]
     )
     def toggle_d3_visibility(vis):
@@ -1697,7 +1724,7 @@ def init_callbacks(dash_app):
     
 
     @dash_app.callback(
-        dash.dependencies.Output('tnm_select','style'),
+        dash.dependencies.Output('hide-this','style'),
         [dash.dependencies.Input('radio-list','value')]
     )
     def toggle_dropdown(v):
@@ -1759,7 +1786,7 @@ def init_callbacks(dash_app):
         #overall survival Kaplan Meier chart
         km_os,km_dfs,km_css = KM2.generate_kaplan_meier_with_filters_for_all_survival_types(filters_dict,input_df) #all filters wo tnm stage
 
-        km_os.to_csv("C:\\Users\\Jesslyn\\Desktop\\tst.csv",index=False)
+        # km_os.to_csv("C:\\Users\\Jesslyn\\Desktop\\tst.csv",index=False)
         if km_os.shape[0] == 0:
             x = [0]
             y = [0]
@@ -1898,7 +1925,7 @@ def init_callbacks(dash_app):
             ],
             'layout': go.Layout(
                     title = "Proportion of Patients Alive Vs Dead",
-                    xaxis = {'title': 'Cause of Death'},
+                    xaxis = {'title': 'Cause of Death','automargin': True},
                     yaxis = {'title': 'Percentage of Patients'},
                     hovermode='closest'
             )
@@ -2031,7 +2058,7 @@ def init_callbacks(dash_app):
                             'data': data,
                             'layout': go.Layout(
                                 title = "Distribution of patient expenditure",
-                                xaxis = {'title': 'Patient ID'},
+                                xaxis = {'title': 'Patient ID','automargin': True},
                                 yaxis = {'title': 'Patient expenditure ($)'})
             }
         return figure
