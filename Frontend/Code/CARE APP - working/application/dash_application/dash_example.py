@@ -441,15 +441,15 @@ def generate_clinical_controls():
                 options=[{"label":i, "value":i} for i in Race_List],
                 value=Race_List[0]
             ),
-            
-            html.Br(),
-            html.P("Select TNM Stage"),
-            dcc.Dropdown(
-                id="tnm_select",
-                options= [{"label": i, "value": i} for i in tnm_list],
-                value=tnm_list[1]
-            )
-            ,
+            html.Div([
+                html.Br(),
+                html.Div(id='hide-this',children=[html.P("Select TNM Stage")]),
+                dcc.Dropdown(
+                    id="tnm_select",
+                    options= [{"label": i, "value": i} for i in tnm_list],
+                    value=tnm_list[1]
+                ),
+            ],style={'display':'block'}),
             html.Br(),
             html.P("Select ER status"),
             dcc.Dropdown(
@@ -471,28 +471,38 @@ def generate_clinical_controls():
                 options=[{"label": i, "value": i} for i in Her2_list],
                 value=Her2_list[0]
             ),
-            html.Br(),
-            html.P("Select T Stage:"),
-            dcc.Dropdown(
-                id="t_select",
-                value=[],
-                style={'display': 'none'}
+            html.Div(id="hide-me-1",
+            children=[
+                    html.Br(),
+                    html.P("Select T Stage:"),
+                    dcc.Dropdown(
+                        id="t_select",
+                        value=['t0'], #default values
+                    )
+                ],style={'display': 'none'}
             ),
-            html.Br(),
-            html.P("Select N Stage:"),
-            dcc.Dropdown(
-                id="n_select",
-                value=[],
-                style={'display':'none'}
+            html.Div(id="hide-me-2", 
+            children=[
+                    html.Br(),
+                    html.P("Select N Stage:"),
+                    dcc.Dropdown(
+                        id="n_select",
+                        value=['n0'], #default values
+                        
+                    )
+                ],style={'display':'none'}
             ),
+            html.Div(id="hide-me-3",children=[
+                html.Br(),
+                html.P("Select M Stage:"),
+                dcc.Dropdown(
+                    id="m_select",
+                    value=['m0'], #default values
+                ),
+            ],style={'display':'none'}),
             html.Br(),
-            html.P("Select M Stage:"),
-            dcc.Dropdown(
-                id="m_select",
-                value=[],
-                style={'display':'none'}
-            ),
-            html.Br() 
+            html.Br(),
+            html.Br(),
         ],
     )
 
@@ -941,78 +951,71 @@ clinical_dashboard = dbc.Container(
                                                                                 )
                                                                             ]
                                                                         ),
-
-                                                                        dbc.Row(
-                                                                            [
-                                                                                dbc.Col(
-                                                                                    [
-                                                                                    dcc.Graph(
-                                                                                        id="OS_KM",
-                                                                                        figure=go.Figure(
-                                                                                            data=[],
-                                                                                            layout=go.Layout(
-                                                                                                title="Patient's Overall Survival Kaplan Meier Chart",
-                                                                                                #height=400,
-                                                                                                #width=1200,  
-                                                                                                xaxis = {'title': 'Year'},
-                                                                                                yaxis = {'title': 'Percentage of Survival'},
-                                                                                                hovermode= "closest",
+                                                                        html.Div(id="hide-km-charts", children=[
+                                                                            dbc.Row(
+                                                                                [
+                                                                                    dbc.Col(
+                                                                                        [
+                                                                                        dcc.Graph(
+                                                                                            id="OS_KM",
+                                                                                            figure=go.Figure(
+                                                                                                data=[],
+                                                                                                layout=go.Layout(
+                                                                                                    title="Patient's Overall Survival Kaplan Meier Chart",
+                                                                                                    xaxis = {'title': 'Year'},
+                                                                                                    yaxis = {'title': 'Percentage of Survival'},
+                                                                                                    hovermode= "closest",
+                                                                                                ),
                                                                                             ),
                                                                                         ),
-                                                                                    ),
-                                                                                    ], 
-                                                                                ),  
-                                                                            ], 
-                                                                        ),
-                                                                        dbc.Row(
-                                                                            [
-                                                                                dbc.Col(
-                                                                                    [
-                                                                                    dcc.Graph(
-                                                                                        id="CSS_KM",
-                                                                                        figure=go.Figure(
-                                                                                            data=[],
-                                                                                            layout=go.Layout(
-                                                                                                title="Patient's Cancer Specific Survival Kaplan Meier Chart",
-                                                                                                #height=400,
-                                                                                                #width=1200,
-                                                                                                xaxis = {'title': 'Year'},
-                                                                                                yaxis = {'title': 'Percentage of Survival'}, 
-                                                                                                hovermode= "closest",
+                                                                                        ], 
+                                                                                    ),  
+                                                                                ], 
+                                                                            ),
+                                                                            dbc.Row(
+                                                                                [
+                                                                                    dbc.Col(
+                                                                                        [
+                                                                                        dcc.Graph(
+                                                                                            id="CSS_KM",
+                                                                                            figure=go.Figure(
+                                                                                                data=[],
+                                                                                                layout=go.Layout(
+                                                                                                    title="Patient's Cancer Specific Survival Kaplan Meier Chart",
+                                                                                                    #height=400,
+                                                                                                    #width=1200,
+                                                                                                    xaxis = {'title': 'Year'},
+                                                                                                    yaxis = {'title': 'Percentage of Survival'}, 
+                                                                                                    hovermode= "closest",
+                                                                                                ),
                                                                                             ),
                                                                                         ),
-                                                                                    ),
-                                                                                    ],
-                                                                                ), 
-                                                                            ], 
-                                                                        ),
-                                                                        dbc.Row(
-                                                                            [
-                                                                                dbc.Col(
-                                                                                    [
-                                                                                    dcc.Graph(
-                                                                                        id="DFS_KM",
-                                                                                        figure=go.Figure(
-                                                                                            data=[],
-                                                                                            layout=go.Layout(
-                                                                                                title="Patient's Disease-Free Survival Kaplan Meier Chart",
-                                                                                                #height=400,
-                                                                                                #width=1200,
-                                                                                                xaxis = {'title': 'Year'},
-                                                                                                yaxis = {'title': 'Percentage of Survival'},                                                                
-                                                                                                hovermode= "closest",
+                                                                                        ],
+                                                                                    ), 
+                                                                                ], 
+                                                                            ),
+                                                                            dbc.Row(
+                                                                                [
+                                                                                    dbc.Col(
+                                                                                        [
+                                                                                        dcc.Graph(
+                                                                                            id="DFS_KM",
+                                                                                            figure=go.Figure(
+                                                                                                data=[],
+                                                                                                layout=go.Layout(
+                                                                                                    title="Patient's Disease-Free Survival Kaplan Meier Chart",
+                                                                                                    xaxis = {'title': 'Year'},
+                                                                                                    yaxis = {'title': 'Percentage of Survival'},                                                                
+                                                                                                    hovermode= "closest",
+                                                                                                ),
                                                                                             ),
-                                                                                        ),
-                                                                                    )
-                                                                                    ],
-                                                                                ), 
-                                                                            ], 
-                                                                        ),
-
-
-                                                    
-                                        
-
+                                                                                        )
+                                                                                        ],
+                                                                                    ), 
+                                                                                ], 
+                                                                            ),
+                                                                    ]
+                                                                )
                                                                     ]
                                                                 )
                                                                                                 
@@ -1690,46 +1693,62 @@ def init_callbacks(dash_app):
         valid = list(output['M'].unique())
         return [{'label': i, 'value': i} for i in sorted(valid)]
     
+    ### Hide & Show Dropdowns According to radio buttons
+    
     @dash_app.callback(
-        dash.dependencies.Output('t_select','style'),
+        [
+            dash.dependencies.Output('hide-me-1','style'), 
+            dash.dependencies.Output('t_select','style'), 
+            dash.dependencies.Output('hide-km-charts', 'style')
+        ],
         [dash.dependencies.Input('radio-list','value')]
     )
     def toggle_dd_visibility(visible):
         if visible == 'Kaplan Meier':
-            return {'display':'block'}
+            return {'display':'block'}, {'display':'block'}, {'display':'block'}
         if visible == 'Clinical':
-            return {'display':'none'}
+            return {'display':'none'},{'display':'none'}, {'display':'none'}
     
     @dash_app.callback(
-        dash.dependencies.Output('n_select','style'),
+        [
+            dash.dependencies.Output('hide-me-2','style'), 
+            dash.dependencies.Output('n_select','style')
+        ],
         [dash.dependencies.Input('radio-list','value')]
     )
     def toggle_d2_visibility(vi):
         if vi == 'Kaplan Meier':
-            return {'display':'block'}
+            return {'display':'block'}, {'display':'block'}
         if vi == 'Clinical':
-            return {'display':'none'}
+            return {'display':'none'},{'display':'none'}
 
     @dash_app.callback(
-        dash.dependencies.Output('m_select','style'),
+        [
+            dash.dependencies.Output('hide-me-3','style'), 
+            dash.dependencies.Output('m_select','style')
+        ],
         [dash.dependencies.Input('radio-list','value')]
     )
     def toggle_d3_visibility(vis):
         if vis == 'Kaplan Meier':
-            return {'display':'block'}
+            return {'display':'block'}, {'display':'block'}
         if vis == 'Clinical':
-            return {'display':'none'}
+            return {'display':'none'}, {'display':'none'}
     
 
     @dash_app.callback(
-        dash.dependencies.Output('tnm_select','style'),
+        [
+            dash.dependencies.Output('hide-this','style'), 
+            dash.dependencies.Output('tnm_select','style')
+        ]
+        ,
         [dash.dependencies.Input('radio-list','value')]
     )
     def toggle_dropdown(v):
         if v == 'Kaplan Meier':
-            return {'display':'none'}
+            return {'display':'none'}, {'display':'none'}
         if v == 'Clinical':
-            return {'display':'block'}
+            return {'display':'block'}, {'display':'block'}
 
     @dash_app.callback(
         [
