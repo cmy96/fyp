@@ -29,6 +29,29 @@ main.py: Implementation example of kaplan_meier.py.
 
 
 ML models.ipynb: Contains code for cost modelling
+    Function:   scale_data
+    Usage:      transforms then scales data according to min-max
+
+    Function:   ann_structure
+    Usage:      function to declare ANN ann_structure
+
+    Function:   remove_out_of_range
+    Usage:      determines index of data where there is no additional information
+
+    Function:   remove_meaningless_data
+    Usage:      returns index of all rows that do not add any additional input. all fields are 0
+
+    Function:   make_comparison
+    Usage:      Given a specific user, calculate out his actual cost and predicted costs
+
+    Function:   make_prediction
+    Usage:      Given user data(dataframe) and the trained model, outputs the predicted values.
+    
+    Function:   get_running_total
+    Usage:      Change the data from additional costs into running total
+
+    Function:   get_scoring
+    Usage:      Used to get the scoring of the performance of predictions against actual data
 
 
 
