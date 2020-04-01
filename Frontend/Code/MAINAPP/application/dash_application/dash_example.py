@@ -1,4 +1,4 @@
-a"""Create a Dash app within a Flask app."""
+"""Create a Dash app within a Flask app."""
 from pathlib import Path
 import dash
 import dash_table
@@ -50,18 +50,13 @@ app = dash.Dash(__name__,external_stylesheets=external_stylesheets)
 app.scripts.config.serve_locally = True
 app.css.config.serve_locally = True
 
-filename = 'application\\assets\\waffle-chart-km.png' #where picture will be stored, replace w ur own
+filename = 'C:\\Users\\Jesslyn\\Documents\\GitHub\\fyp\\Frontend\\Code\\MAINAPP\\application\\assets\\waffle-chart-km.png' #where picture will be stored, replace w ur own
 if os.path.exists(filename):
     os.remove(filename) #remove old
 
 # Path
 BASE_PATH = pathlib.Path(__file__).parent.resolve()
 DATA_PATH = BASE_PATH.joinpath("data").resolve()
-
-filename = 'C:\\Users\\Jesslyn\\Documents\\GitHub\\fyp\\Frontend\\Code\\MAINAPP\\application\\assets\\waffle-chart-km.png' #where picture will be stored, replace w ur own
-filepath = BASE_PATH.joinpath("assets").resolve().joinpath("waffle-chart-km.png")
-if os.path.exists(filepath):
-    os.remove(filepath) #remove old
 
 # Read data
 clinical = pd.read_csv(DATA_PATH.joinpath("clinical_full_data.csv"))
@@ -77,6 +72,11 @@ ER_list = clinical['ER'].dropna().unique()
 pr_list = clinical['PR'].dropna().unique()
 Her2_list = clinical['Her2'].dropna().unique()
 
+T_list = clinical['T'].unique()
+N_list = clinical['N'].unique()
+M_list = clinical['M'].unique()
+
+TNM_options_dict = {'T': T_list, 'N': [], 'M': []}
 
 
 clinical.dropna(axis=0,subset=['Age_@_Dx'],inplace=True)
@@ -186,24 +186,12 @@ category_list = list(gross_list.keys())
 #BAR CHART DE DONGXI
 average = bills2.groupby(['Consolidated.Main.Group']).mean()
 average_list = {}
-display_values = [] #text on bars
-key_values = [] # category 
-all_values = [] # category average expenditure values
+display_values = []
 for row in average.itertuples():
     average_list[row.Index] = row[1]
 
-print('###########################################', average)
-print('###############################BEFORE############', average_list)
-
-average_list = sorted(average_list.items(), key=operator.itemgetter(1), reverse=True)
-print('###################################AFTER########avg list:', average_list)
-
-for i in average_list:
-    key_values.append(i[0])
-    all_values.append(round(i[1],2))
-
-for value in all_values:
-    display_values.append('$ ' + str(value))
+for value in list(average_list.values()):
+    display_values.append("$ " + str(round(value,2)))
 
 
 
@@ -273,6 +261,7 @@ def generate_epr_chart_data(df):
                     status_dict[pr_status] = round(total_score,2)
                     continue
         else:
+            # num_of_er = 0.00
             total_score = 0.00
             er_dict[key] = status_dict 
             continue #skip to next er status if er status is not found in df
@@ -311,7 +300,6 @@ clinical['Race'].fillna('Unknown', inplace=True)
 Race_List = clinical['Race'].unique()
 Race_List = list(Race_List) + ['All'] #Keep because makes sense to display All
 
-#Execution of pywaffle
 generate_waffle_chart()
 
 
@@ -376,6 +364,8 @@ def filter_df_epr_chart(df, min1, max1, tnm_select):
             output = output[(output[k] == v)]
     return output
 
+
+
 def cost_scatter_data(min_n, max_n):
     '''
         Total Gross Cost Dataset Generator.
@@ -383,11 +373,15 @@ def cost_scatter_data(min_n, max_n):
     ''' 
     scatter = bills2.groupby(['Case.No']).sum()
     scatter = scatter.reset_index()
+    # print(scatter)
     new_scatter = scatter[min_n:max_n]
     
     scatter_list = {} #convert new_scatter to dictionary
     for row in new_scatter.itertuples():
         scatter_list[row.Index] = row[1]
+
+    # pd.DataFrame.from_dict(scatter_list)
+
     return new_scatter
 
 def display_radio_btns():
@@ -437,7 +431,7 @@ def generate_clinical_controls():
             ),
             html.Div([
                 html.Br(),
-                html.Div(id='hide-this',children=[html.P("Select TNM Stage")]),
+                html.P("Select TNM Stage"),
                 dcc.Dropdown(
                     id="tnm_select",
                     options= [{"label": i, "value": i} for i in tnm_list],
@@ -445,21 +439,21 @@ def generate_clinical_controls():
                 ),
             ],style={'display':'block'}),
             html.Br(),
-            html.P("Select ER status:"),
+            html.P("Select ER status"),
             dcc.Dropdown(
                 id="er_select",
                 options=[{"label": i, "value": i} for i in ER_list],
                 value=ER_list[0],
             ),
             html.Br(),
-            html.P("Select PR status:"),
+            html.P("Select PR status"),
             dcc.Dropdown(
                 id="pr_select",
                 options=[{"label": i, "value": i} for i in pr_list],
                 value=pr_list[0]
             ),
             html.Br(),
-            html.P("Select Her2 status:"),
+            html.P("Select Her2 status"),
             dcc.Dropdown(
                 id="her2_select",
                 options=[{"label": i, "value": i} for i in Her2_list],
@@ -470,7 +464,7 @@ def generate_clinical_controls():
                     html.Div(id="hide-me-1",children=[html.P("Select T Stage:")],),
                     dcc.Dropdown(
                         id="t_select",
-                        value=['t0'], #default values
+                        value=[],
                         style={'display': 'none'}
                     )
                 ]
@@ -480,7 +474,7 @@ def generate_clinical_controls():
                     html.Div(id="hide-me-2",children=[html.P("Select N Stage:")]),
                     dcc.Dropdown(
                         id="n_select",
-                        value=['n0'], #default values
+                        value=[],
                         style={'display':'none'}
                     )
                 ]
@@ -490,7 +484,7 @@ def generate_clinical_controls():
                 html.Div(id="hide-me-3",children=[html.P("Select M Stage:")]),
                 dcc.Dropdown(
                     id="m_select",
-                    value=['m0'], #default values
+                    value=[],
                     style={'display':'none'}
                 ),
             ]),
@@ -523,7 +517,7 @@ def generate_bills_controls():
                             max=10000,
                             value=[3000, 6500],
                             marks={
-                                0:'0',
+                                0: '0',
                                 2000: '2000',
                                 4000: '4000',
                                 6000: '6000',
@@ -743,17 +737,15 @@ bills_dashboard = dbc.Container(
                                                                                     figure={
                                                                                         'data': [
                                                                                             go.Bar(
-                                                                                                x= key_values,
-                                                                                                y= all_values,
+                                                                                                x= list(average_list.keys()),
+                                                                                                y= list(average_list.values()),
                                                                                                 text=display_values,
                                                                                                 textposition='auto',
-                                                                                                marker={'color': ['#1881e1','#1574ca', '#1367b4','#105a9d','#0e4d87','#0c4070','#09335a', '#072643','#04192d','#020c16', '#000000']}
+                                                                                                marker={'color': list(average_list.values()),'colorscale': 'RdBu'}
                                                                                             )
                                                                                         ],
                                                                                         'layout': go.Layout(
                                                                                             title='Average Expenditure by Category',
-                                                                                            xaxis = {'title':'Category'},
-                                                                                            yaxis={'title':'Average Patient Expenditure ($)'},
                                                                                             hovermode='closest'
                                                                                         ),
                                                                                         
@@ -1618,7 +1610,7 @@ def init_callbacks(dash_app):
                 output = output[(output[k] == v)]
 
         valid = list(output['T'].unique()) 
-        return [{'label': i, 'value': i} for i in sorted(valid)] 
+        return [{'label': i, 'value': i} for i in valid] 
 
     #Dynamic Dropdown
     @dash_app.callback(
@@ -1654,7 +1646,7 @@ def init_callbacks(dash_app):
             if v != "All":
                 output = output[(output[k] == v)]
         valid = list(output['N'].unique()) #Get valid N based on  T values entered
-        return [{'label': i, 'value': i} for i in sorted(valid)] #populate N dropdown with new n values
+        return [{'label': i, 'value': i} for i in valid] #populate N dropdown with new n values
 
     @dash_app.callback(
         dash.dependencies.Output('m_select', 'options'),
@@ -1689,7 +1681,7 @@ def init_callbacks(dash_app):
                 output = output[(output[k] == v)]
 
         valid = list(output['M'].unique())
-        return [{'label': i, 'value': i} for i in sorted(valid)]
+        return [{'label': i, 'value': i} for i in valid]
     
     @dash_app.callback(
         [dash.dependencies.Output('hide-me-1','style'), dash.dependencies.Output('t_select','style')],
@@ -2038,7 +2030,7 @@ def init_callbacks(dash_app):
         min_patient_num = cost_slider[0]
         max_patient_num = cost_slider[1]
         patient_spend = cost_scatter_data(min_patient_num, max_patient_num)
-        patient_spend = patient_spend[cost_slider[0]: cost_slider[1]]
+        patient_spend[cost_slider[0]: cost_slider[1]]
         patient_id = list(patient_spend['Case.No'])
         total_spent = list(patient_spend['Gross..exclude.GST.'])
         data.append(
