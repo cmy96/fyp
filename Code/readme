@@ -1,8 +1,97 @@
 List of ipynb notebooks
 
 Cleaning of data.ipynb : Contains functions used to clean the master data that we received. 
+
+
+
 Clinical Decision Tree.ipynb: Contains the code for the random survival forest
-Integration Model.ipynb: Contains code to help with integration with frontend
+
+
+
+Integration Model.ipynb: Contains code to help with integration with front-end
+
+
 Kaplan Meier By Group.ipynb: Contains codes for kaplan Meier
+
+
+
 ML models.ipynb: Contains code for cost modelling
+
+
 Survivability module.ipynb: Contains evaluation for the layers approach that was utilized
+    Function:   drop_by_index(X,indexes)
+    Usage:      helper function to drop rows of dataframe and return new dataframe without those rows with indexes resetted
+    
+    Function:   dataSetting(dropCol,FILE_FOLDER = "C:\\SMU_v2\\")
+    Usage:      function to read the pkl from from datasource
+                    1. Remove dx_date that is NULL.
+                    2. Drop all rows where crucial fields for X_features are NULL.
+                    3. Convert Date columns into datetime format
+                    4. Derive OS, CSS, DFS days based on dx_date
+                    5. Create status column to indicate if the patient is dead or alive base on if death_age exists
+                    6. drop rows that are specified in dropCol
+    
+    Function:   ComputeYears(df, Year_list)
+    Usage:      Return a list to contain df for different years of survival
+                The df will filter those patient that has deceased or days of survival longer than the defined years.
+                
+    Function:   dropSubGroup(df,colToDropSubGroup,subgroups, notDropSubgroups)
+    Usage:      drop patient records that contains T,N.M subgroups ('a','b','c')
+                notDropSubGroups is a list of values that we want to be cautious and not drop during processing
+    
+    Function:   train_test(X, Y, test_size = 0.33, random_state = 42)
+    Usage:      Splitting the dataset into the Training set and Test set
+    
+    Function:   fit_and_score_features(X, y)
+    Usage:      Based on the Cox model, rank the scores of each feature to understand which X features plays the key role in modelling
+    
+    Function:   plotGraph(df, YEAR, STYPE, UNITS = 0)
+    Usage:      function to plot the graph
+                UNITS: {0: days, 1: years}
+                
+    Function:   FeaturesPriority(df,x_features,y_features)
+    Usage:      A function to filter the df and get T, N, M stages that are more critical (severe)
+                x_features: all the features we want to see in the group
+                y_features: all dependent features
+            
+    Function:   settingXY(df, X_features, Y_features, OHE_LOCATION = "C:\\SMU_v2\\OHE\\", name="")
+    Usage:      This function returns the X and Y features need for model training
+                - The function also generates one pkl that contains the One Hot Encoder for new raw data 
+                X_features = features to use for X
+                Y_features = features to use for Y 
+                YEAR = years of patient record interested
+                SYTPE = survival type (OS, DFS, CSS)
+                OHE_LOCATION = location to store the pkl file
+           
+    Function:   layeredData(df, group_dict,y_features, YEAR, STYPE)
+    Usage:      this function generates the dataframe required for specific groups we hope to analyze
+                there are total 3 different groups but group 3 consist of multiple subgroups which leads a total of 5
+                dataframe.
+                Group 1: patient with stage 4 cancer
+                Group 2: patient which unknown records or at initial diagnosis stage
+                Group 3: make up of patient that does not belong to the groups above
+    
+    Function:   loadOHE(df,OHE_LOCATION = "C:\\SMU_v2\\OHE\\", name="")
+    Usage:      load enconder to OHE new raw data for prediction
+    
+    
+    Function:   survivalTable(modelName, raw_data,OHE_LOCATION = "C:\\SMU_v2\\OHE\\",interval = list([0.5,1,2,5,10]))
+    Usage:      Calculate survival rate in years of interest
+    
+    Function:   model_creation(X, Y, label, cox_alpha=1e-4, n_estimators = 1000, random_state = 20, file_location = "Model_folder\\")
+    Usage:      Using  the X and Y labels, return 2 models: Cox and RSF
+                X: independent features used for model training
+                Y: dependent features 
+                labels: the name of the file we going to save in the defined file location
+                cox_alpha: learning rate
+                n_estimators: number of trees in ensemble learning
+                random_state: how the trees are selected
+                file_location: where to store the models
+                
+    
+    
+    
+                    
+    
+    
+    
