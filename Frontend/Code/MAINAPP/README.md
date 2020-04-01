@@ -1,19 +1,33 @@
 # Project Title
 C.A.R.E Web Application
 
+Requirement: Download Anaconda on the computer
 
-## Setup
-$ cd GitHub\fyp\Frontend\Code\CARE APP - Tanny (directory where wsgi.py resides in)
-$ python3 setup.py install
+Installation: Using Anaconda prompt run all the install commands below:
+conda install -c anaconda flask
+conda install -c conda-forge dash
+conda install -c conda-forge dash-bootstrap-components
+pip install survive
+conda install -c sebp scikit-survival
+conda install -c conda-forge tensorflow
+c drive > users > users> anaconda3 > envs> fyp > lib > site-packages > font (add font5 awesome.otf file)
+conda install -c conda-forge flask-assets
+
+
+## Setup: open 2 anaconda command prompts and run the line below for both command prompts
+$ cd GitHub\fyp\Frontend\Code\CARE APP - Tanny (the directory where wsgi.py resides in) 
 
 ## Run the Application
 $ python wsgi.py
 $ python server.py
 
-Application is hosted on **http://127.0.0.1:5000/**
+When the Application is loaded, you will see the message below:
 
 "Running on http://0.0.0.0:5000/" message on cmd or console informs you that your PC will be listening for incoming requests from all NICs/ bind to all interface.
 (reference: https://stackoverflow.com/questions/46835568/this-site-can-t-be-reached-flask-python)  
+
+Open a browser, the application will be hosted on http://127.0.0.1:5000/
+
 
 ## Documentation
 
@@ -54,6 +68,15 @@ html layout for Dash application. Overrides the underlying HTML template of Dash
 Python file that contains the Dash application. All python and dash code/ functions/ graphs to be written in this file.
 Multi-Page app and url routing defined using app callbacks.
 
+#### To run prediction models
+1) conda install -c sebp scikit-survival
+2) conda install tensorflow=2.0 in anaconda env
+3) Open an empty folder - middleWomen (case-sensitive) in the same level of MAINAPP
+4) Ensure you have the necessary data files in /data/ (kapalan_meier_by_group.csv)
+5) make sure you have the most updated files - server.py & somefunction.py & dash_example.py
+6) make sure you have the 4 folders OHE, Model_folder, ann, Layered_folder in C:/SMU_v2/
+7) Check all references to file directories (if the files exist)
+
 
 ### static folder
 Static assets such as CSS, js, bootstrap and images.
@@ -63,5 +86,3 @@ Referenced with url_for('static', filename='...')
 ### templates folder
 Jinja2 templates rendered as HTML templates for Flask app. 
 Reference with render_template('...')
-
-

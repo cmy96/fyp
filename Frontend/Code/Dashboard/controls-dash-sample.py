@@ -165,6 +165,8 @@ def generate_epr_chart_data(df):
     # print(final)
     return final 
 
+
+
 ###########################################################################################################################
 
 def filter_df(df, min1, max1, tnm_select, er_select, pr_select, her2_select):
@@ -197,6 +199,31 @@ def description_card():
             ),
         ],
     )
+
+def filter_picker():
+    """
+        :return: returns a checkbox list of filters
+    """
+    return html.Div(
+        id="checklist-card",
+        children=[
+            html.P("Show filter(s):"),
+            dcc.Checklist(
+                id = 'checklist_for_filters',
+                options=[
+                    {'label': 'Age', 'value': 'age_slider'},
+                    {'label': 'TNM Stage', 'value': 'tnm_select'},
+                    {'label': 'ER', 'value': 'er_select'},
+                    {'label': 'PR', 'value': 'pr_select'},
+                    {'label': 'HER2', 'value': 'her2_select'}
+                ],
+                value=['age_slider', 'tnm_select', 'er_select',  'pr_select', 'her2_select'],
+                labelStyle={'display': 'inline-block'}
+            )
+        ],
+        style={'margin-top':'10'}
+    )
+
 
 def generate_controls():
     """
@@ -294,7 +321,7 @@ app.layout = html.Div(
     html.Div(
         id="controls",
         className="four columns",
-        children=[description_card(), generate_controls()]
+        children=[description_card(), filter_picker(), generate_controls()]
         + [
                 html.Div(
                     ["initial child"], id="output-clientside", style={"display": "none"}
@@ -514,6 +541,19 @@ app.layout = html.Div(
 #     Output('output-clientside','children'),
 #     [Input('age_slider','value')]
 # )
+
+
+# Disable Sliders if kernel not in the given list
+@app.callback(
+    Output("tnm_select", "disabled"),
+    [Input("checklist_for_filters", "value")],
+)
+def disable_you(selected):
+    return selected not in ["Kaplan-Meier"]
+
+
+
+
 
 @app.callback(
     [
