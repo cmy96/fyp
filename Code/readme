@@ -11,11 +11,25 @@ Clinical Decision Tree.ipynb: Contains the code for the random survival forest
 Integration Model.ipynb: Contains code to help with integration with front-end
 
 
-Kaplan Meier By Group.ipynb: Contains codes for kaplan Meier
+
+Kaplan Meier By Group.ipynb: Contains functions to generate Kaplan Meier Chart by the group of patient that was input in application
+
+
+
+Kaplan Meier Full Population.ipynb: Contains functions to generate Kaplan Meier Chart based on full population without filters. 
+
+
+
+kaplan_meier.py: Contains functions to generate Dynamic Kaplan Meier chart based on specific filters e.g. TNM, Her2, ER, PR.
+
+
+
+main.py: Implementation example of kaplan_meier.py.
 
 
 
 ML models.ipynb: Contains code for cost modelling
+
 
 
 Survivability module.ipynb: Contains evaluation for the layers approach that was utilized
