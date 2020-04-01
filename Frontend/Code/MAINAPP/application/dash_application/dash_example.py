@@ -1,4 +1,4 @@
-a"""Create a Dash app within a Flask app."""
+"""Create a Dash app within a Flask app."""
 from pathlib import Path
 import dash
 import dash_table
@@ -465,35 +465,35 @@ def generate_clinical_controls():
                 options=[{"label": i, "value": i} for i in Her2_list],
                 value=Her2_list[0]
             ),
-            html.Div([
+            html.Div(id="hide-me-1",
+            children=[
                     html.Br(),
-                    html.Div(id="hide-me-1",children=[html.P("Select T Stage:")],),
+                    html.P("Select T Stage:"),
                     dcc.Dropdown(
                         id="t_select",
                         value=['t0'], #default values
-                        style={'display': 'none'}
                     )
-                ]
+                ],style={'display': 'none'}
             ),
-            html.Div([
+            html.Div(id="hide-me-2", 
+            children=[
                     html.Br(),
-                    html.Div(id="hide-me-2",children=[html.P("Select N Stage:")]),
+                    html.P("Select N Stage:"),
                     dcc.Dropdown(
                         id="n_select",
                         value=['n0'], #default values
-                        style={'display':'none'}
+                        
                     )
-                ]
+                ],style={'display':'none'}
             ),
-            html.Div([
+            html.Div(id="hide-me-3",children=[
                 html.Br(),
-                html.Div(id="hide-me-3",children=[html.P("Select M Stage:")]),
+                html.P("Select M Stage:"),
                 dcc.Dropdown(
                     id="m_select",
                     value=['m0'], #default values
-                    style={'display':'none'}
                 ),
-            ]),
+            ],style={'display':'none'}),
             html.Br() 
         ],
     )
@@ -881,139 +881,131 @@ clinical_dashboard = dbc.Container(
                                                                                 )
                                                                             ]
                                                                         ),
-
-                                                                        dbc.Row(
-                                                                            [
-                                                                                dbc.Col(
-                                                                                    dcc.Graph(
-                                                                                        id='er_pr_chart',
-                                                                                        figure={
-                                                                                            'data': [
-                                                                                                go.Bar(
-                                                                                                    x= [er_finalized_dict['positive'][0],er_finalized_dict['negative'][0],er_finalized_dict['equivocal'][0]],
-                                                                                                    y= ['positive','negative','equivocal','unknown'],
-                                                                                                    name='PR Positive',
-                                                                                                    orientation='h',
-                                                                                                    marker=dict(
-                                                                                                    color='palegreen',
-                                                                                                    line=dict(color='palegreen', width=3)
-                                                                                                    )
-                                                                                                ),
-                                                                                                go.Bar(
-                                                                                                    x= [er_finalized_dict['positive'][1],er_finalized_dict['negative'][1],er_finalized_dict['equivocal'][1]],
-                                                                                                    y= ['positive','negative','equivocal','unknown'],
-                                                                                                    name='PR Negative',
-                                                                                                    orientation='h',
-                                                                                                    marker=dict(
-                                                                                                    color='lightpink',
-                                                                                                    line=dict(color='lightpink', width=3)
-                                                                                                    )
-                                                                                                ),
-                                                                                                go.Bar(
-                                                                                                    x= [er_finalized_dict['positive'][2],er_finalized_dict['negative'][2],er_finalized_dict['equivocal'][2]],
-                                                                                                    y= ['positive','negative','equivocal','unknown'],
-                                                                                                    name='PR Equivocal',
-                                                                                                    orientation='h',
-                                                                                                    marker=dict(
-                                                                                                    color='lightblue',
-                                                                                                    line=dict(color='lightblue', width=3)
-                                                                                                    )
-                                                                                                ),
-                                                                                                go.Bar(
-                                                                                                    x= [er_finalized_dict['positive'][3],er_finalized_dict['negative'][3],er_finalized_dict['equivocal'][3]],
-                                                                                                    y= ['positive','negative','equivocal','unknown'],
-                                                                                                    name='PR Unknown',
-                                                                                                    orientation='h',
-                                                                                                    marker=dict(
-                                                                                                    color='lightgrey',
-                                                                                                    line=dict(color='lightgrey', width=3)
-                                                                                                    )
+                                                                    dbc.Row(
+                                                                        [
+                                                                            dbc.Col(
+                                                                                dcc.Graph(
+                                                                                    id='er_pr_chart',
+                                                                                    figure={
+                                                                                        'data': [
+                                                                                            go.Bar(
+                                                                                                x= [er_finalized_dict['positive'][0],er_finalized_dict['negative'][0],er_finalized_dict['equivocal'][0]],
+                                                                                                y= ['positive','negative','equivocal','unknown'],
+                                                                                                name='PR Positive',
+                                                                                                orientation='h',
+                                                                                                marker=dict(
+                                                                                                color='palegreen',
+                                                                                                line=dict(color='palegreen', width=3)
                                                                                                 )
-                                                                                            ],
-                                                                                            'layout': go.Layout(
-                                                                                                title = "Relationship between ER & PR",
-                                                                                                xaxis = {'title': 'Percentage of ER & PR'},
-                                                                                                yaxis = {'title': 'ER/PR stages'},
-                                                                                                hovermode='closest',
-                                                                                                barmode='stack',
+                                                                                            ),
+                                                                                            go.Bar(
+                                                                                                x= [er_finalized_dict['positive'][1],er_finalized_dict['negative'][1],er_finalized_dict['equivocal'][1]],
+                                                                                                y= ['positive','negative','equivocal','unknown'],
+                                                                                                name='PR Negative',
+                                                                                                orientation='h',
+                                                                                                marker=dict(
+                                                                                                color='lightpink',
+                                                                                                line=dict(color='lightpink', width=3)
+                                                                                                )
+                                                                                            ),
+                                                                                            go.Bar(
+                                                                                                x= [er_finalized_dict['positive'][2],er_finalized_dict['negative'][2],er_finalized_dict['equivocal'][2]],
+                                                                                                y= ['positive','negative','equivocal','unknown'],
+                                                                                                name='PR Equivocal',
+                                                                                                orientation='h',
+                                                                                                marker=dict(
+                                                                                                color='lightblue',
+                                                                                                line=dict(color='lightblue', width=3)
+                                                                                                )
+                                                                                            ),
+                                                                                            go.Bar(
+                                                                                                x= [er_finalized_dict['positive'][3],er_finalized_dict['negative'][3],er_finalized_dict['equivocal'][3]],
+                                                                                                y= ['positive','negative','equivocal','unknown'],
+                                                                                                name='PR Unknown',
+                                                                                                orientation='h',
+                                                                                                marker=dict(
+                                                                                                color='lightgrey',
+                                                                                                line=dict(color='lightgrey', width=3)
+                                                                                                )
                                                                                             )
-                                                                                        }
-                                                                                    ),
-                                                                                )
-                                                                            ]
-                                                                        ),
-
-                                                                        dbc.Row(
-                                                                            [
-                                                                                dbc.Col(
-                                                                                    [
-                                                                                    dcc.Graph(
-                                                                                        id="OS_KM",
-                                                                                        figure=go.Figure(
-                                                                                            data=[],
-                                                                                            layout=go.Layout(
-                                                                                                title="Patient's Overall Survival Kaplan Meier Chart",
-                                                                                                #height=400,
-                                                                                                #width=1200,  
-                                                                                                xaxis = {'title': 'Year'},
-                                                                                                yaxis = {'title': 'Percentage of Survival'},
-                                                                                                hovermode= "closest",
+                                                                                        ],
+                                                                                        'layout': go.Layout(
+                                                                                            title = "Relationship between ER & PR",
+                                                                                            xaxis = {'title': 'Percentage of ER & PR'},
+                                                                                            yaxis = {'title': 'ER/PR stages'},
+                                                                                            hovermode='closest',
+                                                                                            barmode='stack',
+                                                                                        )
+                                                                                    }
+                                                                                ),
+                                                                            )
+                                                                        ]
+                                                                    ),
+                                                                    html.Div(id="hide-km-charts", children=[
+                                                                            dbc.Row(
+                                                                                [
+                                                                                    dbc.Col(
+                                                                                        [
+                                                                                        dcc.Graph(
+                                                                                            id="OS_KM",
+                                                                                            figure=go.Figure(
+                                                                                                data=[],
+                                                                                                layout=go.Layout(
+                                                                                                    title="Patient's Overall Survival Kaplan Meier Chart",
+                                                                                                    xaxis = {'title': 'Year'},
+                                                                                                    yaxis = {'title': 'Percentage of Survival'},
+                                                                                                    hovermode= "closest",
+                                                                                                ),
                                                                                             ),
                                                                                         ),
-                                                                                    ),
-                                                                                    ], 
-                                                                                ),  
-                                                                            ], 
-                                                                        ),
-                                                                        dbc.Row(
-                                                                            [
-                                                                                dbc.Col(
-                                                                                    [
-                                                                                    dcc.Graph(
-                                                                                        id="CSS_KM",
-                                                                                        figure=go.Figure(
-                                                                                            data=[],
-                                                                                            layout=go.Layout(
-                                                                                                title="Patient's Cancer Specific Survival Kaplan Meier Chart",
-                                                                                                #height=400,
-                                                                                                #width=1200,
-                                                                                                xaxis = {'title': 'Year'},
-                                                                                                yaxis = {'title': 'Percentage of Survival'}, 
-                                                                                                hovermode= "closest",
+                                                                                        ], 
+                                                                                    ),  
+                                                                                ], 
+                                                                            ),
+                                                                            dbc.Row(
+                                                                                [
+                                                                                    dbc.Col(
+                                                                                        [
+                                                                                        dcc.Graph(
+                                                                                            id="CSS_KM",
+                                                                                            figure=go.Figure(
+                                                                                                data=[],
+                                                                                                layout=go.Layout(
+                                                                                                    title="Patient's Cancer Specific Survival Kaplan Meier Chart",
+                                                                                                    #height=400,
+                                                                                                    #width=1200,
+                                                                                                    xaxis = {'title': 'Year'},
+                                                                                                    yaxis = {'title': 'Percentage of Survival'}, 
+                                                                                                    hovermode= "closest",
+                                                                                                ),
                                                                                             ),
                                                                                         ),
-                                                                                    ),
-                                                                                    ],
-                                                                                ), 
-                                                                            ], 
-                                                                        ),
-                                                                        dbc.Row(
-                                                                            [
-                                                                                dbc.Col(
-                                                                                    [
-                                                                                    dcc.Graph(
-                                                                                        id="DFS_KM",
-                                                                                        figure=go.Figure(
-                                                                                            data=[],
-                                                                                            layout=go.Layout(
-                                                                                                title="Patient's Disease-Free Survival Kaplan Meier Chart",
-                                                                                                #height=400,
-                                                                                                #width=1200,
-                                                                                                xaxis = {'title': 'Year'},
-                                                                                                yaxis = {'title': 'Percentage of Survival'},                                                                
-                                                                                                hovermode= "closest",
+                                                                                        ],
+                                                                                    ), 
+                                                                                ], 
+                                                                            ),
+                                                                            dbc.Row(
+                                                                                [
+                                                                                    dbc.Col(
+                                                                                        [
+                                                                                        dcc.Graph(
+                                                                                            id="DFS_KM",
+                                                                                            figure=go.Figure(
+                                                                                                data=[],
+                                                                                                layout=go.Layout(
+                                                                                                    title="Patient's Disease-Free Survival Kaplan Meier Chart",
+                                                                                                    xaxis = {'title': 'Year'},
+                                                                                                    yaxis = {'title': 'Percentage of Survival'},                                                                
+                                                                                                    hovermode= "closest",
+                                                                                                ),
                                                                                             ),
-                                                                                        ),
-                                                                                    )
-                                                                                    ],
-                                                                                ), 
-                                                                            ], 
-                                                                        ),
-
-
-                                                    
-                                        
-
+                                                                                        )
+                                                                                        ],
+                                                                                    ), 
+                                                                                ], 
+                                                                            ),
+                                                                    ]
+                                                                )
                                                                     ]
                                                                 )
                                                                                                 
@@ -1668,8 +1660,7 @@ def init_callbacks(dash_app):
             dash.dependencies.Input('n_select', 'value'),
         ])
     def update_m_dropdown(age_slider, er_select, pr_select, her2_select, race_select,t_value, n_value ):
-        #optimise code later - delete repeated code
-        max1=age_slider[1]
+        max1= age_slider[1]
         min1 = age_slider[0]
 
         condition = (input_df['Age_@_Dx'] <= max1) & (input_df['Age_@_Dx'] >= min1)
@@ -1691,15 +1682,21 @@ def init_callbacks(dash_app):
         valid = list(output['M'].unique())
         return [{'label': i, 'value': i} for i in sorted(valid)]
     
+    ### Hide & Show Dropdowns According to radio buttons
+    
     @dash_app.callback(
-        [dash.dependencies.Output('hide-me-1','style'), dash.dependencies.Output('t_select','style')],
+        [
+            dash.dependencies.Output('hide-me-1','style'), 
+            dash.dependencies.Output('t_select','style'), 
+            dash.dependencies.Output('hide-km-charts', 'style')
+        ],
         [dash.dependencies.Input('radio-list','value')]
     )
     def toggle_dd_visibility(visible):
         if visible == 'Kaplan Meier':
-            return {'display':'block'}
+            return {'display':'block'}, {'display':'block'}, {'display':'block'}
         if visible == 'Clinical':
-            return {'display':'none'}
+            return {'display':'none'},{'display':'none'}, {'display':'none'}
     
     @dash_app.callback(
         [dash.dependencies.Output('hide-me-2','style'), dash.dependencies.Output('n_select','style')],
@@ -1707,9 +1704,9 @@ def init_callbacks(dash_app):
     )
     def toggle_d2_visibility(vi):
         if vi == 'Kaplan Meier':
-            return {'display':'block'}
+            return {'display':'block'}, {'display':'block'}
         if vi == 'Clinical':
-            return {'display':'none'}
+            return {'display':'none'},{'display':'none'}
 
     @dash_app.callback(
         
@@ -1718,20 +1715,23 @@ def init_callbacks(dash_app):
     )
     def toggle_d3_visibility(vis):
         if vis == 'Kaplan Meier':
-            return {'display':'block'}
+            return {'display':'block'}, {'display':'block'}
         if vis == 'Clinical':
-            return {'display':'none'}
+            return {'display':'none'}, {'display':'none'}
     
 
     @dash_app.callback(
-        dash.dependencies.Output('hide-this','style'),
+        [dash.dependencies.Output('hide-this','style'), dash.dependencies.Output('tnm_select','style')]
+        ,
         [dash.dependencies.Input('radio-list','value')]
     )
     def toggle_dropdown(v):
         if v == 'Kaplan Meier':
-            return {'display':'none'}
+            return {'display':'none'}, {'display':'none'}
         if v == 'Clinical':
-            return {'display':'block'}
+            return {'display':'block'}, {'display':'block'}
+
+    ### Graph Update Callback
 
     @dash_app.callback(
         [
