@@ -95,7 +95,7 @@
                         </div>
 
                         <div class="row row_space">
-                            <label for="tstage" class="col-md-2 first_input_labels"">T Stage</label>
+                            <label for="tstage" class="col-md-2 first_input_labels"">T Stage*</label>
                             <div class="col-md-2 extra_space more_space">
                                 <select class="form-control dropdowns" name="tstage" id="tstage" onchange="getStage(this);" onclick="getStage(this); t_prompt(this);" required>
                                     <option value=""></option>
@@ -119,7 +119,7 @@
                             </div>
     
 
-                            <label for="nstage" class="col-md-2  input_labels">N Stage</label>
+                            <label for="nstage" class="col-md-2  input_labels">N Stage*</label>
                             <div class="col-md-2 extra_space more_space">
                                 <select class="form-control dropdowns" name="nstage" id="nstage" onchange="getStage(this);" onclick="getStage(this); n_prompt(this);" required>
                                     <option value=""></option>
@@ -157,29 +157,9 @@
                         </div>
 
                         <div class="row row_space">
-                            <label for="diff" class="col-md-2 first_input_labels">Diff Grade</label>
-                            <!-- <select class="form-control col-md-2" name="diff" id="diff">
-                                <option value="grade 1">Grade 1</option>
-                                <option value="grade 2">Grade 2</option>
-                                <option value="grade 3">Grade 3</option>
-                                <option value="unknown">Unknown</option>
-                            </select>  -->
-                            <div class="btn-group-toggle col-md-2 extra_space btn-group more_space" data-toggle="buttons">
-                                <label class="btn btn-light">
-                                    <input type="radio" name="diff" id="grade 1" value="grade 1" autocomplete="off" required> 1
-                                </label>
+                            <label for="diff" class="col-md-2 first_input_labels">Stage*</label>
 
-                                <label class="btn btn-light">
-                                    <input type="radio" name="diff" id="grade 2" value="grade 2" autocomplete="off"> 2
-                                </label>
-
-                                <label class="btn btn-light">
-                                    <input type="radio" name="diff" id="grade 3" value="grade 3" autocomplete="off"> 3
-                                </label>
-                            </div>
-        
-                            <label for="stage" class="col-md-2 input_labels">Stage</label>
-                            <div class="col-md-2 extra_space ">
+                            <div class="col-md-2 extra_space more_space">
                                 <select class="form-control dropdowns" name="stage" id="stage" onchange="stage_prompt(this);" required>
                                     <option value=""></option>
                                     <option value="stage 0">Stage 0</option>
@@ -197,7 +177,25 @@
                                     <option value="unknown">Unknown</option>
                                     <option value="dcis/lcis non-invasive">Dcis/lcis non-invasive</option>   
                                 </select>
-                            </div>
+                                </div>
+
+
+
+        
+                            <label for="stage" class="col-md-2 input_labels">Diff Grade</label>
+                            <div class="btn-group-toggle col-md-2 extra_space btn-group" data-toggle="buttons">
+                                    <label class="btn btn-light">
+                                        <input type="radio" name="diff" id="grade 1" value="grade 1" autocomplete="off" required> 1
+                                    </label>
+    
+                                    <label class="btn btn-light">
+                                        <input type="radio" name="diff" id="grade 2" value="grade 2" autocomplete="off"> 2
+                                    </label>
+    
+                                    <label class="btn btn-light">
+                                        <input type="radio" name="diff" id="grade 3" value="grade 3" autocomplete="off"> 3
+                                    </label>
+                                </div>
                            
                         </div>
 
@@ -264,6 +262,11 @@
 
                             <div class="col-md-5 offset-md-5 submitContainer" align="center">
                                     <input type="submit" value="Calculate" class="submitButton" onclick="loader(this);">
+                            </div>
+
+                            <div class="col-md-5 foot_note">
+                                <br>
+                                <p>* denotes derived fields that will be automatically filled based on input values</p>
                             </div>
                         </div> 
 
