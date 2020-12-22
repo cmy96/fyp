@@ -43,14 +43,14 @@ while True:
                 # if required, use bytes(var, encoding='utf-8') function to convert string to bytes object. Connection.sendall accepts bytes object.
 
                 surv_df, pred, groupj, bills= haha(data)
-#`````````````````` Update this whole file and give then the model files ```````````
+
                 fileLocation = "..\\middleWomen\\patient_new.csv"
                 fileLocation_my = "..\\middleWomen\\bills_new.csv"
                 fileLocation_surv = "..\\middleWomen\\survival.csv"
                 pred.to_csv(fileLocation)
                 bills.to_csv(fileLocation_my)
                 surv_df.to_csv(fileLocation_surv)
-#`````````````````` Update this whole file and give then the model files (END) ```````````                
+
                 pred_string = json.dumps(groupj)
 
                 #takes string and returns bytes object

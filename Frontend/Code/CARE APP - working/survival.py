@@ -1,3 +1,4 @@
+# Survival prediction model
 import tensorflow as tf
 
 model = tf.keras.models.load_model('C:\\SMU_v2\\ann\\model_group1_10y.h5' ,custom_objects={'leaky_relu': tf.nn.leaky_relu})
