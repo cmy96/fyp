@@ -111,6 +111,8 @@ layout = dict(
 
 ###########################################   Prediction model visualisations    ######################################
 
+# Waffle Chart is the chart with stickman icons found in Survival Prediction tab 
+# Home > Prediction Input Page > Survival Prediction tab
 
 def generate_waffle_chart():
     '''
@@ -175,7 +177,9 @@ def generate_waffle_chart():
 
 ###########################################   Data manipulation for bills charts    ######################################
 
-#PIE CHART DE DONGXI
+#PIE CHART DATA MANIPULATION FOR BILLS 
+# Home > Prediction Input Page > Survival Prediction tab
+
 gross = bills2.groupby(['Consolidated.Main.Group']).sum()
 gross_list = {}
 for row in gross.itertuples():
@@ -183,7 +187,9 @@ for row in gross.itertuples():
 
 category_list = list(gross_list.keys())
 
-#BAR CHART DE DONGXI
+#BAR CHART DATA MANIPULATION FOR BILLS
+# Home > Prediction Input Page > Survival Prediction tab
+
 average = bills2.groupby(['Consolidated.Main.Group']).mean()
 average_list = {}
 display_values = [] #text on bars
@@ -208,6 +214,8 @@ for value in all_values:
 
 
 ###########################################   Data manipulation for clinical charts    ######################################
+
+# Function to rename dictionary's keys
 def rename_keys(dict_, new_keys):
     """
      new_keys: type List(), must match length of dict_
@@ -215,7 +223,7 @@ def rename_keys(dict_, new_keys):
     d1 = dict( zip( list(dict_.keys()), new_keys) )
     return {d1[oldK]: value for oldK, value in dict_.items()}
 
-
+# Calculate percentage of clinical data value
 def calPercent(df1,columnDF,nullExist=False, *replaceWith):
     dict_list = {}
     values = columnDF.unique()
@@ -241,11 +249,13 @@ def calPercent(df1,columnDF,nullExist=False, *replaceWith):
     return dict_list
 
 
-
+# Transform data columns into dataframe
 def df_func(output,column1,column2):
     tmp = pd.DataFrame(output.items(), columns=[column1, column2])
     return tmp
 
+# Data manipulation for ER/ PR charts
+# Home > Dashboard > Clinical
 def generate_epr_chart_data(df):
     '''
     :return a dictionary of dictionaries where each ER status has a dictionary of scores (% against a PR status)
@@ -292,20 +302,20 @@ def generate_epr_chart_data(df):
 
 #Execution of functions for clinical
 
-# # this has null
+# # Remove null values
 death_cause = clinical['cause_of_death']
 death_cause_dict_old = calPercent(clinical,death_cause,True,"Alive")
 death_cause_dict = rename_keys(death_cause_dict_old,\
                        death_cause.unique())
 
-# (Hover) Binning of diagnosed age - Tanny
+# (Hover) Binning of diagnosed age
 bins = np.arange(clinical['Age_@_Dx'].min(),clinical['Age_@_Dx'].max() + 4, 4)
 clinical['binned'] = np.searchsorted(bins, clinical['Age_@_Dx'].values)
 age_bin_count = clinical.groupby(pd.cut(clinical['Age_@_Dx'], bins=19, precision = 0, right = False)).size()
 
 er_finalized_dict = generate_epr_chart_data(clinical)
 
-#Column Race containing unusual vals - replc
+#Replace values from Column Race containing unusual values
 clinical['Race'].replace('9', 'Unknown', inplace=True)
 clinical['Race'].replace('#N/A', 'Unknown',inplace=True)
 clinical['Race'].fillna('Unknown', inplace=True)
@@ -315,7 +325,9 @@ Race_List = list(Race_List) + ['All'] #Keep because makes sense to display All
 generate_waffle_chart()
 
 
-###########################################################################################################################
+#################################################### Functions for dashboard filter panel ##################################################
+# Purpose: manipulate data according to filter inputs
+# Home > Dashboard
 
 def filter_df_all(df, min1, max1, tnm_select, er_select, pr_select, her2_select, race_select):
     '''
@@ -377,6 +389,7 @@ def filter_df_epr_chart(df, min1, max1, tnm_select):
     return output
 
 
+# Display scatter plot for transaction spending of each patient ID
 
 def cost_scatter_data(min_n, max_n):
     '''
@@ -396,6 +409,7 @@ def cost_scatter_data(min_n, max_n):
 
     return new_scatter
 
+# Radio buttons for filter panel
 def display_radio_btns():
     '''
         returns radio buttons selector to show TNM filter for Kaplan
@@ -410,6 +424,8 @@ def display_radio_btns():
         inputStyle={"margin-right": "5px", 'margin-left':'10px'}
     )  
 
+# Filter panel design for clinical tab
+# Home > Dashboard > Clinical
 
 def generate_clinical_controls():
     """
@@ -506,7 +522,8 @@ def generate_clinical_controls():
         ],
     )
 
-
+# Filter panel design for bills tab
+# Home > Dashboard > Bills
 
 def generate_bills_controls():
     """
@@ -564,6 +581,9 @@ layout = dict(
 )
 
 
+################################################### Page layout design for bills tab #######################################################
+# Home > Dashboard > Bills
+
 bills_layout = dbc.Container(
         [
             dbc.Row(
@@ -607,6 +627,9 @@ bills_layout = dbc.Container(
             ),
         ]
     )
+
+################################################### Page layout design for clinical tab #######################################################
+# Home > Dashboard > Clinical
 
 clinical_layout = dbc.Container(
         [
@@ -652,6 +675,8 @@ clinical_layout = dbc.Container(
         ]
     )
 
+################################################### Chart dashboard design for bills tab #######################################################
+# Home > Dashboard > Bills
 
 bills_dashboard = dbc.Container(
     [
@@ -791,6 +816,8 @@ bills_dashboard = dbc.Container(
     ]
 )
 
+################################################### Chart dashboard design for clinical tab #######################################################
+# Home > Dashboard > Clinical
 
 clinical_dashboard = dbc.Container(
     [
@@ -1036,9 +1063,10 @@ clinical_dashboard = dbc.Container(
     ]
 )
                                         
-                                                                
+################################################## Design for prediction page #######################################################                                                             
 
-
+# HTML for prediction tab
+# Home > Prediction Input Page > Survival Prediction tab
 Doctor_View = dbc.Card(
     dbc.CardBody(
         [
@@ -1225,6 +1253,7 @@ patient_button = dbc.Container(
     ]
 )
 
+###################################### Code to create a Dash app (server configuration) ###################################
 def Add_Dash(server):
     """Create a Dash app."""
     external_stylesheets = ['/static/dist/css/styles.css',
@@ -1261,7 +1290,7 @@ def Add_Dash(server):
     return dash_app.server
 
 
-
+########################### Callback for dash app ################################################
 def init_callbacks(dash_app):
     @dash_app.callback(
         
@@ -1280,9 +1309,6 @@ def init_callbacks(dash_app):
         elif pathname == "/survival/":
             cookies = session['received']
             cookies = cookies.decode("utf-8")
-            # group =cookies.split(",")
-            # # # cookie = html.H1(cookies)
-            # print(str(group)[3:10], "group 1")
 
             patient = pd.read_csv("..\\middleWomen\\patient_new.csv")
 
@@ -1293,6 +1319,7 @@ def init_callbacks(dash_app):
                                 line_shape='hv'))
 
             #doctor's graphs
+            # Home > Prediction Input Page > Survival Prediction tab > Doctor view
             doctor_graphs =  html.Div(
                 [
                     dbc.Row(
@@ -1311,9 +1338,7 @@ def init_callbacks(dash_app):
                                                         figure=go.Figure(
                                                             data=[surv4],
                                                             layout=go.Layout(
-                                                                #title="Patient's Predicted Kaplan Meier Chart",
                                                                 height=650,
-                                                                #width=700,
                                                                 xaxis_range=(0, 10),
                                                                 yaxis_range=(0, 100),
                                                                 xaxis = {'title': 'Year(s)'},
@@ -1336,14 +1361,16 @@ def init_callbacks(dash_app):
             )
             return survival_layout, doctor_button, doctor_graphs
         elif pathname == "/cost/":
+  
             #cost outputs
+
             my_bills = pd.read_csv("..\\middleWomen\\bills_new.csv")
             my_bills = my_bills.iloc[:,:-1]
             # key = ["6 months after","1 year after","2 year after","5 years after","10 years after"]
-            key = my_bills.columns.tolist()[1:] #to be edited!!!!!!!!!!!!!!!!!!!!!1
+            key = my_bills.columns.tolist()[1:]
             values = [my_bills[k].tolist() for k in key]
 
-            #cost graphs for FC
+            #Prepare chart format for cost data - Financial Consultant
             trace1 = go.Bar(
                                 x=key,
                                 y=[round(x[0],2) for x in values],
@@ -1357,7 +1384,8 @@ def init_callbacks(dash_app):
             y=[round(x[0],2) for x in values],
             name = "prediction line"
             )
-            
+
+            # Home > Prediction Input Page > Cost Prediction tab
             cost_graphs =  html.Div(
                 [
                     dbc.Container(
@@ -1389,9 +1417,7 @@ def init_callbacks(dash_app):
                                                                 )
                                                             ],
                                                             'layout':go.Layout(
-                                                                #title="Predicted Cost Table",
-                                                                #height=600,
-                                                                #width=800,
+
                                                             )
                                                         })                                                        
                                                     ]
@@ -1414,9 +1440,7 @@ def init_callbacks(dash_app):
                                                         layout=go.Layout(
                                                             xaxis = {'title': 'Year(s)'},
                                                             yaxis = {'title': 'Fees Prediction ($)'},                                                             
-                                                            #title="Patient's Cost Prediction ($)",
-                                                            #height =600,
-                                                            #width=800,
+
 
                                                     
                                                         )
@@ -1440,11 +1464,14 @@ def init_callbacks(dash_app):
         elif pathname =="/survival/patient":
 
             #survival outputs
+
             surv = pd.read_csv("..\\middleWomen\\survival.csv")
             # key = ["6 months after","1 year after","2 year after","5 years after","10 years after"]
             surv_key = surv.columns.tolist()[1:]
             surv_values = [surv[k].tolist() for k in surv_key]
-#HERE CHANGE !!!!!!!!!!!!!!!11
+
+
+            #Prepare chart format for patient survival data
 
             trace1s = go.Bar(
                 x=surv_key,
@@ -1462,6 +1489,7 @@ def init_callbacks(dash_app):
 
 
             #patient's graphs
+            # Home > Prediction Input Page > Patient Prediction tab
             patient_graphs =  html.Div(
                 [
                     dbc.Container(
@@ -1492,9 +1520,7 @@ def init_callbacks(dash_app):
                                                                             align='center')
                                                                     )],
                                                                     'layout': go.Layout(
-                                                                        #title="Survival Rate Table",
-                                                                        #height=600,
-                                                                        #width=800,
+
                                                                     )
                                                                 }
                                                         ),                                                        
@@ -1517,9 +1543,7 @@ def init_callbacks(dash_app):
                                                         figure=go.Figure(
                                                             data=[trace1s,trace2s],
                                                             layout=go.Layout(
-                                                            #title="Patient's Survival Rates Prediction (%)",
-                                                            #height=600,
-                                                            #width=800,
+
                                                             xaxis = {'title': 'Year(s)'},
                                                             yaxis = {'title': 'Percentage of Survival (%)'}, 
                                                             )
@@ -1586,7 +1610,7 @@ def init_callbacks(dash_app):
  
             return survival_layout, patient_button, patient_graphs
 
-    #Dynamic Dropdown
+    ##################################Interactive Dynamic Dropdown for dashboard filter (backend)#############################################
     @dash_app.callback(
         dash.dependencies.Output('t_select', 'options'),
         [

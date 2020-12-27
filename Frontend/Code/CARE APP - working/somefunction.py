@@ -1,5 +1,3 @@
-#`````````````````` Update this whole file and give then the model files ````````````
-
 from sksurv.preprocessing import OneHotEncoder
 from sklearn.externals import joblib
 import pickle
@@ -9,6 +7,7 @@ import ast
 import json
 import tensorflow as tf
 
+# Load encoder to OHE new raw data for prediction
 def loadOHE(df,OHE_LOCATION = "C:\\SMU_v2\\OHE\\", name=""):
     '''
     load enconder to OHE new raw data for prediction
@@ -22,7 +21,8 @@ def loadOHE(df,OHE_LOCATION = "C:\\SMU_v2\\OHE\\", name=""):
     OHE_New_Data = enc.transform(df)
     
     return OHE_New_Data
-    
+
+# Get output of survival model and load into doctor predicted survival charts
 def get_patient_prediction(raw_data,group):
     
     if group == 1:
@@ -72,6 +72,7 @@ def get_patient_prediction(raw_data,group):
     to_return = pd.DataFrame([[pred_6m,pred_1y,pred_2y,pred_5y,pred_10y]],columns = ["6m","1y","2y","5y","10y"])
     return to_return
 
+# Prepare data for survival table
 def survivalTable(modelName, raw_data):
     '''
     Calculate survival rate in years of interest
@@ -94,6 +95,7 @@ def survivalTable(modelName, raw_data):
     dic = pd.DataFrame.from_dict(dic)
     return dic,graphaxis
 
+# Categorize patient inputs into survival model's groupings
 def haha(input):
 
     # data2 = {'Cancer drugs': 268941532, 'Hospital care': 96600809, 'Investigations': 247463280, 'Other drugs': 37384671, 

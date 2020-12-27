@@ -1,3 +1,5 @@
+############## Template ##############################
+
 """Create a Dash app within a Flask app."""
 from pathlib import Path
 import dash
