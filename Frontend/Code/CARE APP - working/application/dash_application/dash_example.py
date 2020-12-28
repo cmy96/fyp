@@ -1584,7 +1584,7 @@ def init_callbacks(dash_app):
                                                                     },
                                                                     ),
                                                                 html.P(
-                                                                    "Out of 100 random breast cancer patients, X will survive within the 10 year time period.",
+                                                                    "",
                                                                     style={"margin-left":"3%", "margin-bottom":"3%"}
                                                                 )
                                                             ]

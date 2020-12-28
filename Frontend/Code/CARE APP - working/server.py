@@ -5,7 +5,7 @@ import json
 import pandas as pd
 import pickle
 
-from somefunction import haha
+from functions import categorize
 
 # Create a TCP/ IP socket
 sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -42,7 +42,7 @@ while True:
                 # if required, use json.dumps(var) to convert data to string. bytes() function requires string argument to encode.
                 # if required, use bytes(var, encoding='utf-8') function to convert string to bytes object. Connection.sendall accepts bytes object.
 
-                surv_df, pred, groupj, bills= haha(data)
+                surv_df, pred, groupj, bills= categorize(data)
 
                 fileLocation = "..\\middleWomen\\patient_new.csv"
                 fileLocation_my = "..\\middleWomen\\bills_new.csv"

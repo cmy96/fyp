@@ -96,7 +96,7 @@ def survivalTable(modelName, raw_data):
     return dic,graphaxis
 
 # Categorize patient inputs into survival model's groupings
-def haha(input):
+def categorize(input):
 
     # data2 = {'Cancer drugs': 268941532, 'Hospital care': 96600809, 'Investigations': 247463280, 'Other drugs': 37384671, 
     # 'Other surgeries': 137540609, 'Others': 67517445, 'Professional services': 87810977, 'Radiation therapy': 78311175, 
