@@ -48,7 +48,7 @@ pyreadline==2.1
 python-dateutil==2.8.1
 pytz==2019.3
 pywaffle==0.2.1
-PyYAML==5.3.1
+PyYAML==5.4
 retrying==1.3.3
 scikit-learn==0.21.3
 scikit-survival==0.11
