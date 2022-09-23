@@ -39,7 +39,7 @@ numpy==1.18.1
 osqp==0.5.0
 pandas==0.25.3
 plotly==4.5.4
-protobuf==3.11.4
+protobuf==3.18.3
 pyparsing==2.4.6
 PyQt5==5.12.3
 PyQt5-sip==4.19.18
